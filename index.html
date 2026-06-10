@@ -364,6 +364,8 @@
       let timer;
       let pauseMenuLevel = "main";
       const roomStorageKey = "snake-online-rooms";
+      const playerStorageKey = "snake-online-player-id";
+      const playerId = getPlayerId();
 
       function startGame(gameName) {
         currentGame = gameName;
@@ -740,6 +742,17 @@
         localStorage.setItem(roomStorageKey, JSON.stringify(rooms));
       }
 
+      function getPlayerId() {
+        let id = localStorage.getItem(playerStorageKey);
+
+        if (!id) {
+          id = `PLAYER-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+          localStorage.setItem(playerStorageKey, id);
+        }
+
+        return id;
+      }
+
       function generateRoomCode() {
         const rooms = getRooms();
         let code;
@@ -756,6 +769,8 @@
         const code = generateRoomCode();
         rooms[code] = {
           players: 1,
+          createdBy: playerId,
+          joinedBy: null,
           createdAt: Date.now()
         };
         saveRooms(rooms);
@@ -776,7 +791,13 @@
 
         if (!rooms[code]) {
           roomCodeEl.textContent = "";
-          roomNoteEl.textContent = "Room not found.";
+          roomNoteEl.textContent = "Room not found on this device.";
+          return;
+        }
+
+        if (rooms[code].createdBy === playerId) {
+          roomCodeEl.textContent = `Room code: ${code}`;
+          roomNoteEl.textContent = "You created this room. A different player must join it.";
           return;
         }
 
@@ -787,6 +808,7 @@
         }
 
         rooms[code].players += 1;
+        rooms[code].joinedBy = playerId;
         saveRooms(rooms);
         roomCodeEl.textContent = `Joined room: ${code}`;
         roomNoteEl.textContent = "Player 2 joined. Online match setup is ready.";

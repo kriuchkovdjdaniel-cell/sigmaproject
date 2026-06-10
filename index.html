@@ -191,6 +191,51 @@
         display: grid;
       }
 
+      .game-list {
+        display: none;
+        gap: 0.75rem;
+      }
+
+      .game-list.open {
+        display: grid;
+      }
+
+      .room-form {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      input {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(248, 250, 252, 0.22);
+        border-radius: 8px;
+        padding: 0.7rem 0.95rem;
+        background: #020617;
+        color: #f8fafc;
+        font: inherit;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .room-code {
+        min-height: 1.4rem;
+        margin: 0;
+        color: #5eead4;
+        text-align: center;
+        font-weight: 800;
+      }
+
+      .room-note {
+        min-height: 1.4rem;
+        margin: 0;
+        color: #cbd5e1;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
       @media (max-width: 560px) {
         header {
           align-items: stretch;
@@ -210,7 +255,7 @@
   <body>
     <main>
       <header>
-        <h1>Snake</h1>
+        <h1 id="gameTitle">Snake</h1>
         <div class="scoreboard" aria-label="Scoreboard">
           <div class="stat">Score <span id="score">0</span></div>
           <div class="stat">Best <span id="best">0</span></div>
@@ -237,10 +282,24 @@
       <div class="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
         <h2 id="pauseTitle">Paused</h2>
         <button type="button" id="resume">Resume</button>
+        <button type="button" id="back" hidden>Back</button>
         <button type="button" id="games">Games</button>
         <div class="game-options" id="gameOptions" aria-label="Game modes">
           <button type="button" id="singlePlayer">Single Player</button>
           <button type="button" id="online">Online</button>
+        </div>
+        <div class="game-list" id="singlePlayerGames" aria-label="Single player games">
+          <button type="button" id="snakeClassic">Snake Classic</button>
+          <button type="button" id="appleCatcher">Apple Catcher</button>
+        </div>
+        <div class="game-list" id="onlineGames" aria-label="Online games">
+          <button type="button" id="createRoom">Create Room</button>
+          <div class="room-form">
+            <input id="roomCodeInput" type="text" maxlength="8" placeholder="Room code" aria-label="Room code">
+            <button type="button" id="joinRoom">Join Room</button>
+          </div>
+          <p class="room-code" id="roomCode"></p>
+          <p class="room-note" id="roomNote"></p>
         </div>
       </div>
     </div>
@@ -248,6 +307,7 @@
     <script>
       const canvas = document.getElementById("board");
       const ctx = canvas.getContext("2d");
+      const gameTitle = document.getElementById("gameTitle");
       const scoreEl = document.getElementById("score");
       const bestEl = document.getElementById("best");
       const statusEl = document.getElementById("status");
@@ -255,8 +315,20 @@
       const pauseButton = document.getElementById("pause");
       const pauseMenu = document.getElementById("pauseMenu");
       const resumeButton = document.getElementById("resume");
+      const backButton = document.getElementById("back");
       const gamesButton = document.getElementById("games");
       const gameOptions = document.getElementById("gameOptions");
+      const singlePlayerButton = document.getElementById("singlePlayer");
+      const onlineButton = document.getElementById("online");
+      const singlePlayerGames = document.getElementById("singlePlayerGames");
+      const onlineGames = document.getElementById("onlineGames");
+      const snakeClassicButton = document.getElementById("snakeClassic");
+      const appleCatcherButton = document.getElementById("appleCatcher");
+      const createRoomButton = document.getElementById("createRoom");
+      const joinRoomButton = document.getElementById("joinRoom");
+      const roomCodeInput = document.getElementById("roomCodeInput");
+      const roomCodeEl = document.getElementById("roomCode");
+      const roomNoteEl = document.getElementById("roomNote");
       const gridSize = 20;
       const tileCount = canvas.width / gridSize;
       const startSnake = [
@@ -264,23 +336,44 @@
         { x: 7, y: 10 },
         { x: 6, y: 10 }
       ];
+      const games = {
+        snake: {
+          title: "Snake",
+          bestKey: "snake-best",
+          help: "Use arrow keys or WASD to play."
+        },
+        catcher: {
+          title: "Apple Catcher",
+          bestKey: "catcher-best",
+          help: "Use Left/Right or A/D to catch apples."
+        }
+      };
 
+      let currentGame = "snake";
       let snake;
       let food;
       let direction;
       let nextDirection;
+      let catcher;
+      let apple;
+      let catcherMove = 0;
       let score;
-      let best = Number(localStorage.getItem("snake-best") || 0);
+      let best;
       let gameOver;
       let paused;
       let timer;
+      let pauseMenuLevel = "main";
+      const roomStorageKey = "snake-online-rooms";
 
-      bestEl.textContent = best;
+      function startGame(gameName) {
+        currentGame = gameName;
+        gameTitle.textContent = games[currentGame].title;
+        best = Number(localStorage.getItem(games[currentGame].bestKey) || 0);
+        bestEl.textContent = best;
+        resetGame();
+      }
 
       function resetGame() {
-        snake = startSnake.map((part) => ({ ...part }));
-        direction = { x: 1, y: 0 };
-        nextDirection = { x: 1, y: 0 };
         score = 0;
         gameOver = false;
         paused = false;
@@ -288,13 +381,46 @@
         pauseButton.textContent = "Pause";
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
-        gamesButton.hidden = false;
-        gameOptions.classList.remove("open");
-        statusEl.textContent = "Use arrow keys or WASD to play.";
-        placeFood();
-        draw();
+        resetPauseMenu();
+        statusEl.textContent = games[currentGame].help;
         clearInterval(timer);
-        timer = setInterval(tick, 115);
+
+        if (currentGame === "snake") {
+          resetSnake();
+          timer = setInterval(tickSnake, 115);
+        } else {
+          resetCatcher();
+          timer = setInterval(tickCatcher, 28);
+        }
+
+        draw();
+      }
+
+      function resetSnake() {
+        snake = startSnake.map((part) => ({ ...part }));
+        direction = { x: 1, y: 0 };
+        nextDirection = { x: 1, y: 0 };
+        placeFood();
+      }
+
+      function resetCatcher() {
+        catcherMove = 0;
+        catcher = {
+          x: canvas.width / 2 - 48,
+          y: canvas.height - 44,
+          width: 96,
+          height: 18
+        };
+        resetApple();
+      }
+
+      function resetApple() {
+        apple = {
+          x: 20 + Math.random() * (canvas.width - 40),
+          y: -24,
+          size: 18,
+          speed: 3.7 + Math.min(score * 0.16, 5)
+        };
       }
 
       function placeFood() {
@@ -307,6 +433,14 @@
       }
 
       function changeDirection(newDirection) {
+        if (currentGame === "catcher") {
+          if (newDirection.x !== 0) {
+            catcherMove = newDirection.x;
+            moveCatcher(catcherMove);
+          }
+          return;
+        }
+
         const reversing =
           newDirection.x + direction.x === 0 &&
           newDirection.y + direction.y === 0;
@@ -316,7 +450,15 @@
         }
       }
 
-      function tick() {
+      function moveCatcher(amount) {
+        if (paused || gameOver) {
+          return;
+        }
+        catcher.x = Math.max(0, Math.min(canvas.width - catcher.width, catcher.x + amount * 9));
+        draw();
+      }
+
+      function tickSnake() {
         if (paused || gameOver) {
           return;
         }
@@ -339,13 +481,7 @@
         snake.unshift(head);
 
         if (head.x === food.x && head.y === food.y) {
-          score += 1;
-          scoreEl.textContent = score;
-          if (score > best) {
-            best = score;
-            bestEl.textContent = best;
-            localStorage.setItem("snake-best", String(best));
-          }
+          addPoint();
           placeFood();
         } else {
           snake.pop();
@@ -354,17 +490,62 @@
         draw();
       }
 
+      function tickCatcher() {
+        if (paused || gameOver) {
+          return;
+        }
+
+        if (catcherMove !== 0) {
+          moveCatcher(catcherMove);
+        }
+
+        apple.y += apple.speed;
+        const caught =
+          apple.y + apple.size >= catcher.y &&
+          apple.y <= catcher.y + catcher.height &&
+          apple.x + apple.size >= catcher.x &&
+          apple.x <= catcher.x + catcher.width;
+
+        if (caught) {
+          addPoint();
+          resetApple();
+        } else if (apple.y > canvas.height) {
+          endGame();
+          return;
+        }
+
+        draw();
+      }
+
+      function addPoint() {
+        score += 1;
+        scoreEl.textContent = score;
+        if (score > best) {
+          best = score;
+          bestEl.textContent = best;
+          localStorage.setItem(games[currentGame].bestKey, String(best));
+        }
+      }
+
       function endGame() {
         gameOver = true;
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
-        gamesButton.hidden = false;
-        gameOptions.classList.remove("open");
+        resetPauseMenu();
         statusEl.textContent = "Game over. Press Restart to play again.";
         draw();
       }
 
       function draw() {
+        drawBoard();
+        if (currentGame === "snake") {
+          drawSnake();
+        } else {
+          drawCatcher();
+        }
+      }
+
+      function drawBoard() {
         ctx.fillStyle = "#020617";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -381,7 +562,9 @@
           ctx.lineTo(canvas.width, position);
           ctx.stroke();
         }
+      }
 
+      function drawSnake() {
         ctx.fillStyle = "#f97316";
         roundTile(food.x, food.y, 7);
 
@@ -389,6 +572,23 @@
           ctx.fillStyle = index === 0 ? "#5eead4" : "#14b8a6";
           roundTile(part.x, part.y, 5);
         });
+      }
+
+      function drawCatcher() {
+        ctx.fillStyle = "#f97316";
+        ctx.beginPath();
+        ctx.arc(apple.x, apple.y, apple.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#14b8a6";
+        ctx.beginPath();
+        ctx.roundRect(catcher.x, catcher.y, catcher.width, catcher.height, 8);
+        ctx.fill();
+
+        ctx.fillStyle = "#5eead4";
+        ctx.beginPath();
+        ctx.roundRect(catcher.x + 14, catcher.y - 12, catcher.width - 28, 14, 7);
+        ctx.fill();
       }
 
       function roundTile(x, y, radius) {
@@ -429,15 +629,57 @@
         }
       });
 
+      document.addEventListener("keyup", (event) => {
+        if (currentGame !== "catcher") {
+          return;
+        }
+
+        const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && catcherMove < 0;
+        const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && catcherMove > 0;
+
+        if (leftReleased || rightReleased) {
+          catcherMove = 0;
+        }
+      });
+
       document.querySelectorAll("[data-direction]").forEach((button) => {
+        const directions = {
+          up: { x: 0, y: -1 },
+          down: { x: 0, y: 1 },
+          left: { x: -1, y: 0 },
+          right: { x: 1, y: 0 }
+        };
+
         button.addEventListener("click", () => {
-          const directions = {
-            up: { x: 0, y: -1 },
-            down: { x: 0, y: 1 },
-            left: { x: -1, y: 0 },
-            right: { x: 1, y: 0 }
-          };
+          if (currentGame === "catcher") {
+            return;
+          }
           changeDirection(directions[button.dataset.direction]);
+        });
+
+        button.addEventListener("pointerdown", (event) => {
+          if (currentGame !== "catcher") {
+            return;
+          }
+
+          const direction = directions[button.dataset.direction];
+          if (direction.x !== 0) {
+            event.preventDefault();
+            catcherMove = direction.x;
+            button.setPointerCapture(event.pointerId);
+          }
+        });
+
+        button.addEventListener("pointerup", () => {
+          if (currentGame === "catcher") {
+            catcherMove = 0;
+          }
+        });
+
+        button.addEventListener("pointercancel", () => {
+          if (currentGame === "catcher") {
+            catcherMove = 0;
+          }
         });
       });
 
@@ -449,22 +691,144 @@
         pauseButton.textContent = paused ? "Resume" : "Pause";
         pauseMenu.classList.toggle("open", paused);
         pauseMenu.setAttribute("aria-hidden", String(!paused));
-        if (!paused) {
-          gamesButton.hidden = false;
-          gameOptions.classList.remove("open");
+        resetPauseMenu();
+        statusEl.textContent = paused ? "Paused." : games[currentGame].help;
+      }
+
+      function resetPauseMenu() {
+        pauseMenuLevel = "main";
+        resumeButton.hidden = false;
+        backButton.hidden = true;
+        gamesButton.hidden = false;
+        gameOptions.classList.remove("open");
+        singlePlayerGames.classList.remove("open");
+        onlineGames.classList.remove("open");
+      }
+
+      function showGameModeMenu() {
+        pauseMenuLevel = "modes";
+        resumeButton.hidden = true;
+        backButton.hidden = false;
+        gamesButton.hidden = true;
+        gameOptions.classList.add("open");
+        singlePlayerGames.classList.remove("open");
+        onlineGames.classList.remove("open");
+      }
+
+      function showGameList(list) {
+        pauseMenuLevel = list;
+        resumeButton.hidden = true;
+        backButton.hidden = false;
+        gamesButton.hidden = true;
+        gameOptions.classList.remove("open");
+        singlePlayerGames.classList.toggle("open", list === "single");
+        onlineGames.classList.toggle("open", list === "online");
+        if (list === "online") {
+          clearRoomMessage();
         }
-        statusEl.textContent = paused ? "Paused." : "Use arrow keys or WASD to play.";
+      }
+
+      function getRooms() {
+        try {
+          return JSON.parse(localStorage.getItem(roomStorageKey) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function saveRooms(rooms) {
+        localStorage.setItem(roomStorageKey, JSON.stringify(rooms));
+      }
+
+      function generateRoomCode() {
+        const rooms = getRooms();
+        let code;
+
+        do {
+          code = `CODE${Math.floor(1000 + Math.random() * 9000)}`;
+        } while (rooms[code]);
+
+        return code;
+      }
+
+      function createRoom() {
+        const rooms = getRooms();
+        const code = generateRoomCode();
+        rooms[code] = {
+          players: 1,
+          createdAt: Date.now()
+        };
+        saveRooms(rooms);
+        roomCodeInput.value = code;
+        roomCodeEl.textContent = `Room code: ${code}`;
+        roomNoteEl.textContent = "Waiting for player 2 to join.";
+      }
+
+      function joinRoom() {
+        const code = roomCodeInput.value.trim().toUpperCase();
+        const rooms = getRooms();
+
+        if (!code) {
+          roomCodeEl.textContent = "";
+          roomNoteEl.textContent = "Enter a room code first.";
+          return;
+        }
+
+        if (!rooms[code]) {
+          roomCodeEl.textContent = "";
+          roomNoteEl.textContent = "Room not found.";
+          return;
+        }
+
+        if (rooms[code].players >= 2) {
+          roomCodeEl.textContent = `Room code: ${code}`;
+          roomNoteEl.textContent = "This room is already full.";
+          return;
+        }
+
+        rooms[code].players += 1;
+        saveRooms(rooms);
+        roomCodeEl.textContent = `Joined room: ${code}`;
+        roomNoteEl.textContent = "Player 2 joined. Online match setup is ready.";
+      }
+
+      function clearRoomMessage() {
+        roomCodeEl.textContent = "";
+        roomNoteEl.textContent = "";
       }
 
       restartButton.addEventListener("click", resetGame);
       pauseButton.addEventListener("click", togglePause);
       resumeButton.addEventListener("click", togglePause);
       gamesButton.addEventListener("click", () => {
-        gamesButton.hidden = true;
-        gameOptions.classList.add("open");
+        showGameModeMenu();
+      });
+      singlePlayerButton.addEventListener("click", () => {
+        showGameList("single");
+      });
+      onlineButton.addEventListener("click", () => {
+        showGameList("online");
+      });
+      snakeClassicButton.addEventListener("click", () => {
+        startGame("snake");
+      });
+      appleCatcherButton.addEventListener("click", () => {
+        startGame("catcher");
+      });
+      createRoomButton.addEventListener("click", createRoom);
+      joinRoomButton.addEventListener("click", joinRoom);
+      roomCodeInput.addEventListener("input", () => {
+        roomCodeInput.value = roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      });
+      backButton.addEventListener("click", () => {
+        if (pauseMenuLevel === "single" || pauseMenuLevel === "online") {
+          showGameModeMenu();
+        } else {
+          resetPauseMenu();
+        }
       });
 
-      resetGame();
+      startGame("snake");
     </script>
   </body>
 </html>

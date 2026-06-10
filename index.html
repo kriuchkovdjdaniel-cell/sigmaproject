@@ -354,6 +354,16 @@
           title: "Apple Catcher",
           bestKey: "catcher-best",
           help: "Use Left/Right or A/D to catch apples."
+        },
+        "online-snake": {
+          title: "Online Snake",
+          bestKey: "online-snake-best",
+          help: "Player 1 is teal. Player 2 is orange."
+        },
+        "online-catcher": {
+          title: "Online Apple Catcher",
+          bestKey: "online-catcher-best",
+          help: "Catch apples with your friend."
         }
       };
       const onlineGameNames = {
@@ -376,6 +386,13 @@
       let paused;
       let timer;
       let pauseMenuLevel = "main";
+      let onlineRoomCode = "";
+      let onlinePlayerSlot = "";
+      let onlineDirection = { x: 1, y: 0 };
+      let onlineState = null;
+      let onlineSyncBusy = false;
+      let lastOnlineFetch = 0;
+      let lastOnlinePush = 0;
       const firebaseDatabaseUrl = "https://fir-a3f0a-default-rtdb.firebaseio.com";
       const playerStorageKey = "snake-online-player-id";
       const ownedRoomsStorageKey = "snake-owned-room-codes";
@@ -391,6 +408,11 @@
       }
 
       function resetGame() {
+        if (currentGame === "online-snake" || currentGame === "online-catcher") {
+          restartOnlineGame();
+          return;
+        }
+
         score = 0;
         gameOver = false;
         paused = false;
@@ -450,6 +472,26 @@
       }
 
       function changeDirection(newDirection) {
+        if (currentGame === "online-snake") {
+          const player = onlineState?.playersState?.[onlinePlayerSlot];
+          const currentDirection = player?.dir || onlineDirection;
+          const reversing =
+            newDirection.x + currentDirection.x === 0 &&
+            newDirection.y + currentDirection.y === 0;
+
+          if (!reversing) {
+            onlineDirection = newDirection;
+          }
+          return;
+        }
+
+        if (currentGame === "online-catcher") {
+          if (newDirection.x !== 0) {
+            catcherMove = newDirection.x;
+          }
+          return;
+        }
+
         if (currentGame === "catcher") {
           if (newDirection.x !== 0) {
             catcherMove = newDirection.x;
@@ -557,8 +599,10 @@
         drawBoard();
         if (currentGame === "snake") {
           drawSnake();
-        } else {
+        } else if (currentGame === "catcher") {
           drawCatcher();
+        } else {
+          drawOnlineGame();
         }
       }
 
@@ -647,7 +691,7 @@
       });
 
       document.addEventListener("keyup", (event) => {
-        if (currentGame !== "catcher") {
+        if (currentGame !== "catcher" && currentGame !== "online-catcher") {
           return;
         }
 
@@ -668,14 +712,14 @@
         };
 
         button.addEventListener("click", () => {
-          if (currentGame === "catcher") {
+          if (currentGame === "catcher" || currentGame === "online-catcher") {
             return;
           }
           changeDirection(directions[button.dataset.direction]);
         });
 
         button.addEventListener("pointerdown", (event) => {
-          if (currentGame !== "catcher") {
+          if (currentGame !== "catcher" && currentGame !== "online-catcher") {
             return;
           }
 
@@ -688,13 +732,13 @@
         });
 
         button.addEventListener("pointerup", () => {
-          if (currentGame === "catcher") {
+          if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
         });
 
         button.addEventListener("pointercancel", () => {
-          if (currentGame === "catcher") {
+          if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
         });
@@ -772,6 +816,22 @@
         return response.json();
       }
 
+      async function patchRoom(code, patch) {
+        const response = await fetch(`${firebaseDatabaseUrl}/rooms/${code}.json`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(patch)
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not update room.");
+        }
+
+        return response.json();
+      }
+
       function getPlayerId() {
         let id = "";
 
@@ -827,6 +887,338 @@
         return code;
       }
 
+      function makeOnlinePlayer(slot, gameName) {
+        if (gameName === "online-catcher") {
+          return {
+            x: slot === "p1" ? 136 : 328,
+            y: canvas.height - 44,
+            score: 0,
+            alive: true
+          };
+        }
+
+        return {
+          snake: slot === "p1"
+            ? [{ x: 7, y: 10 }, { x: 6, y: 10 }, { x: 5, y: 10 }]
+            : [{ x: 20, y: 10 }, { x: 21, y: 10 }, { x: 22, y: 10 }],
+          dir: slot === "p1" ? { x: 1, y: 0 } : { x: -1, y: 0 },
+          score: 0,
+          alive: true
+        };
+      }
+
+      function makeOnlineFood() {
+        return {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      }
+
+      function makeOnlineApple() {
+        return {
+          x: 24 + Math.random() * (canvas.width - 48),
+          y: -24,
+          size: 18,
+          speed: 4
+        };
+      }
+
+      async function beginOnlineRoom(code, gameName, slot, room) {
+        clearInterval(timer);
+        onlineRoomCode = code;
+        onlinePlayerSlot = slot;
+        currentGame = gameName;
+        gameTitle.textContent = onlineGameNames[gameName] || games[gameName].title;
+        best = 0;
+        score = 0;
+        scoreEl.textContent = "0";
+        bestEl.textContent = "0";
+        gameOver = false;
+        paused = false;
+        pauseButton.textContent = "Pause";
+        pauseMenu.classList.remove("open");
+        pauseMenu.setAttribute("aria-hidden", "true");
+        resetPauseMenu();
+
+        onlineState = prepareOnlineState(room, gameName, slot);
+        onlineDirection = onlineState.playersState[slot]?.dir || { x: 1, y: 0 };
+        onlineSyncBusy = false;
+        lastOnlineFetch = 0;
+        lastOnlinePush = 0;
+        statusEl.textContent =
+          `${slot === "p1" ? "Player 1" : "Player 2"} in ${gameTitle.textContent}. Room ${code}.`;
+        await saveRoom(code, onlineState);
+        drawOnlineGame();
+        timer = setInterval(tickOnlineGame, gameName === "online-snake" ? 155 : 30);
+      }
+
+      function prepareOnlineState(room, gameName, slot) {
+        const state = {
+          ...room,
+          game: gameName,
+          gameName: onlineGameNames[gameName],
+          playersState: {
+            ...(room.playersState || {})
+          }
+        };
+
+        if (!state.playersState.p1) {
+          state.playersState.p1 = makeOnlinePlayer("p1", gameName);
+        }
+
+        if (slot === "p2" && !state.playersState.p2) {
+          state.playersState.p2 = makeOnlinePlayer("p2", gameName);
+        }
+
+        if (gameName === "online-snake" && !state.food) {
+          state.food = makeOnlineFood();
+        }
+
+        if (gameName === "online-catcher" && !state.apple) {
+          state.apple = makeOnlineApple();
+        }
+
+        return state;
+      }
+
+      async function restartOnlineGame() {
+        if (!onlineRoomCode || !onlinePlayerSlot) {
+          startGame("snake");
+          return;
+        }
+
+        const room = await getRoom(onlineRoomCode);
+        await beginOnlineRoom(onlineRoomCode, currentGame, onlinePlayerSlot, room || {});
+      }
+
+      function tickOnlineGame() {
+        if (paused || gameOver || !onlineRoomCode) {
+          return;
+        }
+
+        if (currentGame === "online-snake") {
+          updateOnlineSnake();
+        } else {
+          updateOnlineCatcher();
+        }
+
+        drawOnlineGame();
+        syncOnlineState();
+      }
+
+      function syncOnlineState() {
+        const now = Date.now();
+        const fetchDelay = currentGame === "online-snake" ? 260 : 180;
+        const pushDelay = currentGame === "online-snake" ? 120 : 80;
+
+        if (now - lastOnlinePush > pushDelay) {
+          lastOnlinePush = now;
+          patchRoom(onlineRoomCode, buildOnlinePatch()).catch(() => {
+            statusEl.textContent = "Online sync failed. Check Firebase rules or connection.";
+          });
+        }
+
+        if (onlineSyncBusy || now - lastOnlineFetch < fetchDelay) {
+          return;
+        }
+
+        onlineSyncBusy = true;
+        lastOnlineFetch = now;
+
+        getRoom(onlineRoomCode)
+          .then((room) => {
+            if (!room) {
+              endGame();
+              statusEl.textContent = "Online room closed.";
+              return;
+            }
+
+            mergeOnlineState(room);
+          })
+          .catch(() => {
+            statusEl.textContent = "Online sync failed. Check Firebase rules or connection.";
+          })
+          .finally(() => {
+            onlineSyncBusy = false;
+          });
+      }
+
+      function buildOnlinePatch() {
+        const patch = {
+          updatedAt: Date.now()
+        };
+
+        patch[`playersState/${onlinePlayerSlot}`] = onlineState.playersState[onlinePlayerSlot];
+
+        if (currentGame === "online-snake") {
+          patch.food = onlineState.food || null;
+        }
+
+        if (currentGame === "online-catcher") {
+          patch.apple = onlineState.apple || null;
+        }
+
+        return patch;
+      }
+
+      function mergeOnlineState(room) {
+        const remoteState = prepareOnlineState(room, currentGame, onlinePlayerSlot);
+        const otherSlot = onlinePlayerSlot === "p1" ? "p2" : "p1";
+
+        if (remoteState.playersState[otherSlot]) {
+          onlineState.playersState[otherSlot] = remoteState.playersState[otherSlot];
+        }
+
+        if (currentGame === "online-snake" && remoteState.food) {
+          onlineState.food = remoteState.food;
+        }
+
+        if (currentGame === "online-catcher" && remoteState.apple) {
+          onlineState.apple = remoteState.apple;
+        }
+      }
+
+      function updateOnlineSnake() {
+        const player = onlineState.playersState[onlinePlayerSlot];
+
+        if (!player?.alive) {
+          return;
+        }
+
+        player.dir = onlineDirection;
+        const head = player.snake[0];
+        const nextHead = {
+          x: (head.x + player.dir.x + tileCount) % tileCount,
+          y: (head.y + player.dir.y + tileCount) % tileCount
+        };
+        const hitSelf = player.snake.some((part) => part.x === nextHead.x && part.y === nextHead.y);
+
+        if (hitSelf) {
+          player.alive = false;
+          statusEl.textContent = "You crashed. Press Restart to rejoin.";
+          return;
+        }
+
+        player.snake.unshift(nextHead);
+
+        if (onlineState.food && nextHead.x === onlineState.food.x && nextHead.y === onlineState.food.y) {
+          player.score += 1;
+          onlineState.food = makeOnlineFood();
+        } else {
+          player.snake.pop();
+        }
+
+        score = player.score;
+        scoreEl.textContent = score;
+        bestEl.textContent = Math.max(
+          onlineState.playersState.p1?.score || 0,
+          onlineState.playersState.p2?.score || 0
+        );
+      }
+
+      function updateOnlineCatcher() {
+        const player = onlineState.playersState[onlinePlayerSlot];
+
+        if (!player?.alive) {
+          return;
+        }
+
+        if (catcherMove !== 0) {
+          player.x = Math.max(0, Math.min(canvas.width - 96, player.x + catcherMove * 9));
+        }
+
+        if (onlinePlayerSlot === "p1") {
+          onlineState.apple.y += onlineState.apple.speed;
+
+          if (onlineState.apple.y > canvas.height) {
+            onlineState.apple = makeOnlineApple();
+          }
+        }
+
+        const caught =
+          onlineState.apple.y + onlineState.apple.size >= player.y &&
+          onlineState.apple.y <= player.y + 18 &&
+          onlineState.apple.x + onlineState.apple.size >= player.x &&
+          onlineState.apple.x <= player.x + 96;
+
+        if (caught) {
+          player.score += 1;
+          onlineState.apple = makeOnlineApple();
+        }
+
+        score = player.score;
+        scoreEl.textContent = score;
+        bestEl.textContent = Math.max(
+          onlineState.playersState.p1?.score || 0,
+          onlineState.playersState.p2?.score || 0
+        );
+      }
+
+      function drawOnlineGame() {
+        drawBoard();
+
+        if (!onlineState) {
+          return;
+        }
+
+        if (currentGame === "online-snake") {
+          drawOnlineSnake();
+        } else {
+          drawOnlineCatcher();
+        }
+      }
+
+      function drawOnlineSnake() {
+        if (onlineState.food) {
+          ctx.fillStyle = "#f97316";
+          roundTile(onlineState.food.x, onlineState.food.y, 7);
+        }
+
+        drawOnlineSnakePlayer(onlineState.playersState.p1, "#5eead4", "#14b8a6");
+        drawOnlineSnakePlayer(onlineState.playersState.p2, "#fdba74", "#f97316");
+      }
+
+      function drawOnlineSnakePlayer(player, headColor, bodyColor) {
+        if (!player?.snake) {
+          return;
+        }
+
+        player.snake.forEach((part, index) => {
+          ctx.fillStyle = index === 0 ? headColor : bodyColor;
+          roundTile(part.x, part.y, 5);
+        });
+      }
+
+      function drawOnlineCatcher() {
+        const appleState = onlineState.apple;
+
+        if (appleState) {
+          ctx.fillStyle = "#f97316";
+          ctx.beginPath();
+          ctx.arc(appleState.x, appleState.y, appleState.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        drawOnlineCatcherPlayer(onlineState.playersState.p1, "#14b8a6", "#5eead4");
+        drawOnlineCatcherPlayer(onlineState.playersState.p2, "#f97316", "#fdba74");
+      }
+
+      function drawOnlineCatcherPlayer(player, baseColor, topColor) {
+        if (!player) {
+          return;
+        }
+
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.roundRect(player.x, player.y, 96, 18, 8);
+        ctx.fill();
+
+        ctx.fillStyle = topColor;
+        ctx.beginPath();
+        ctx.roundRect(player.x + 14, player.y - 12, 68, 14, 7);
+        ctx.fill();
+      }
+
       async function createRoom() {
         createRoomButton.disabled = true;
         joinRoomButton.disabled = true;
@@ -841,7 +1233,12 @@
             gameName: onlineGameNames[selectedOnlineGame],
             createdBy: playerId,
             joinedBy: null,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            playersState: {
+              p1: makeOnlinePlayer("p1", selectedOnlineGame)
+            },
+            food: selectedOnlineGame === "online-snake" ? makeOnlineFood() : null,
+            apple: selectedOnlineGame === "online-catcher" ? makeOnlineApple() : null
           };
 
           await saveRoom(code, room);
@@ -850,6 +1247,7 @@
           roomCodeInput.value = code;
           roomCodeEl.textContent = `Room code: ${code}`;
           roomNoteEl.textContent = `${room.gameName} selected. Share this code with player 2.`;
+          await beginOnlineRoom(code, selectedOnlineGame, "p1", room);
         } catch {
           roomCodeEl.textContent = "";
           roomNoteEl.textContent = "Could not create room. Check Firebase database rules.";
@@ -900,14 +1298,21 @@
             return;
           }
 
-          await saveRoom(code, {
+          const joinedRoom = {
             ...room,
             players: 2,
+            playersState: {
+              ...(room.playersState || {}),
+              p2: makeOnlinePlayer("p2", room.game || "online-snake")
+            },
             joinedBy: playerId,
             joinedAt: Date.now()
-          });
+          };
+
+          await saveRoom(code, joinedRoom);
           roomCodeEl.textContent = `Joined room: ${code}`;
           roomNoteEl.textContent = `Joined ${room.gameName || "online game"}. Online match setup is ready.`;
+          await beginOnlineRoom(code, room.game || "online-snake", "p2", joinedRoom);
         } catch {
           roomCodeEl.textContent = "";
           roomNoteEl.textContent = "Could not join room. Check Firebase database rules.";

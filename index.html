@@ -73,8 +73,42 @@
       }
 
       .game {
+        position: relative;
         display: grid;
         gap: 0.9rem;
+      }
+
+      .play-overlay {
+        position: absolute;
+        inset: 0 0 auto;
+        aspect-ratio: 1;
+        display: none;
+        place-items: center;
+        padding: 1rem;
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.64);
+      }
+
+      .play-overlay.open {
+        display: grid;
+      }
+
+      .play-panel {
+        width: min(74vw, 260px);
+        display: grid;
+        gap: 0.75rem;
+        text-align: center;
+      }
+
+      .play-panel h2 {
+        margin: 0;
+        font-size: 1.75rem;
+      }
+
+      .play-panel p {
+        margin: 0;
+        color: #cbd5e1;
+        font-weight: 800;
       }
 
       canvas {
@@ -277,6 +311,14 @@
 
       <section class="game" aria-label="Snake game">
         <canvas id="board" width="560" height="560"></canvas>
+        <div class="play-overlay" id="playOverlay" aria-hidden="true">
+          <div class="play-panel">
+            <h2 id="playTitle">Snake</h2>
+            <p id="playMessage"></p>
+            <button type="button" id="playButton">Play</button>
+            <button type="button" id="cancelWaitButton" hidden>Leave Room</button>
+          </div>
+        </div>
         <p class="status" id="status">Use arrow keys or WASD to play.</p>
         <div class="controls">
           <button type="button" id="restart">Restart</button>
@@ -324,6 +366,11 @@
       const canvas = document.getElementById("board");
       const ctx = canvas.getContext("2d");
       const gameTitle = document.getElementById("gameTitle");
+      const playOverlay = document.getElementById("playOverlay");
+      const playTitle = document.getElementById("playTitle");
+      const playMessage = document.getElementById("playMessage");
+      const playButton = document.getElementById("playButton");
+      const cancelWaitButton = document.getElementById("cancelWaitButton");
       const scoreEl = document.getElementById("score");
       const bestEl = document.getElementById("best");
       const localScoreboard = document.getElementById("localScoreboard");
@@ -398,7 +445,9 @@
       let best;
       let gameOver;
       let paused;
+      let waitingToPlay = false;
       let timer;
+      let waitingTimer;
       let pauseMenuLevel = "main";
       let onlineRoomCode = "";
       let onlinePlayerSlot = "";
@@ -419,6 +468,7 @@
 
       function startGame(gameName) {
         if (gameName === "snake" || gameName === "catcher") {
+          clearInterval(waitingTimer);
           onlineRoomCode = "";
           onlinePlayerSlot = "";
           onlineState = null;
@@ -435,19 +485,25 @@
 
       function resetGame() {
         if (currentGame === "online-snake" || currentGame === "online-catcher") {
+          if (waitingToPlay) {
+            leaveOnlineRoom();
+            return;
+          }
           restartOnlineGame();
           return;
         }
 
         score = 0;
         gameOver = false;
-        paused = false;
+        waitingToPlay = true;
+        paused = true;
         scoreEl.textContent = score;
         pauseButton.textContent = "Pause";
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
-        statusEl.textContent = games[currentGame].help;
+        showPlayOverlay();
+        statusEl.textContent = "Press Play to start.";
         clearInterval(timer);
 
         if (currentGame === "snake") {
@@ -536,7 +592,7 @@
       }
 
       function moveCatcher(amount) {
-        if (paused || gameOver) {
+        if (waitingToPlay || paused || gameOver) {
           return;
         }
         catcher.x = Math.max(0, Math.min(canvas.width - catcher.width, catcher.x + amount * 9));
@@ -544,7 +600,7 @@
       }
 
       function tickSnake() {
-        if (paused || gameOver) {
+        if (waitingToPlay || paused || gameOver) {
           return;
         }
 
@@ -576,7 +632,7 @@
       }
 
       function tickCatcher() {
-        if (paused || gameOver) {
+        if (waitingToPlay || paused || gameOver) {
           return;
         }
 
@@ -614,11 +670,50 @@
 
       function endGame() {
         gameOver = true;
+        waitingToPlay = false;
+        hidePlayOverlay();
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
         statusEl.textContent = "Game over. Press Restart to play again.";
         draw();
+      }
+
+      function showPlayOverlay() {
+        playTitle.textContent = games[currentGame].title;
+        playMessage.textContent = "";
+        playButton.hidden = false;
+        cancelWaitButton.hidden = true;
+        playOverlay.classList.add("open");
+        playOverlay.setAttribute("aria-hidden", "false");
+      }
+
+      function showWaitingOverlay(code, gameName) {
+        playTitle.textContent = "Waiting";
+        playMessage.textContent = `${onlineGameNames[gameName]} room ${code}`;
+        playButton.hidden = true;
+        cancelWaitButton.hidden = false;
+        playOverlay.classList.add("open");
+        playOverlay.setAttribute("aria-hidden", "false");
+      }
+
+      function hidePlayOverlay() {
+        playOverlay.classList.remove("open");
+        playOverlay.setAttribute("aria-hidden", "true");
+        playButton.hidden = false;
+        cancelWaitButton.hidden = true;
+      }
+
+      function playLocalGame() {
+        if (!waitingToPlay || currentGame === "online-snake" || currentGame === "online-catcher") {
+          return;
+        }
+
+        waitingToPlay = false;
+        paused = false;
+        hidePlayOverlay();
+        pauseButton.textContent = "Pause";
+        statusEl.textContent = games[currentGame].help;
       }
 
       function draw() {
@@ -771,7 +866,7 @@
       });
 
       function togglePause() {
-        if (gameOver) {
+        if (gameOver || waitingToPlay) {
           return;
         }
         paused = !paused;
@@ -987,6 +1082,7 @@
 
       async function beginOnlineRoom(code, gameName, slot, room) {
         clearInterval(timer);
+        clearInterval(waitingTimer);
         onlineRoomCode = code;
         onlinePlayerSlot = slot;
         currentGame = gameName;
@@ -998,6 +1094,8 @@
         bestEl.textContent = "0";
         gameOver = false;
         paused = false;
+        waitingToPlay = false;
+        hidePlayOverlay();
         pauseButton.textContent = "Pause";
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
@@ -1124,6 +1222,50 @@
         await beginOnlineRoom(onlineRoomCode, currentGame, onlinePlayerSlot, room || {});
       }
 
+      function waitForSecondPlayer(code, gameName, room) {
+        clearInterval(timer);
+        clearInterval(waitingTimer);
+        onlineRoomCode = code;
+        onlinePlayerSlot = "p1";
+        currentGame = gameName;
+        gameTitle.textContent = onlineGameNames[gameName];
+        showOnlineScoreboard();
+        scoreEl.textContent = "0";
+        bestEl.textContent = "0";
+        gameOver = false;
+        paused = true;
+        waitingToPlay = true;
+        resetPauseMenu();
+        pauseMenu.classList.remove("open");
+        pauseMenu.setAttribute("aria-hidden", "true");
+        showWaitingOverlay(code, gameName);
+        statusEl.textContent = `Room ${code}. Waiting for player 2.`;
+        drawBoard();
+        onlineState = prepareOnlineState(room, gameName, "p1");
+        updateOnlineScoreboard();
+
+        waitingTimer = setInterval(async () => {
+          try {
+            const latestRoom = await getRoom(code);
+
+            if (!latestRoom) {
+              clearInterval(waitingTimer);
+              statusEl.textContent = "Room closed.";
+              startGame("snake");
+              return;
+            }
+
+            if (latestRoom.players >= 2 && latestRoom.playersState?.p2) {
+              clearInterval(waitingTimer);
+              waitingToPlay = false;
+              await beginOnlineRoom(code, gameName, "p1", latestRoom);
+            }
+          } catch {
+            statusEl.textContent = "Waiting sync failed. Check Firebase rules or connection.";
+          }
+        }, 900);
+      }
+
       async function leaveOnlineRoom() {
         if (!onlineRoomCode) {
           startGame("snake");
@@ -1135,6 +1277,7 @@
         const wasCreator = slotToLeave === "p1";
 
         clearInterval(timer);
+        clearInterval(waitingTimer);
         leaveRoomButton.disabled = true;
         statusEl.textContent = "Leaving room...";
 
@@ -1495,7 +1638,7 @@
           roomCodeInput.value = code;
           roomCodeEl.textContent = `Room code: ${code}`;
           roomNoteEl.textContent = `${room.gameName} selected. Share this code with player 2.`;
-          await beginOnlineRoom(code, selectedOnlineGame, "p1", room);
+          waitForSecondPlayer(code, selectedOnlineGame, room);
         } catch {
           roomCodeEl.textContent = "";
           roomNoteEl.textContent = "Could not create room. Check Firebase database rules.";
@@ -1582,6 +1725,8 @@
       }
 
       restartButton.addEventListener("click", resetGame);
+      playButton.addEventListener("click", playLocalGame);
+      cancelWaitButton.addEventListener("click", leaveOnlineRoom);
       pauseButton.addEventListener("click", togglePause);
       resumeButton.addEventListener("click", togglePause);
       leaveRoomButton.addEventListener("click", leaveOnlineRoom);

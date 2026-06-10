@@ -363,7 +363,7 @@
       let paused;
       let timer;
       let pauseMenuLevel = "main";
-      const roomStorageKey = "snake-online-rooms";
+      const firebaseDatabaseUrl = "https://fir-a3f0a-default-rtdb.firebaseio.com";
       const playerStorageKey = "snake-online-player-id";
       const ownedRoomsStorageKey = "snake-owned-room-codes";
       const playerId = getPlayerId();
@@ -732,20 +732,30 @@
         }
       }
 
-      function getRooms() {
-        try {
-          return JSON.parse(localStorage.getItem(roomStorageKey) || "{}");
-        } catch {
-          return {};
+      async function getRoom(code) {
+        const response = await fetch(`${firebaseDatabaseUrl}/rooms/${code}.json`);
+
+        if (!response.ok) {
+          throw new Error("Could not reach room server.");
         }
+
+        return response.json();
       }
 
-      function saveRooms(rooms) {
-        try {
-          localStorage.setItem(roomStorageKey, JSON.stringify(rooms));
-        } catch {
-          roomNoteEl.textContent = "This browser blocked room saving.";
+      async function saveRoom(code, room) {
+        const response = await fetch(`${firebaseDatabaseUrl}/rooms/${code}.json`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(room)
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not save room.");
         }
+
+        return response.json();
       }
 
       function getPlayerId() {
@@ -791,37 +801,50 @@
         }
       }
 
-      function generateRoomCode() {
-        const rooms = getRooms();
+      async function generateRoomCode() {
         let code;
+        let existingRoom;
 
         do {
           code = `CODE${Math.floor(1000 + Math.random() * 9000)}`;
-        } while (rooms[code]);
+          existingRoom = await getRoom(code);
+        } while (existingRoom);
 
         return code;
       }
 
-      function createRoom() {
-        const rooms = getRooms();
-        const code = generateRoomCode();
-        createdRoomCode = code;
-        rooms[code] = {
-          players: 1,
-          createdBy: playerId,
-          joinedBy: null,
-          createdAt: Date.now()
-        };
-        saveRooms(rooms);
-        saveOwnedRoomCode(code);
-        roomCodeInput.value = code;
-        roomCodeEl.textContent = `Room code: ${code}`;
-        roomNoteEl.textContent = "Waiting for player 2 to join.";
+      async function createRoom() {
+        createRoomButton.disabled = true;
+        joinRoomButton.disabled = true;
+        roomCodeEl.textContent = "";
+        roomNoteEl.textContent = "Creating room...";
+
+        try {
+          const code = await generateRoomCode();
+          const room = {
+            players: 1,
+            createdBy: playerId,
+            joinedBy: null,
+            createdAt: Date.now()
+          };
+
+          await saveRoom(code, room);
+          createdRoomCode = code;
+          saveOwnedRoomCode(code);
+          roomCodeInput.value = code;
+          roomCodeEl.textContent = `Room code: ${code}`;
+          roomNoteEl.textContent = "Share this code with player 2.";
+        } catch {
+          roomCodeEl.textContent = "";
+          roomNoteEl.textContent = "Could not create room. Check Firebase database rules.";
+        } finally {
+          createRoomButton.disabled = false;
+          joinRoomButton.disabled = false;
+        }
       }
 
-      function joinRoom() {
+      async function joinRoom() {
         const code = roomCodeInput.value.trim().toUpperCase();
-        const rooms = getRooms();
 
         if (!code) {
           roomCodeEl.textContent = "";
@@ -835,29 +858,47 @@
           return;
         }
 
-        if (!rooms[code]) {
+        createRoomButton.disabled = true;
+        joinRoomButton.disabled = true;
+        roomCodeEl.textContent = "";
+        roomNoteEl.textContent = "Joining room...";
+
+        try {
+          const room = await getRoom(code);
+
+          if (!room) {
+            roomCodeEl.textContent = "";
+            roomNoteEl.textContent = "Room not found. Check the code from player 1.";
+            return;
+          }
+
+          if (room.createdBy === playerId) {
+            roomCodeEl.textContent = `Room code: ${code}`;
+            roomNoteEl.textContent = "You created this room. A different player must join it.";
+            return;
+          }
+
+          if (room.players >= 2) {
+            roomCodeEl.textContent = `Room code: ${code}`;
+            roomNoteEl.textContent = "This room is already full.";
+            return;
+          }
+
+          await saveRoom(code, {
+            ...room,
+            players: 2,
+            joinedBy: playerId,
+            joinedAt: Date.now()
+          });
+          roomCodeEl.textContent = `Joined room: ${code}`;
+          roomNoteEl.textContent = "Player 2 joined. Online match setup is ready.";
+        } catch {
           roomCodeEl.textContent = "";
-          roomNoteEl.textContent = "Room not found here. Real online rooms need a shared server.";
-          return;
+          roomNoteEl.textContent = "Could not join room. Check Firebase database rules.";
+        } finally {
+          createRoomButton.disabled = false;
+          joinRoomButton.disabled = false;
         }
-
-        if (rooms[code].createdBy === playerId) {
-          roomCodeEl.textContent = `Room code: ${code}`;
-          roomNoteEl.textContent = "You created this room. A different player must join it.";
-          return;
-        }
-
-        if (rooms[code].players >= 2) {
-          roomCodeEl.textContent = `Room code: ${code}`;
-          roomNoteEl.textContent = "This room is already full.";
-          return;
-        }
-
-        rooms[code].players += 1;
-        rooms[code].joinedBy = playerId;
-        saveRooms(rooms);
-        roomCodeEl.textContent = `Joined room: ${code}`;
-        roomNoteEl.textContent = "Player 2 joined. Online match setup is ready.";
       }
 
       function clearRoomMessage() {

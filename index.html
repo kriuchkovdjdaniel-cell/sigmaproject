@@ -365,7 +365,9 @@
       let pauseMenuLevel = "main";
       const roomStorageKey = "snake-online-rooms";
       const playerStorageKey = "snake-online-player-id";
+      const ownedRoomsStorageKey = "snake-owned-room-codes";
       const playerId = getPlayerId();
+      let createdRoomCode = "";
 
       function startGame(gameName) {
         currentGame = gameName;
@@ -739,18 +741,54 @@
       }
 
       function saveRooms(rooms) {
-        localStorage.setItem(roomStorageKey, JSON.stringify(rooms));
+        try {
+          localStorage.setItem(roomStorageKey, JSON.stringify(rooms));
+        } catch {
+          roomNoteEl.textContent = "This browser blocked room saving.";
+        }
       }
 
       function getPlayerId() {
-        let id = localStorage.getItem(playerStorageKey);
+        let id = "";
+
+        try {
+          id = localStorage.getItem(playerStorageKey);
+        } catch {
+          id = "";
+        }
 
         if (!id) {
           id = `PLAYER-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
-          localStorage.setItem(playerStorageKey, id);
+          try {
+            localStorage.setItem(playerStorageKey, id);
+          } catch {
+            // The in-memory id still works until the page reloads.
+          }
         }
 
         return id;
+      }
+
+      function getOwnedRoomCodes() {
+        try {
+          return JSON.parse(localStorage.getItem(ownedRoomsStorageKey) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function saveOwnedRoomCode(code) {
+        const ownedCodes = getOwnedRoomCodes();
+
+        if (!ownedCodes.includes(code)) {
+          ownedCodes.push(code);
+        }
+
+        try {
+          localStorage.setItem(ownedRoomsStorageKey, JSON.stringify(ownedCodes));
+        } catch {
+          // Same-session createdRoomCode still prevents joining your own room.
+        }
       }
 
       function generateRoomCode() {
@@ -767,6 +805,7 @@
       function createRoom() {
         const rooms = getRooms();
         const code = generateRoomCode();
+        createdRoomCode = code;
         rooms[code] = {
           players: 1,
           createdBy: playerId,
@@ -774,6 +813,7 @@
           createdAt: Date.now()
         };
         saveRooms(rooms);
+        saveOwnedRoomCode(code);
         roomCodeInput.value = code;
         roomCodeEl.textContent = `Room code: ${code}`;
         roomNoteEl.textContent = "Waiting for player 2 to join.";
@@ -789,9 +829,15 @@
           return;
         }
 
+        if (code === createdRoomCode || getOwnedRoomCodes().includes(code)) {
+          roomCodeEl.textContent = `Room code: ${code}`;
+          roomNoteEl.textContent = "You created this room. A different player must join it.";
+          return;
+        }
+
         if (!rooms[code]) {
           roomCodeEl.textContent = "";
-          roomNoteEl.textContent = "Room not found on this device.";
+          roomNoteEl.textContent = "Room not found here. Real online rooms need a shared server.";
           return;
         }
 

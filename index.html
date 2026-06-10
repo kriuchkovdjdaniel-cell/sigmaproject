@@ -409,6 +409,8 @@
       let lastOnlineFetch = 0;
       let lastOnlinePush = 0;
       let lastOnlineSnakeMove = 0;
+      let onlineFoodsDirty = false;
+      let onlineApplesDirty = false;
       const firebaseDatabaseUrl = "https://fir-a3f0a-default-rtdb.firebaseio.com";
       const playerStorageKey = "snake-online-player-id";
       const ownedRoomsStorageKey = "snake-owned-room-codes";
@@ -942,20 +944,45 @@
         };
       }
 
-      function makeOnlineFood() {
-        return {
-          x: Math.floor(Math.random() * tileCount),
-          y: Math.floor(Math.random() * tileCount)
-        };
+      function makeOnlineFood(blockedCells = []) {
+        let foodItem;
+        let attempts = 0;
+
+        do {
+          foodItem = {
+            x: Math.floor(Math.random() * tileCount),
+            y: Math.floor(Math.random() * tileCount)
+          };
+          attempts += 1;
+        } while (
+          attempts < 200 &&
+          blockedCells.some((cell) => cell.x === foodItem.x && cell.y === foodItem.y)
+        );
+
+        return foodItem;
+      }
+
+      function makeOnlineFoods(state = null) {
+        const foods = [];
+
+        while (foods.length < 4) {
+          foods.push(makeOnlineFood([...getOnlineSnakeBlockedCells(state), ...foods]));
+        }
+
+        return foods;
       }
 
       function makeOnlineApple() {
         return {
           x: 24 + Math.random() * (canvas.width - 48),
-          y: -24,
+          y: -24 - Math.random() * 260,
           size: 18,
-          speed: 4
+          speed: 3.4 + Math.random() * 1.6
         };
+      }
+
+      function makeOnlineApples() {
+        return Array.from({ length: 4 }, () => makeOnlineApple());
       }
 
       async function beginOnlineRoom(code, gameName, slot, room) {
@@ -984,6 +1011,8 @@
         lastOnlineFetch = 0;
         lastOnlinePush = 0;
         lastOnlineSnakeMove = 0;
+        onlineFoodsDirty = false;
+        onlineApplesDirty = false;
         statusEl.textContent =
           `${slot === "p1" ? "Player 1" : "Player 2"} in ${gameTitle.textContent}. Room ${code}.`;
         await saveRoom(code, onlineState);
@@ -1009,15 +1038,80 @@
           state.playersState.p2 = makeOnlinePlayer("p2", gameName);
         }
 
-        if (gameName === "online-snake" && !state.food) {
-          state.food = makeOnlineFood();
+        if (gameName === "online-snake") {
+          state.foods = Array.isArray(state.foods)
+            ? state.foods.slice(0, 4)
+            : state.food
+              ? [state.food]
+              : [];
+
+          while (state.foods.length < 4) {
+            state.foods.push(makeOnlineFood([...getOnlineSnakeBlockedCells(state), ...state.foods]));
+          }
+
+          state.foods = state.foods.map((foodItem, index) => {
+            const blockedCells = [
+              ...getOnlineSnakeBlockedCells(state),
+              ...state.foods.filter((_, foodIndex) => foodIndex !== index)
+            ];
+            const blocked = blockedCells.some((cell) => cell.x === foodItem.x && cell.y === foodItem.y);
+
+            return blocked ? makeOnlineFood(blockedCells) : foodItem;
+          });
+
+          delete state.food;
         }
 
-        if (gameName === "online-catcher" && !state.apple) {
-          state.apple = makeOnlineApple();
+        if (gameName === "online-catcher") {
+          state.apples = Array.isArray(state.apples)
+            ? state.apples.slice(0, 4)
+            : state.apple
+              ? [state.apple]
+              : [];
+
+          while (state.apples.length < 4) {
+            state.apples.push(makeOnlineApple());
+          }
+
+          delete state.apple;
         }
 
         return state;
+      }
+
+      function getOnlineSnakeBlockedCells(state = onlineState) {
+        const playersState = state?.playersState || {};
+        const p1Snake = playersState.p1?.snake || [];
+        const p2Snake = playersState.p2?.snake || [];
+        return [...p1Snake, ...p2Snake];
+      }
+
+      function ensureOnlineSnakeFoods() {
+        if (!onlineState) {
+          return;
+        }
+
+        onlineState.foods = Array.isArray(onlineState.foods) ? onlineState.foods.slice(0, 4) : [];
+
+        while (onlineState.foods.length < 4) {
+          onlineState.foods.push(makeOnlineFood([...getOnlineSnakeBlockedCells(), ...onlineState.foods]));
+          onlineFoodsDirty = true;
+        }
+
+        onlineState.foods = onlineState.foods.map((foodItem, index) => {
+          const blockedCells = [
+            ...getOnlineSnakeBlockedCells(),
+            ...onlineState.foods.filter((_, foodIndex) => foodIndex !== index)
+          ];
+          const blocked = blockedCells.some((cell) => cell.x === foodItem.x && cell.y === foodItem.y);
+
+          if (blocked) {
+            onlineFoodsDirty = true;
+            return makeOnlineFood(blockedCells);
+          }
+
+          return foodItem;
+        });
       }
 
       async function restartOnlineGame() {
@@ -1075,6 +1169,7 @@
         }
 
         if (currentGame === "online-snake") {
+          ensureOnlineSnakeFoods();
           updateOnlineSnake();
         } else {
           updateOnlineCatcher();
@@ -1093,7 +1188,19 @@
         if (!onlinePushBusy && now - lastOnlinePush > pushDelay) {
           lastOnlinePush = now;
           onlinePushBusy = true;
-          patchRoom(onlineRoomCode, buildOnlinePatch())
+          const patch = buildOnlinePatch();
+          const pushedFoods = Object.prototype.hasOwnProperty.call(patch, "foods");
+          const pushedApples = Object.prototype.hasOwnProperty.call(patch, "apples");
+
+          patchRoom(onlineRoomCode, patch)
+            .then(() => {
+              if (pushedFoods) {
+                onlineFoodsDirty = false;
+              }
+              if (pushedApples) {
+                onlineApplesDirty = false;
+              }
+            })
             .catch(() => {
               statusEl.textContent = "Online sync failed. Check Firebase rules or connection.";
             })
@@ -1135,11 +1242,18 @@
         patch[`playersState/${onlinePlayerSlot}`] = onlineState.playersState[onlinePlayerSlot];
 
         if (currentGame === "online-snake") {
-          patch.food = onlineState.food || null;
+          ensureOnlineSnakeFoods();
+          if (onlineFoodsDirty) {
+            patch.foods = onlineState.foods || null;
+            patch.food = null;
+          }
         }
 
         if (currentGame === "online-catcher") {
-          patch.apple = onlineState.apple || null;
+          if (onlineApplesDirty) {
+            patch.apples = onlineState.apples || null;
+            patch.apple = null;
+          }
         }
 
         return patch;
@@ -1153,16 +1267,24 @@
           onlineState.playersState[otherSlot] = remoteState.playersState[otherSlot];
         }
 
-        if (currentGame === "online-snake" && remoteState.food) {
-          onlineState.food = remoteState.food;
+        if (currentGame === "online-snake" && remoteState.foods && !onlineFoodsDirty) {
+          if (!Array.isArray(room.foods) || room.foods.length < 4) {
+            onlineFoodsDirty = true;
+          }
+          onlineState.foods = remoteState.foods;
+          ensureOnlineSnakeFoods();
         }
 
-        if (currentGame === "online-catcher" && remoteState.apple) {
-          onlineState.apple = remoteState.apple;
+        if (currentGame === "online-catcher" && remoteState.apples && !onlineApplesDirty) {
+          if (!Array.isArray(room.apples) || room.apples.length < 4) {
+            onlineApplesDirty = true;
+          }
+          onlineState.apples = remoteState.apples;
         }
       }
 
       function updateOnlineSnake() {
+        ensureOnlineSnakeFoods();
         const player = onlineState.playersState[onlinePlayerSlot];
 
         if (!player?.alive) {
@@ -1195,9 +1317,17 @@
 
         player.snake.unshift(nextHead);
 
-        if (onlineState.food && nextHead.x === onlineState.food.x && nextHead.y === onlineState.food.y) {
+        const eatenFoodIndex = onlineState.foods.findIndex(
+          (foodItem) => nextHead.x === foodItem.x && nextHead.y === foodItem.y
+        );
+
+        if (eatenFoodIndex >= 0) {
           player.score += 1;
-          onlineState.food = makeOnlineFood();
+          onlineState.foods[eatenFoodIndex] = makeOnlineFood([
+            ...getOnlineSnakeBlockedCells(),
+            ...onlineState.foods.filter((_, index) => index !== eatenFoodIndex)
+          ]);
+          onlineFoodsDirty = true;
         } else {
           player.snake.pop();
         }
@@ -1219,22 +1349,29 @@
         }
 
         if (onlinePlayerSlot === "p1") {
-          onlineState.apple.y += onlineState.apple.speed;
+          onlineState.apples = onlineState.apples.map((appleItem) => {
+            const nextApple = {
+              ...appleItem,
+              y: appleItem.y + appleItem.speed
+            };
 
-          if (onlineState.apple.y > canvas.height) {
-            onlineState.apple = makeOnlineApple();
-          }
+            return nextApple.y > canvas.height ? makeOnlineApple() : nextApple;
+          });
+          onlineApplesDirty = true;
         }
 
-        const caught =
-          onlineState.apple.y + onlineState.apple.size >= player.y &&
-          onlineState.apple.y <= player.y + 18 &&
-          onlineState.apple.x + onlineState.apple.size >= player.x &&
-          onlineState.apple.x <= player.x + 96;
+        const caughtAppleIndex = onlineState.apples.findIndex(
+          (appleItem) =>
+            appleItem.y + appleItem.size >= player.y &&
+            appleItem.y <= player.y + 18 &&
+            appleItem.x + appleItem.size >= player.x &&
+            appleItem.x <= player.x + 96
+        );
 
-        if (caught) {
+        if (caughtAppleIndex >= 0) {
           player.score += 1;
-          onlineState.apple = makeOnlineApple();
+          onlineState.apples[caughtAppleIndex] = makeOnlineApple();
+          onlineApplesDirty = true;
         }
 
         score = player.score;
@@ -1273,9 +1410,12 @@
       }
 
       function drawOnlineSnake() {
-        if (onlineState.food) {
+        ensureOnlineSnakeFoods();
+        if (onlineState.foods) {
           ctx.fillStyle = "#f97316";
-          roundTile(onlineState.food.x, onlineState.food.y, 7);
+          onlineState.foods.forEach((foodItem) => {
+            roundTile(foodItem.x, foodItem.y, 7);
+          });
         }
 
         drawOnlineSnakePlayer(onlineState.playersState.p1, "#5eead4", "#14b8a6");
@@ -1294,13 +1434,13 @@
       }
 
       function drawOnlineCatcher() {
-        const appleState = onlineState.apple;
-
-        if (appleState) {
+        if (onlineState.apples) {
           ctx.fillStyle = "#f97316";
-          ctx.beginPath();
-          ctx.arc(appleState.x, appleState.y, appleState.size, 0, Math.PI * 2);
-          ctx.fill();
+          onlineState.apples.forEach((appleState) => {
+            ctx.beginPath();
+            ctx.arc(appleState.x, appleState.y, appleState.size, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
 
         drawOnlineCatcherPlayer(onlineState.playersState.p1, "#14b8a6", "#5eead4");
@@ -1341,9 +1481,13 @@
             playersState: {
               p1: makeOnlinePlayer("p1", selectedOnlineGame)
             },
-            food: selectedOnlineGame === "online-snake" ? makeOnlineFood() : null,
-            apple: selectedOnlineGame === "online-catcher" ? makeOnlineApple() : null
+            foods: null,
+            apples: selectedOnlineGame === "online-catcher" ? makeOnlineApples() : null
           };
+
+          if (selectedOnlineGame === "online-snake") {
+            room.foods = makeOnlineFoods(room);
+          }
 
           await saveRoom(code, room);
           createdRoomCode = code;

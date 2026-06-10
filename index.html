@@ -1218,8 +1218,39 @@
           return;
         }
 
-        const room = await getRoom(onlineRoomCode);
-        await beginOnlineRoom(onlineRoomCode, currentGame, onlinePlayerSlot, room || {});
+        try {
+          const room = await getRoom(onlineRoomCode);
+
+          if (!room) {
+            startGame("snake");
+            return;
+          }
+
+          onlineState = prepareOnlineState(room, currentGame, onlinePlayerSlot);
+          const resetPlayer = makeOnlinePlayer(onlinePlayerSlot, currentGame);
+          onlineState.playersState[onlinePlayerSlot] = resetPlayer;
+          onlineDirection = resetPlayer.dir || { x: 1, y: 0 };
+          score = 0;
+          scoreEl.textContent = "0";
+          gameOver = false;
+          paused = false;
+          waitingToPlay = false;
+          lastOnlineSnakeMove = 0;
+          hidePlayOverlay();
+          pauseButton.textContent = "Pause";
+          statusEl.textContent = `Restarted in room ${onlineRoomCode}.`;
+          await patchRoom(onlineRoomCode, {
+            [`playersState/${onlinePlayerSlot}`]: resetPlayer,
+            updatedAt: Date.now()
+          });
+          updateOnlineScoreboard();
+          drawOnlineGame();
+
+          clearInterval(timer);
+          timer = setInterval(tickOnlineGame, currentGame === "online-snake" ? 180 : 30);
+        } catch {
+          statusEl.textContent = "Could not restart online game.";
+        }
       }
 
       function waitForSecondPlayer(code, gameName, room) {

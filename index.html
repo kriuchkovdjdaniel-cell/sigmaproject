@@ -248,7 +248,8 @@
         gap: 0.75rem;
       }
 
-      input {
+      input,
+      select {
         width: 100%;
         min-height: 44px;
         border: 1px solid rgba(248, 250, 252, 0.22);
@@ -369,8 +370,12 @@
 
       .admin-points {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 0.75rem;
+      }
+
+      .admin-points select {
+        text-transform: none;
       }
 
       @media (max-width: 560px) {
@@ -385,6 +390,10 @@
 
         .stat {
           flex: 1;
+        }
+
+        .admin-points {
+          grid-template-columns: 1fr;
         }
       }
     </style>
@@ -402,6 +411,9 @@
           <span id="adminRoomCount">Rooms: 0</span>
         </div>
         <div class="admin-points">
+          <select id="pointsTargetSelect" aria-label="Points target">
+            <option value="local">Current game</option>
+          </select>
           <input id="pointsInput" type="number" min="1" max="999" value="1" aria-label="Points amount">
           <button type="button" id="addPointsButton">Add Points</button>
         </div>
@@ -417,8 +429,8 @@
           <div class="stat">Best <span id="best">0</span></div>
         </div>
         <div class="scoreboard" id="onlineScoreboard" aria-label="Online scoreboard" hidden>
-          <div class="stat">P1 <span id="playerOneScore">0</span></div>
-          <div class="stat">P2 <span id="playerTwoScore">0</span></div>
+          <div class="stat"><strong id="playerOneName">P1</strong><span id="playerOneScore">0</span></div>
+          <div class="stat"><strong id="playerTwoName">P2</strong><span id="playerTwoScore">0</span></div>
         </div>
       </header>
 
@@ -502,12 +514,15 @@
       const bestEl = document.getElementById("best");
       const localScoreboard = document.getElementById("localScoreboard");
       const onlineScoreboard = document.getElementById("onlineScoreboard");
+      const playerOneNameEl = document.getElementById("playerOneName");
       const playerOneScoreEl = document.getElementById("playerOneScore");
+      const playerTwoNameEl = document.getElementById("playerTwoName");
       const playerTwoScoreEl = document.getElementById("playerTwoScore");
       const accountStatus = document.getElementById("accountStatus");
       const logoutButton = document.getElementById("logoutButton");
       const adminPanel = document.getElementById("adminPanel");
       const adminRoomCount = document.getElementById("adminRoomCount");
+      const pointsTargetSelect = document.getElementById("pointsTargetSelect");
       const pointsInput = document.getElementById("pointsInput");
       const addPointsButton = document.getElementById("addPointsButton");
       const refreshAdminButton = document.getElementById("refreshAdminButton");
@@ -1398,6 +1413,7 @@
         }
 
         adminMessage.textContent = "Loading...";
+        updatePointsTargetOptions();
 
         try {
           const rooms = await getAllRooms();
@@ -1444,22 +1460,28 @@
         const points = Math.max(1, Math.min(999, Number(pointsInput.value) || 1));
         pointsInput.value = points;
 
-        if (currentGame === "online-snake" || currentGame === "online-catcher") {
-          if (!onlineRoomCode || !onlinePlayerSlot || !onlineState?.playersState?.[onlinePlayerSlot]) {
+        if (currentGame.startsWith("online-")) {
+          const targetSlot = pointsTargetSelect.value || onlinePlayerSlot;
+
+          if (!onlineRoomCode || !targetSlot || !onlineState?.playersState?.[targetSlot]) {
             adminMessage.textContent = "No online player to add points to.";
             return;
           }
 
-          const player = onlineState.playersState[onlinePlayerSlot];
+          const player = onlineState.playersState[targetSlot];
           player.score = (player.score || 0) + points;
-          score = player.score;
-          scoreEl.textContent = score;
+
+          if (targetSlot === onlinePlayerSlot) {
+            score = player.score;
+            scoreEl.textContent = score;
+          }
+
           updateOnlineScoreboard();
-          adminMessage.textContent = `Added ${points} online points.`;
+          adminMessage.textContent = `Added ${points} points to ${player.username || targetSlot.toUpperCase()}.`;
 
           try {
             await patchRoom(onlineRoomCode, {
-              [`playersState/${onlinePlayerSlot}/score`]: player.score,
+              [`playersState/${targetSlot}/score`]: player.score,
               updatedAt: Date.now()
             });
           } catch {
@@ -1589,8 +1611,11 @@
       }
 
       function makeOnlinePlayer(slot, gameName) {
+        const username = currentAccount?.username || slot.toUpperCase();
+
         if (gameName === "online-tanks") {
           return {
+            username,
             x: slot === "p1" ? 140 : 380,
             y: slot === "p1" ? 280 : 280,
             dir: slot === "p1" ? { x: 1, y: 0 } : { x: -1, y: 0 },
@@ -1602,6 +1627,7 @@
 
         if (gameName === "online-catcher") {
           return {
+            username,
             x: slot === "p1" ? 136 : 328,
             y: canvas.height - 44,
             score: 0,
@@ -1610,6 +1636,7 @@
         }
 
         return {
+          username,
           snake: slot === "p1"
             ? [{ x: 7, y: 10 }, { x: 6, y: 10 }, { x: 5, y: 10 }]
             : [{ x: 20, y: 10 }, { x: 21, y: 10 }, { x: 22, y: 10 }],
@@ -1719,6 +1746,18 @@
 
         if (slot === "p2" && !state.playersState.p2) {
           state.playersState.p2 = makeOnlinePlayer("p2", gameName);
+        }
+
+        if (state.playersState.p1) {
+          state.playersState.p1.username = state.playersState.p1.username || "P1";
+        }
+
+        if (state.playersState.p2) {
+          state.playersState.p2.username = state.playersState.p2.username || "P2";
+        }
+
+        if (state.playersState[slot] && currentAccount?.username) {
+          state.playersState[slot].username = currentAccount.username;
         }
 
         if (gameName === "online-snake") {
@@ -2219,6 +2258,7 @@
       function showLocalScoreboard() {
         localScoreboard.hidden = false;
         onlineScoreboard.hidden = true;
+        updatePointsTargetOptions();
       }
 
       function showOnlineScoreboard() {
@@ -2228,8 +2268,53 @@
       }
 
       function updateOnlineScoreboard() {
-        playerOneScoreEl.textContent = onlineState?.playersState?.p1?.score || 0;
-        playerTwoScoreEl.textContent = onlineState?.playersState?.p2?.score || 0;
+        const playerOne = onlineState?.playersState?.p1;
+        const playerTwo = onlineState?.playersState?.p2;
+
+        playerOneNameEl.textContent = playerOne?.username || "P1";
+        playerTwoNameEl.textContent = playerTwo?.username || "P2";
+        playerOneScoreEl.textContent = playerOne?.score || 0;
+        playerTwoScoreEl.textContent = playerTwo?.score || 0;
+        updatePointsTargetOptions();
+      }
+
+      function updatePointsTargetOptions() {
+        if (!pointsTargetSelect) {
+          return;
+        }
+
+        const previousValue = pointsTargetSelect.value;
+        pointsTargetSelect.innerHTML = "";
+
+        if (onlineState?.playersState && currentGame.startsWith("online-")) {
+          ["p1", "p2"].forEach((slot) => {
+            const player = onlineState.playersState[slot];
+
+            if (!player) {
+              return;
+            }
+
+            const option = document.createElement("option");
+            option.value = slot;
+            option.textContent = player.username || slot.toUpperCase();
+            pointsTargetSelect.appendChild(option);
+          });
+        }
+
+        if (!pointsTargetSelect.options.length) {
+          const option = document.createElement("option");
+          option.value = "local";
+          option.textContent = "Current game";
+          pointsTargetSelect.appendChild(option);
+        }
+
+        const values = Array.from(pointsTargetSelect.options).map((option) => option.value);
+
+        if (values.includes(previousValue)) {
+          pointsTargetSelect.value = previousValue;
+        } else if (values.includes(onlinePlayerSlot)) {
+          pointsTargetSelect.value = onlinePlayerSlot;
+        }
       }
 
       function drawOnlineGame() {

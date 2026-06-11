@@ -414,7 +414,7 @@
           <select id="pointsTargetSelect" aria-label="Points target">
             <option value="local">Current game</option>
           </select>
-          <input id="pointsInput" type="number" min="1" max="999" value="1" aria-label="Points amount">
+          <input id="pointsInput" type="number" min="1" value="1" aria-label="Points amount">
           <button type="button" id="addPointsButton">Add Points</button>
         </div>
         <button type="button" id="refreshAdminButton">Refresh</button>
@@ -648,9 +648,22 @@
         currentGame = gameName;
         updateShootButton();
         gameTitle.textContent = games[currentGame].title;
-        best = Number(localStorage.getItem(games[currentGame].bestKey) || 0);
+        best = getLocalBestScore(currentGame);
         bestEl.textContent = best;
+        syncCurrentBestScore();
         resetGame();
+      }
+
+      function isSinglePlayerGame(gameName) {
+        return gameName === "snake" || gameName === "catcher";
+      }
+
+      function getLocalBestScore(gameName) {
+        return Number(localStorage.getItem(games[gameName].bestKey) || 0);
+      }
+
+      function setLocalBestScore(gameName, value) {
+        localStorage.setItem(games[gameName].bestKey, String(value));
       }
 
       function resetGame() {
@@ -848,7 +861,7 @@
         if (score > best) {
           best = score;
           bestEl.textContent = best;
-          localStorage.setItem(games[currentGame].bestKey, String(best));
+          saveBestScore(currentGame, best);
         }
       }
 
@@ -1284,6 +1297,7 @@
         }
 
         updateAccountUi();
+        syncBestScoresFromAccount();
       }
 
       function sanitizeUsername(value) {
@@ -1326,6 +1340,83 @@
         }
 
         return response.json();
+      }
+
+      async function patchUser(username, patch) {
+        const response = await fetch(`${firebaseDatabaseUrl}/users/${username}.json`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(patch)
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not update account.");
+        }
+
+        return response.json();
+      }
+
+      function getLocalBestScores() {
+        return {
+          snake: getLocalBestScore("snake"),
+          catcher: getLocalBestScore("catcher")
+        };
+      }
+
+      async function saveBestScore(gameName, value) {
+        setLocalBestScore(gameName, value);
+
+        if (!currentAccount?.username || !isSinglePlayerGame(gameName)) {
+          return;
+        }
+
+        try {
+          await patchUser(usernameKey(currentAccount.username), {
+            [`bestScores/${gameName}`]: value
+          });
+        } catch {
+          statusEl.textContent = "Record saved on this device. Cloud save failed.";
+        }
+      }
+
+      async function syncBestScoresFromAccount() {
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        try {
+          const user = await getUser(usernameKey(currentAccount.username));
+          const remoteScores = user?.bestScores || {};
+          const localScores = getLocalBestScores();
+          const mergedScores = {
+            snake: Math.max(Number(remoteScores.snake || 0), localScores.snake),
+            catcher: Math.max(Number(remoteScores.catcher || 0), localScores.catcher)
+          };
+
+          setLocalBestScore("snake", mergedScores.snake);
+          setLocalBestScore("catcher", mergedScores.catcher);
+
+          await patchUser(usernameKey(currentAccount.username), {
+            bestScores: mergedScores
+          });
+
+          if (isSinglePlayerGame(currentGame)) {
+            best = mergedScores[currentGame] || 0;
+            bestEl.textContent = best;
+          }
+        } catch {
+          statusEl.textContent = "Could not load cloud records.";
+        }
+      }
+
+      function syncCurrentBestScore() {
+        if (!currentAccount?.username || !isSinglePlayerGame(currentGame)) {
+          return;
+        }
+
+        syncBestScoresFromAccount();
       }
 
       async function getAllUsers() {
@@ -1457,7 +1548,7 @@
           return;
         }
 
-        const points = Math.max(1, Math.min(999, Number(pointsInput.value) || 1));
+        const points = Math.max(1, Math.floor(Number(pointsInput.value) || 1));
         pointsInput.value = points;
 
         if (currentGame.startsWith("online-")) {
@@ -1469,10 +1560,10 @@
           }
 
           const player = onlineState.playersState[targetSlot];
-          player.score = (player.score || 0) + points;
+          player.adminPoints = (player.adminPoints || 0) + points;
 
           if (targetSlot === onlinePlayerSlot) {
-            score = player.score;
+            score = getPlayerTotalScore(player);
             scoreEl.textContent = score;
           }
 
@@ -1481,7 +1572,7 @@
 
           try {
             await patchRoom(onlineRoomCode, {
-              [`playersState/${targetSlot}/score`]: player.score,
+              [`playersState/${targetSlot}/adminPoints`]: player.adminPoints,
               updatedAt: Date.now()
             });
           } catch {
@@ -1496,7 +1587,7 @@
         if (score > best) {
           best = score;
           bestEl.textContent = best;
-          localStorage.setItem(games[currentGame].bestKey, String(best));
+          saveBestScore(currentGame, best);
         }
         adminMessage.textContent = `Added ${points} points.`;
       }
@@ -1520,6 +1611,7 @@
           const created = await createUserIfAvailable(userKey, {
             username,
             passwordHash,
+            bestScores: getLocalBestScores(),
             createdAt: Date.now()
           });
 
@@ -1531,6 +1623,7 @@
           passwordInput.value = "";
           authMessage.textContent = "";
           setStoredAccount({ username, isAdmin: false });
+          syncBestScoresFromAccount();
         } catch {
           authMessage.textContent = "Could not register. Check Firebase rules.";
         } finally {
@@ -1568,6 +1661,7 @@
             username: user.username || username,
             isAdmin: Boolean(user.isAdmin)
           });
+          syncBestScoresFromAccount();
         } catch {
           authMessage.textContent = "Could not log in. Check Firebase rules.";
         } finally {
@@ -2047,7 +2141,17 @@
           updatedAt: Date.now()
         };
 
-        patch[`playersState/${onlinePlayerSlot}`] = onlineState.playersState[onlinePlayerSlot];
+        const player = onlineState.playersState[onlinePlayerSlot];
+
+        if (player) {
+          Object.entries(player).forEach(([key, value]) => {
+            if (key === "adminPoints") {
+              return;
+            }
+
+            patch[`playersState/${onlinePlayerSlot}/${key}`] = value;
+          });
+        }
 
         if (currentGame === "online-snake") {
           ensureOnlineSnakeFoods();
@@ -2070,6 +2174,15 @@
       function mergeOnlineState(room) {
         const remoteState = prepareOnlineState(room, currentGame, onlinePlayerSlot);
         const otherSlot = onlinePlayerSlot === "p1" ? "p2" : "p1";
+        const localPlayer = onlineState.playersState[onlinePlayerSlot];
+        const remotePlayer = remoteState.playersState[onlinePlayerSlot];
+
+        if (localPlayer && remotePlayer) {
+          localPlayer.adminPoints = remotePlayer.adminPoints || 0;
+          localPlayer.username = remotePlayer.username || localPlayer.username;
+          score = getPlayerTotalScore(localPlayer);
+          scoreEl.textContent = score;
+        }
 
         if (remoteState.playersState[otherSlot]) {
           onlineState.playersState[otherSlot] = remoteState.playersState[otherSlot];
@@ -2140,7 +2253,7 @@
           player.snake.pop();
         }
 
-        score = player.score;
+        score = getPlayerTotalScore(player);
         scoreEl.textContent = score;
         updateOnlineScoreboard();
       }
@@ -2182,7 +2295,7 @@
           onlineApplesDirty = true;
         }
 
-        score = player.score;
+        score = getPlayerTotalScore(player);
         scoreEl.textContent = score;
         updateOnlineScoreboard();
       }
@@ -2250,7 +2363,7 @@
           });
         }
 
-        score = player.score || 0;
+        score = getPlayerTotalScore(player);
         scoreEl.textContent = score;
         updateOnlineScoreboard();
       }
@@ -2273,9 +2386,13 @@
 
         playerOneNameEl.textContent = playerOne?.username || "P1";
         playerTwoNameEl.textContent = playerTwo?.username || "P2";
-        playerOneScoreEl.textContent = playerOne?.score || 0;
-        playerTwoScoreEl.textContent = playerTwo?.score || 0;
+        playerOneScoreEl.textContent = getPlayerTotalScore(playerOne);
+        playerTwoScoreEl.textContent = getPlayerTotalScore(playerTwo);
         updatePointsTargetOptions();
+      }
+
+      function getPlayerTotalScore(player) {
+        return (player?.score || 0) + (player?.adminPoints || 0);
       }
 
       function updatePointsTargetOptions() {

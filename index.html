@@ -435,6 +435,7 @@
         <p class="status" id="status">Use arrow keys or WASD to play.</p>
         <div class="controls">
           <button type="button" id="restart">Restart</button>
+          <button type="button" id="shootButton">Shoot</button>
           <button type="button" id="pause">Pause</button>
         </div>
         <div class="pad" aria-label="Touch controls">
@@ -463,7 +464,7 @@
         </div>
         <div class="game-list" id="onlineGames" aria-label="Online games">
           <button type="button" class="selected" data-online-game="online-snake">Online Snake</button>
-          <button type="button" data-online-game="online-catcher">Online Apple Catcher</button>
+          <button type="button" data-online-game="online-tanks">Online Tanks</button>
           <button type="button" id="createRoom">Create Room</button>
           <div class="room-form">
             <input id="roomCodeInput" type="text" maxlength="8" placeholder="Room code" aria-label="Room code">
@@ -520,6 +521,7 @@
       const authMessage = document.getElementById("authMessage");
       const statusEl = document.getElementById("status");
       const restartButton = document.getElementById("restart");
+      const shootButton = document.getElementById("shootButton");
       const pauseButton = document.getElementById("pause");
       const pauseMenu = document.getElementById("pauseMenu");
       const resumeButton = document.getElementById("resume");
@@ -566,11 +568,17 @@
           title: "Online Apple Catcher",
           bestKey: "online-catcher-best",
           help: "Catch apples with your friend."
+        },
+        "online-tanks": {
+          title: "Online Tanks",
+          bestKey: "online-tanks-best",
+          help: "Move with WASD/arrows. Shoot with Space."
         }
       };
       const onlineGameNames = {
         "online-snake": "Online Snake",
-        "online-catcher": "Online Apple Catcher"
+        "online-catcher": "Online Apple Catcher",
+        "online-tanks": "Online Tanks"
       };
 
       let currentGame = "snake";
@@ -582,6 +590,8 @@
       let catcher;
       let apple;
       let catcherMove = 0;
+      let tankMove = 0;
+      let lastTankShot = 0;
       let score;
       let best;
       let gameOver;
@@ -616,10 +626,12 @@
           onlinePlayerSlot = "";
           onlineState = null;
           onlineSyncBusy = false;
+          tankMove = 0;
           showLocalScoreboard();
         }
 
         currentGame = gameName;
+        updateShootButton();
         gameTitle.textContent = games[currentGame].title;
         best = Number(localStorage.getItem(games[currentGame].bestKey) || 0);
         bestEl.textContent = best;
@@ -627,7 +639,7 @@
       }
 
       function resetGame() {
-        if (currentGame === "online-snake" || currentGame === "online-catcher") {
+        if (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks") {
           if (waitingToPlay) {
             leaveOnlineRoom();
             return;
@@ -639,7 +651,9 @@
         score = 0;
         gameOver = false;
         waitingToPlay = true;
-        paused = true;
+        paused = false;
+        updateShootButton();
+        updatePauseButton();
         scoreEl.textContent = score;
         pauseButton.textContent = "Pause";
         pauseMenu.classList.remove("open");
@@ -651,7 +665,7 @@
 
         if (currentGame === "snake") {
           resetSnake();
-          timer = setInterval(tickSnake, 160);
+          timer = setInterval(tickSnake, 220);
         } else {
           resetCatcher();
           timer = setInterval(tickCatcher, 28);
@@ -697,6 +711,18 @@
       }
 
       function changeDirection(newDirection) {
+        if (currentGame === "online-tanks") {
+          const player = onlineState?.playersState?.[onlinePlayerSlot];
+
+          if (player) {
+            player.dir = newDirection;
+            tankMove = 1;
+            moveOnlineTank(player, 10);
+          }
+
+          return;
+        }
+
         if (currentGame === "online-snake") {
           const player = onlineState?.playersState?.[onlinePlayerSlot];
           const currentDirection = player?.dir || onlineDirection;
@@ -847,13 +873,31 @@
         cancelWaitButton.hidden = true;
       }
 
+      function updateShootButton() {
+        shootButton.hidden = currentGame !== "online-tanks" || waitingToPlay;
+      }
+
+      function updatePauseButton() {
+        const waitingOnline =
+          waitingToPlay &&
+          (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks");
+
+        pauseButton.hidden = waitingOnline;
+      }
+
       function playLocalGame() {
-        if (!waitingToPlay || currentGame === "online-snake" || currentGame === "online-catcher") {
+        if (
+          !waitingToPlay ||
+          currentGame === "online-snake" ||
+          currentGame === "online-catcher" ||
+          currentGame === "online-tanks"
+        ) {
           return;
         }
 
         waitingToPlay = false;
         paused = false;
+        updatePauseButton();
         hidePlayOverlay();
         pauseButton.textContent = "Pause";
         statusEl.textContent = games[currentGame].help;
@@ -954,12 +998,26 @@
 
         if (event.key === " ") {
           event.preventDefault();
-          togglePause();
+          if (currentGame === "online-tanks") {
+            shootOnlineTank();
+          } else {
+            togglePause();
+          }
         }
       });
 
       document.addEventListener("keyup", (event) => {
         if (isTypingField(event.target)) {
+          return;
+        }
+
+        if (currentGame === "online-tanks") {
+          const movementKey = ["ArrowUp", "w", "W", "ArrowDown", "s", "S", "ArrowLeft", "a", "A", "ArrowRight", "d", "D"].includes(event.key);
+
+          if (movementKey) {
+            tankMove = 0;
+          }
+
           return;
         }
 
@@ -992,9 +1050,26 @@
             return;
           }
           changeDirection(directions[button.dataset.direction]);
+          if (currentGame === "online-tanks") {
+            tankMove = 0;
+          }
         });
 
         button.addEventListener("pointerdown", (event) => {
+          if (currentGame === "online-tanks") {
+            event.preventDefault();
+            const direction = directions[button.dataset.direction];
+            const player = onlineState?.playersState?.[onlinePlayerSlot];
+
+            if (player) {
+              player.dir = direction;
+              tankMove = 1;
+              button.setPointerCapture(event.pointerId);
+            }
+
+            return;
+          }
+
           if (currentGame !== "catcher" && currentGame !== "online-catcher") {
             return;
           }
@@ -1008,12 +1083,20 @@
         });
 
         button.addEventListener("pointerup", () => {
+          if (currentGame === "online-tanks") {
+            tankMove = 0;
+          }
+
           if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
         });
 
         button.addEventListener("pointercancel", () => {
+          if (currentGame === "online-tanks") {
+            tankMove = 0;
+          }
+
           if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
@@ -1021,7 +1104,7 @@
       });
 
       function togglePause() {
-        if (gameOver || waitingToPlay) {
+        if (gameOver) {
           return;
         }
         paused = !paused;
@@ -1029,7 +1112,11 @@
         pauseMenu.classList.toggle("open", paused);
         pauseMenu.setAttribute("aria-hidden", String(!paused));
         resetPauseMenu();
-        statusEl.textContent = paused ? "Paused." : games[currentGame].help;
+        if (waitingToPlay) {
+          statusEl.textContent = paused ? "Paused before start." : "Press Play to start.";
+        } else {
+          statusEl.textContent = paused ? "Paused." : games[currentGame].help;
+        }
       }
 
       function resetPauseMenu() {
@@ -1501,6 +1588,17 @@
       }
 
       function makeOnlinePlayer(slot, gameName) {
+        if (gameName === "online-tanks") {
+          return {
+            x: slot === "p1" ? 140 : 380,
+            y: slot === "p1" ? 280 : 280,
+            dir: slot === "p1" ? { x: 1, y: 0 } : { x: -1, y: 0 },
+            score: 0,
+            alive: true,
+            bullets: []
+          };
+        }
+
         if (gameName === "online-catcher") {
           return {
             x: slot === "p1" ? 136 : 328,
@@ -1567,6 +1665,7 @@
         onlineRoomCode = code;
         onlinePlayerSlot = slot;
         currentGame = gameName;
+        updateShootButton();
         gameTitle.textContent = onlineGameNames[gameName] || games[gameName].title;
         showOnlineScoreboard();
         best = 0;
@@ -1576,6 +1675,8 @@
         gameOver = false;
         paused = false;
         waitingToPlay = false;
+        updateShootButton();
+        updatePauseButton();
         hidePlayOverlay();
         pauseButton.textContent = "Pause";
         pauseMenu.classList.remove("open");
@@ -1592,11 +1693,13 @@
         lastOnlineSnakeMove = 0;
         onlineFoodsDirty = false;
         onlineApplesDirty = false;
+        tankMove = 0;
+        lastTankShot = 0;
         statusEl.textContent =
           `${slot === "p1" ? "Player 1" : "Player 2"} in ${gameTitle.textContent}. Room ${code}.`;
         await saveRoom(code, onlineState);
         drawOnlineGame();
-        timer = setInterval(tickOnlineGame, gameName === "online-snake" ? 180 : 30);
+        timer = setInterval(tickOnlineGame, gameName === "online-snake" ? 240 : 35);
       }
 
       function prepareOnlineState(room, gameName, slot) {
@@ -1717,6 +1820,8 @@
           paused = false;
           waitingToPlay = false;
           lastOnlineSnakeMove = 0;
+          tankMove = 0;
+          lastTankShot = 0;
           hidePlayOverlay();
           pauseButton.textContent = "Pause";
           statusEl.textContent = `Restarted in room ${onlineRoomCode}.`;
@@ -1728,7 +1833,7 @@
           drawOnlineGame();
 
           clearInterval(timer);
-          timer = setInterval(tickOnlineGame, currentGame === "online-snake" ? 180 : 30);
+          timer = setInterval(tickOnlineGame, currentGame === "online-snake" ? 240 : 35);
         } catch {
           statusEl.textContent = "Could not restart online game.";
         }
@@ -1740,13 +1845,16 @@
         onlineRoomCode = code;
         onlinePlayerSlot = "p1";
         currentGame = gameName;
+        updateShootButton();
         gameTitle.textContent = onlineGameNames[gameName];
         showOnlineScoreboard();
         scoreEl.textContent = "0";
         bestEl.textContent = "0";
         gameOver = false;
-        paused = true;
+        paused = false;
         waitingToPlay = true;
+        updateShootButton();
+        updatePauseButton();
         resetPauseMenu();
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
@@ -1770,6 +1878,8 @@
             if (latestRoom.players >= 2 && latestRoom.playersState?.p2) {
               clearInterval(waitingTimer);
               waitingToPlay = false;
+              updateShootButton();
+              updatePauseButton();
               await beginOnlineRoom(code, gameName, "p1", latestRoom);
             }
           } catch {
@@ -1813,6 +1923,7 @@
           onlineState = null;
           onlineSyncBusy = false;
           catcherMove = 0;
+          tankMove = 0;
           leaveRoomButton.disabled = false;
           startGame("snake");
         }
@@ -1826,6 +1937,8 @@
         if (currentGame === "online-snake") {
           ensureOnlineSnakeFoods();
           updateOnlineSnake();
+        } else if (currentGame === "online-tanks") {
+          updateOnlineTanks();
         } else {
           updateOnlineCatcher();
         }
@@ -1947,7 +2060,7 @@
         }
 
         const now = Date.now();
-        if (now - lastOnlineSnakeMove < 165) {
+        if (now - lastOnlineSnakeMove < 225) {
           return;
         }
         lastOnlineSnakeMove = now;
@@ -2034,6 +2147,74 @@
         updateOnlineScoreboard();
       }
 
+      function moveOnlineTank(player, speed) {
+        player.x = Math.max(18, Math.min(canvas.width - 18, player.x + player.dir.x * speed));
+        player.y = Math.max(18, Math.min(canvas.height - 18, player.y + player.dir.y * speed));
+      }
+
+      function shootOnlineTank() {
+        if (currentGame !== "online-tanks" || paused || gameOver || !onlineState) {
+          return;
+        }
+
+        const now = Date.now();
+        if (now - lastTankShot < 380) {
+          return;
+        }
+
+        const player = onlineState.playersState[onlinePlayerSlot];
+        if (!player) {
+          return;
+        }
+
+        lastTankShot = now;
+        player.bullets = Array.isArray(player.bullets) ? player.bullets : [];
+        player.bullets.push({
+          x: player.x + player.dir.x * 22,
+          y: player.y + player.dir.y * 22,
+          dx: player.dir.x,
+          dy: player.dir.y
+        });
+      }
+
+      function updateOnlineTanks() {
+        const player = onlineState.playersState[onlinePlayerSlot];
+        const opponentSlot = onlinePlayerSlot === "p1" ? "p2" : "p1";
+        const opponent = onlineState.playersState[opponentSlot];
+
+        if (!player) {
+          return;
+        }
+
+        if (tankMove !== 0) {
+          moveOnlineTank(player, 4.2);
+        }
+
+        player.bullets = (player.bullets || [])
+          .map((bullet) => ({
+            ...bullet,
+            x: bullet.x + bullet.dx * 10,
+            y: bullet.y + bullet.dy * 10
+          }))
+          .filter((bullet) => bullet.x > 0 && bullet.x < canvas.width && bullet.y > 0 && bullet.y < canvas.height);
+
+        if (opponent) {
+          player.bullets = player.bullets.filter((bullet) => {
+            const hit = Math.abs(bullet.x - opponent.x) < 22 && Math.abs(bullet.y - opponent.y) < 22;
+
+            if (hit) {
+              player.score = (player.score || 0) + 1;
+            }
+
+            return !hit;
+          });
+        }
+
+        score = player.score || 0;
+        scoreEl.textContent = score;
+        updateOnlineScoreboard();
+      }
+
       function showLocalScoreboard() {
         localScoreboard.hidden = false;
         onlineScoreboard.hidden = true;
@@ -2059,6 +2240,8 @@
 
         if (currentGame === "online-snake") {
           drawOnlineSnake();
+        } else if (currentGame === "online-tanks") {
+          drawOnlineTanks();
         } else {
           drawOnlineCatcher();
         }
@@ -2116,6 +2299,37 @@
         ctx.beginPath();
         ctx.roundRect(player.x + 14, player.y - 12, 68, 14, 7);
         ctx.fill();
+      }
+
+      function drawOnlineTanks() {
+        drawTankPlayer(onlineState.playersState.p1, "#14b8a6", "#5eead4");
+        drawTankPlayer(onlineState.playersState.p2, "#f97316", "#fdba74");
+      }
+
+      function drawTankPlayer(player, baseColor, turretColor) {
+        if (!player) {
+          return;
+        }
+
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.roundRect(player.x - 18, player.y - 18, 36, 36, 7);
+        ctx.fill();
+
+        ctx.strokeStyle = turretColor;
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + player.dir.x * 28, player.y + player.dir.y * 28);
+        ctx.stroke();
+
+        ctx.fillStyle = turretColor;
+        (player.bullets || []).forEach((bullet) => {
+          ctx.beginPath();
+          ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
       async function createRoom() {
@@ -2239,6 +2453,7 @@
       restartButton.addEventListener("click", resetGame);
       playButton.addEventListener("click", playLocalGame);
       cancelWaitButton.addEventListener("click", leaveOnlineRoom);
+      shootButton.addEventListener("click", shootOnlineTank);
       loginButton.addEventListener("click", loginAccount);
       registerButton.addEventListener("click", registerAccount);
       logoutButton.addEventListener("click", () => {

@@ -878,11 +878,7 @@
       }
 
       function updatePauseButton() {
-        const waitingOnline =
-          waitingToPlay &&
-          (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks");
-
-        pauseButton.hidden = waitingOnline;
+        pauseButton.hidden = false;
       }
 
       function playLocalGame() {
@@ -1107,8 +1103,13 @@
         if (gameOver) {
           return;
         }
+
+        const waitingOnline =
+          waitingToPlay &&
+          (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks");
+
         paused = !paused;
-        pauseButton.textContent = paused ? "Resume" : "Pause";
+        pauseButton.textContent = waitingOnline ? "Pause" : paused ? "Resume" : "Pause";
         pauseMenu.classList.toggle("open", paused);
         pauseMenu.setAttribute("aria-hidden", String(!paused));
         resetPauseMenu();

@@ -596,6 +596,7 @@
         <div class="game-list" id="singlePlayerGames" aria-label="Single player games">
           <button type="button" id="snakeClassic">Snake Classic</button>
           <button type="button" id="appleCatcher">Apple Catcher</button>
+          <button type="button" id="dodgeBlocks">Dodge Blocks</button>
         </div>
         <div class="game-list" id="onlineGames" aria-label="Online games">
           <button type="button" class="selected" data-online-game="online-snake">Online Snake</button>
@@ -701,6 +702,7 @@
       const onlineGames = document.getElementById("onlineGames");
       const snakeClassicButton = document.getElementById("snakeClassic");
       const appleCatcherButton = document.getElementById("appleCatcher");
+      const dodgeBlocksButton = document.getElementById("dodgeBlocks");
       const createRoomButton = document.getElementById("createRoom");
       const joinRoomButton = document.getElementById("joinRoom");
       const roomCodeInput = document.getElementById("roomCodeInput");
@@ -739,6 +741,11 @@
           bestKey: "catcher-best",
           help: "Use Left/Right or A/D to catch apples."
         },
+        dodger: {
+          title: "Dodge Blocks",
+          bestKey: "dodger-best",
+          help: "Move with WASD/arrows and dodge the falling blocks."
+        },
         "online-snake": {
           title: "Online Snake",
           bestKey: "online-snake-best",
@@ -769,6 +776,10 @@
       let nextDirection;
       let catcher;
       let apple;
+      let dodger;
+      let dodgeBlocks;
+      let dodgeMove = { x: 0, y: 0 };
+      let dodgeTicks = 0;
       let catcherMove = 0;
       let tankMove = 0;
       let lastTankShot = 0;
@@ -822,7 +833,7 @@
       };
 
       function startGame(gameName) {
-        if (gameName === "snake" || gameName === "catcher") {
+        if (gameName === "snake" || gameName === "catcher" || gameName === "dodger") {
           clearInterval(waitingTimer);
           onlineRoomCode = "";
           onlinePlayerSlot = "";
@@ -842,7 +853,7 @@
       }
 
       function isSinglePlayerGame(gameName) {
-        return gameName === "snake" || gameName === "catcher";
+        return gameName === "snake" || gameName === "catcher" || gameName === "dodger";
       }
 
       function getLocalBestScore(gameName) {
@@ -1187,6 +1198,9 @@
         if (currentGame === "snake") {
           resetSnake();
           timer = setInterval(tickSnake, 220);
+        } else if (currentGame === "dodger") {
+          resetDodger();
+          timer = setInterval(tickDodger, 34);
         } else {
           resetCatcher();
           timer = setInterval(tickCatcher, 28);
@@ -1211,6 +1225,28 @@
           height: 18
         };
         resetApple();
+      }
+
+      function resetDodger() {
+        dodgeMove = { x: 0, y: 0 };
+        dodgeTicks = 0;
+        dodger = {
+          x: canvas.width / 2 - 14,
+          y: canvas.height - 60,
+          size: 28
+        };
+        dodgeBlocks = Array.from({ length: 5 }, (_, index) => makeDodgeBlock(-index * 110));
+      }
+
+      function makeDodgeBlock(y = null) {
+        const size = 24 + Math.random() * 30;
+
+        return {
+          x: Math.random() * (canvas.width - size),
+          y: y ?? -size - Math.random() * 180,
+          size,
+          speed: 3 + Math.random() * 2.2
+        };
       }
 
       function resetApple() {
@@ -1272,6 +1308,12 @@
           return;
         }
 
+        if (currentGame === "dodger") {
+          dodgeMove = newDirection;
+          moveDodger();
+          return;
+        }
+
         const reversing =
           newDirection.x + direction.x === 0 &&
           newDirection.y + direction.y === 0;
@@ -1286,6 +1328,17 @@
           return;
         }
         catcher.x = Math.max(0, Math.min(canvas.width - catcher.width, catcher.x + amount * 9));
+        draw();
+      }
+
+      function moveDodger() {
+        if (waitingToPlay || paused || gameOver || !dodger) {
+          return;
+        }
+
+        const speed = 8;
+        dodger.x = Math.max(0, Math.min(canvas.width - dodger.size, dodger.x + dodgeMove.x * speed));
+        dodger.y = Math.max(0, Math.min(canvas.height - dodger.size, dodger.y + dodgeMove.y * speed));
         draw();
       }
 
@@ -1343,6 +1396,42 @@
         } else if (apple.y > canvas.height) {
           endGame();
           return;
+        }
+
+        draw();
+      }
+
+      function tickDodger() {
+        if (waitingToPlay || paused || gameOver) {
+          return;
+        }
+
+        moveDodger();
+        dodgeTicks += 1;
+
+        dodgeBlocks = dodgeBlocks.map((block) => {
+          const nextBlock = {
+            ...block,
+            y: block.y + block.speed + Math.min(score * 0.03, 3)
+          };
+
+          return nextBlock.y > canvas.height ? makeDodgeBlock() : nextBlock;
+        });
+
+        const hit = dodgeBlocks.some((block) =>
+          dodger.x < block.x + block.size &&
+          dodger.x + dodger.size > block.x &&
+          dodger.y < block.y + block.size &&
+          dodger.y + dodger.size > block.y
+        );
+
+        if (hit) {
+          endGame();
+          return;
+        }
+
+        if (dodgeTicks % 18 === 0) {
+          addPoint();
         }
 
         draw();
@@ -1428,6 +1517,8 @@
           drawSnake();
         } else if (currentGame === "catcher") {
           drawCatcher();
+        } else if (currentGame === "dodger") {
+          drawDodger();
         } else {
           drawOnlineGame();
         }
@@ -1478,6 +1569,27 @@
         ctx.fillStyle = theme.head;
         ctx.beginPath();
         ctx.roundRect(catcher.x + 14, catcher.y - 12, catcher.width - 28, 14, 7);
+        ctx.fill();
+      }
+
+      function drawDodger() {
+        const theme = getTheme(playerStyle.color);
+
+        ctx.fillStyle = "#f97316";
+        dodgeBlocks.forEach((block) => {
+          ctx.beginPath();
+          ctx.roundRect(block.x, block.y, block.size, block.size, 6);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = theme.body;
+        ctx.beginPath();
+        ctx.roundRect(dodger.x, dodger.y, dodger.size, dodger.size, playerStyle.skin === "block" ? 3 : 10);
+        ctx.fill();
+
+        ctx.fillStyle = theme.head;
+        ctx.beginPath();
+        ctx.arc(dodger.x + dodger.size / 2, dodger.y + dodger.size / 2, 7, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -1581,6 +1693,19 @@
           return;
         }
 
+        if (currentGame === "dodger") {
+          const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && dodgeMove.x < 0;
+          const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && dodgeMove.x > 0;
+          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && dodgeMove.y < 0;
+          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && dodgeMove.y > 0;
+
+          if (leftReleased || rightReleased || upReleased || downReleased) {
+            dodgeMove = { x: 0, y: 0 };
+          }
+
+          return;
+        }
+
         if (currentGame !== "catcher" && currentGame !== "online-catcher") {
           return;
         }
@@ -1615,6 +1740,9 @@
           if (currentGame === "online-tanks") {
             tankMove = 0;
           }
+          if (currentGame === "dodger") {
+            dodgeMove = { x: 0, y: 0 };
+          }
         });
 
         button.addEventListener("pointerdown", (event) => {
@@ -1629,6 +1757,13 @@
               button.setPointerCapture(event.pointerId);
             }
 
+            return;
+          }
+
+          if (currentGame === "dodger") {
+            event.preventDefault();
+            dodgeMove = directions[button.dataset.direction];
+            button.setPointerCapture(event.pointerId);
             return;
           }
 
@@ -1652,6 +1787,10 @@
           if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
+
+          if (currentGame === "dodger") {
+            dodgeMove = { x: 0, y: 0 };
+          }
         });
 
         button.addEventListener("pointercancel", () => {
@@ -1661,6 +1800,10 @@
 
           if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
+          }
+
+          if (currentGame === "dodger") {
+            dodgeMove = { x: 0, y: 0 };
           }
         });
       });
@@ -1924,7 +2067,8 @@
       function getLocalBestScores() {
         return {
           snake: getLocalBestScore("snake"),
-          catcher: getLocalBestScore("catcher")
+          catcher: getLocalBestScore("catcher"),
+          dodger: getLocalBestScore("dodger")
         };
       }
 
@@ -1955,11 +2099,13 @@
           const localScores = getLocalBestScores();
           const mergedScores = {
             snake: Math.max(Number(remoteScores.snake || 0), localScores.snake),
-            catcher: Math.max(Number(remoteScores.catcher || 0), localScores.catcher)
+            catcher: Math.max(Number(remoteScores.catcher || 0), localScores.catcher),
+            dodger: Math.max(Number(remoteScores.dodger || 0), localScores.dodger)
           };
 
           setLocalBestScore("snake", mergedScores.snake);
           setLocalBestScore("catcher", mergedScores.catcher);
+          setLocalBestScore("dodger", mergedScores.dodger);
 
           await patchUser(usernameKey(currentAccount.username), {
             bestScores: mergedScores
@@ -3334,6 +3480,9 @@
       });
       appleCatcherButton.addEventListener("click", () => {
         startGame("catcher");
+      });
+      dodgeBlocksButton.addEventListener("click", () => {
+        startGame("dodger");
       });
       onlineGameButtons.forEach((button) => {
         button.addEventListener("click", () => {

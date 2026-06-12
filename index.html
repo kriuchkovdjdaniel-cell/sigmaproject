@@ -2547,15 +2547,15 @@
       }
 
       function getOnlineTickDelay(gameName) {
-        return gameName === "online-snake" ? 240 : 50;
+        return gameName === "online-snake" ? 220 : 35;
       }
 
       function getOnlineFetchDelay() {
-        return currentGame === "online-snake" ? 650 : 450;
+        return currentGame === "online-snake" ? 280 : 160;
       }
 
       function getOnlinePushDelay() {
-        return currentGame === "online-snake" ? 320 : 220;
+        return currentGame === "online-snake" ? 180 : 90;
       }
 
       async function beginOnlineRoom(code, gameName, slot, room) {
@@ -2877,7 +2877,7 @@
           onlineLocalDirty ||
           onlineFoodsDirty ||
           onlineApplesDirty ||
-          now - lastOnlineHeartbeat > 2200;
+          now - lastOnlineHeartbeat > 3200;
 
         if (shouldPush && !onlinePushBusy && now - lastOnlinePush > pushDelay) {
           lastOnlinePush = now;

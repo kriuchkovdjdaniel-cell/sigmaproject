@@ -503,7 +503,7 @@
         <div class="controls">
           <button type="button" id="restart">Restart</button>
           <button type="button" id="shootButton">Shoot</button>
-          <button type="button" id="pause">Pause</button>
+          <button type="button" id="pause">Menu</button>
         </div>
         <div class="pad" aria-label="Touch controls">
           <button type="button" class="up" data-direction="up" aria-label="Move up">Up</button>
@@ -516,8 +516,8 @@
 
     <div class="pause-menu" id="pauseMenu" aria-hidden="true">
       <div class="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
-        <h2 id="pauseTitle">Paused</h2>
-        <button type="button" id="resume">Resume</button>
+        <h2 id="pauseTitle">Menu</h2>
+        <button type="button" id="resume">Close Menu</button>
         <button type="button" id="leaveRoom" hidden>Leave Room</button>
         <button type="button" id="back" hidden>Back</button>
         <button type="button" id="games">Games</button>
@@ -596,11 +596,17 @@
         <div class="game-list" id="singlePlayerGames" aria-label="Single player games">
           <button type="button" id="snakeClassic">Snake Classic</button>
           <button type="button" id="appleCatcher">Apple Catcher</button>
-          <button type="button" id="dodgeBlocks">Dodge Blocks</button>
+          <button type="button" id="dodgeBlocks">Gem Runner</button>
         </div>
         <div class="game-list" id="onlineGames" aria-label="Online games">
           <button type="button" class="selected" data-online-game="online-snake">Online Snake</button>
           <button type="button" data-online-game="online-tanks">Online Tanks</button>
+          <button type="button" data-online-game="online-pong">Online Pong</button>
+          <button type="button" data-online-game="online-racing">Online Racing</button>
+          <button type="button" data-online-game="online-tag">Online Tag</button>
+          <button type="button" data-online-game="online-soccer">Online Soccer</button>
+          <button type="button" data-online-game="online-maze">Online Maze Race</button>
+          <button type="button" data-online-game="online-battle">Online Battle Arena</button>
           <button type="button" id="createRoom">Create Room</button>
           <div class="room-form">
             <input id="roomCodeInput" type="text" maxlength="8" placeholder="Room code" aria-label="Room code">
@@ -744,9 +750,9 @@
           help: "Use Left/Right or A/D to catch apples."
         },
         dodger: {
-          title: "Dodge Blocks",
+          title: "Gem Runner",
           bestKey: "dodger-best",
-          help: "Move with WASD/arrows and dodge the falling blocks."
+          help: "Move with WASD/arrows, collect gems, and dodge the red guards."
         },
         "online-snake": {
           title: "Online Snake",
@@ -762,12 +768,48 @@
           title: "Online Tanks",
           bestKey: "online-tanks-best",
           help: "Move with WASD/arrows. Shoot with Space."
+        },
+        "online-pong": {
+          title: "Online Pong",
+          bestKey: "online-pong-best",
+          help: "Move your paddle with Up/Down or W/S. First to 5 wins."
+        },
+        "online-racing": {
+          title: "Online Racing",
+          bestKey: "online-racing-best",
+          help: "Race to the yellow finish line."
+        },
+        "online-tag": {
+          title: "Online Tag",
+          bestKey: "online-tag-best",
+          help: "Red player tags, blue player runs."
+        },
+        "online-soccer": {
+          title: "Online Soccer",
+          bestKey: "online-soccer-best",
+          help: "Push the ball into the other goal."
+        },
+        "online-maze": {
+          title: "Online Maze Race",
+          bestKey: "online-maze-best",
+          help: "Reach the yellow gem before your friend."
+        },
+        "online-battle": {
+          title: "Online Battle Arena",
+          bestKey: "online-battle-best",
+          help: "Take the power orb, then touch your friend."
         }
       };
       const onlineGameNames = {
         "online-snake": "Online Snake",
         "online-catcher": "Online Apple Catcher",
-        "online-tanks": "Online Tanks"
+        "online-tanks": "Online Tanks",
+        "online-pong": "Online Pong",
+        "online-racing": "Online Racing",
+        "online-tag": "Online Tag",
+        "online-soccer": "Online Soccer",
+        "online-maze": "Online Maze Race",
+        "online-battle": "Online Battle Arena"
       };
 
       let currentGame = "snake";
@@ -780,10 +822,13 @@
       let apple;
       let dodger;
       let dodgeBlocks;
+      let dodgeGem;
       let dodgeMove = { x: 0, y: 0 };
       let dodgeTicks = 0;
       let catcherMove = 0;
       let tankMove = 0;
+      let pongMove = 0;
+      let onlineMove = { x: 0, y: 0 };
       let lastTankShot = 0;
       let score;
       let best;
@@ -805,6 +850,8 @@
       let onlineLocalDirty = false;
       let onlineFoodsDirty = false;
       let onlineApplesDirty = false;
+      let onlinePongDirty = false;
+      let onlineSharedDirty = false;
       const firebaseDatabaseUrl = "https://fir-a3f0a-default-rtdb.firebaseio.com";
       const playerStorageKey = "snake-online-player-id";
       const ownedRoomsStorageKey = "snake-owned-room-codes";
@@ -843,6 +890,8 @@
           onlinePlayerSlot = "";
           onlineState = null;
           tankMove = 0;
+          pongMove = 0;
+          onlineMove = { x: 0, y: 0 };
           showLocalScoreboard();
         }
 
@@ -1035,7 +1084,7 @@
         pauseMenu.setAttribute("aria-hidden", "true");
         paused = false;
         updatePauseButton();
-        pauseButton.textContent = "Pause";
+        pauseButton.textContent = "Menu";
         authMenu.classList.add("open");
         authMenu.setAttribute("aria-hidden", "false");
         loadAccountGmail();
@@ -1174,7 +1223,7 @@
       }
 
       function resetGame() {
-        if (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks") {
+        if (currentGame.startsWith("online-")) {
           if (waitingToPlay) {
             leaveOnlineRoom();
             return;
@@ -1190,7 +1239,7 @@
         updateShootButton();
         updatePauseButton();
         scoreEl.textContent = score;
-        pauseButton.textContent = "Pause";
+        pauseButton.textContent = "Menu";
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
@@ -1235,21 +1284,37 @@
         dodgeTicks = 0;
         dodger = {
           x: canvas.width / 2 - 14,
-          y: canvas.height - 60,
+          y: canvas.height / 2 - 14,
           size: 28
         };
-        dodgeBlocks = Array.from({ length: 5 }, (_, index) => makeDodgeBlock(-index * 110));
+        dodgeBlocks = Array.from({ length: 4 }, makeDodgeBlock);
+        placeDodgeGem();
       }
 
-      function makeDodgeBlock(y = null) {
-        const size = 24 + Math.random() * 30;
+      function makeDodgeBlock() {
+        const size = 24 + Math.random() * 18;
+        const speed = 2.2 + Math.random() * 1.8;
 
         return {
-          x: Math.random() * (canvas.width - size),
-          y: y ?? -size - Math.random() * 180,
+          x: 30 + Math.random() * (canvas.width - size - 60),
+          y: 30 + Math.random() * (canvas.height - size - 60),
           size,
-          speed: 3 + Math.random() * 2.2
+          dx: (Math.random() > 0.5 ? 1 : -1) * speed,
+          dy: (Math.random() > 0.5 ? 1 : -1) * speed
         };
+      }
+
+      function placeDodgeGem() {
+        do {
+          dodgeGem = {
+            x: 24 + Math.random() * (canvas.width - 48),
+            y: 24 + Math.random() * (canvas.height - 48),
+            size: 18
+          };
+        } while (
+          Math.abs(dodgeGem.x - dodger.x) < 60 &&
+          Math.abs(dodgeGem.y - dodger.y) < 60
+        );
       }
 
       function resetApple() {
@@ -1304,6 +1369,20 @@
           return;
         }
 
+        if (currentGame === "online-pong") {
+          if (newDirection.y !== 0) {
+            pongMove = newDirection.y;
+            onlineLocalDirty = true;
+          }
+          return;
+        }
+
+        if (isOnlineArcadeGame(currentGame)) {
+          onlineMove = newDirection;
+          onlineLocalDirty = true;
+          return;
+        }
+
         if (currentGame === "catcher") {
           if (newDirection.x !== 0) {
             catcherMove = newDirection.x;
@@ -1340,7 +1419,7 @@
           return;
         }
 
-        const speed = 8;
+        const speed = 5;
         dodger.x = Math.max(0, Math.min(canvas.width - dodger.size, dodger.x + dodgeMove.x * speed));
         dodger.y = Math.max(0, Math.min(canvas.height - dodger.size, dodger.y + dodgeMove.y * speed));
         draw();
@@ -1416,10 +1495,21 @@
         dodgeBlocks = dodgeBlocks.map((block) => {
           const nextBlock = {
             ...block,
-            y: block.y + block.speed + Math.min(score * 0.03, 3)
+            x: block.x + block.dx,
+            y: block.y + block.dy
           };
 
-          return nextBlock.y > canvas.height ? makeDodgeBlock() : nextBlock;
+          if (nextBlock.x <= 0 || nextBlock.x + nextBlock.size >= canvas.width) {
+            nextBlock.dx *= -1;
+            nextBlock.x = Math.max(0, Math.min(canvas.width - nextBlock.size, nextBlock.x));
+          }
+
+          if (nextBlock.y <= 0 || nextBlock.y + nextBlock.size >= canvas.height) {
+            nextBlock.dy *= -1;
+            nextBlock.y = Math.max(0, Math.min(canvas.height - nextBlock.size, nextBlock.y));
+          }
+
+          return nextBlock;
         });
 
         const hit = dodgeBlocks.some((block) =>
@@ -1434,8 +1524,19 @@
           return;
         }
 
-        if (dodgeTicks % 18 === 0) {
+        const collectedGem =
+          dodger.x < dodgeGem.x + dodgeGem.size &&
+          dodger.x + dodger.size > dodgeGem.x &&
+          dodger.y < dodgeGem.y + dodgeGem.size &&
+          dodger.y + dodger.size > dodgeGem.y;
+
+        if (collectedGem) {
           addPoint();
+          placeDodgeGem();
+
+          if (score > 0 && score % 4 === 0 && dodgeBlocks.length < 8) {
+            dodgeBlocks.push(makeDodgeBlock());
+          }
         }
 
         draw();
@@ -1500,9 +1601,7 @@
       function playLocalGame() {
         if (
           !waitingToPlay ||
-          currentGame === "online-snake" ||
-          currentGame === "online-catcher" ||
-          currentGame === "online-tanks"
+          currentGame.startsWith("online-")
         ) {
           return;
         }
@@ -1511,7 +1610,7 @@
         paused = false;
         updatePauseButton();
         hidePlayOverlay();
-        pauseButton.textContent = "Pause";
+        pauseButton.textContent = "Menu";
         statusEl.textContent = games[currentGame].help;
       }
 
@@ -1579,11 +1678,28 @@
       function drawDodger() {
         const theme = getTheme(playerStyle.color);
 
-        ctx.fillStyle = "#f97316";
+        if (dodgeGem) {
+          ctx.fillStyle = "#facc15";
+          ctx.beginPath();
+          ctx.moveTo(dodgeGem.x + dodgeGem.size / 2, dodgeGem.y);
+          ctx.lineTo(dodgeGem.x + dodgeGem.size, dodgeGem.y + dodgeGem.size / 2);
+          ctx.lineTo(dodgeGem.x + dodgeGem.size / 2, dodgeGem.y + dodgeGem.size);
+          ctx.lineTo(dodgeGem.x, dodgeGem.y + dodgeGem.size / 2);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "#ef4444";
         dodgeBlocks.forEach((block) => {
           ctx.beginPath();
-          ctx.roundRect(block.x, block.y, block.size, block.size, 6);
+          ctx.arc(block.x + block.size / 2, block.y + block.size / 2, block.size / 2, 0, Math.PI * 2);
           ctx.fill();
+
+          ctx.fillStyle = "#fecaca";
+          ctx.beginPath();
+          ctx.arc(block.x + block.size / 2, block.y + block.size / 2, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#ef4444";
         });
 
         ctx.fillStyle = theme.body;
@@ -1697,6 +1813,32 @@
           return;
         }
 
+        if (currentGame === "online-pong") {
+          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && pongMove < 0;
+          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && pongMove > 0;
+
+          if ((upReleased || downReleased) && isKeyAllowedForControls(event.key)) {
+            pongMove = 0;
+            onlineLocalDirty = true;
+          }
+
+          return;
+        }
+
+        if (isOnlineArcadeGame(currentGame)) {
+          const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && onlineMove.x < 0;
+          const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && onlineMove.x > 0;
+          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && onlineMove.y < 0;
+          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && onlineMove.y > 0;
+
+          if ((leftReleased || rightReleased || upReleased || downReleased) && isKeyAllowedForControls(event.key)) {
+            onlineMove = { x: 0, y: 0 };
+            onlineLocalDirty = true;
+          }
+
+          return;
+        }
+
         if (currentGame === "dodger") {
           const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && dodgeMove.x < 0;
           const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && dodgeMove.x > 0;
@@ -1744,6 +1886,12 @@
           if (currentGame === "online-tanks") {
             tankMove = 0;
           }
+          if (currentGame === "online-pong") {
+            pongMove = 0;
+          }
+          if (isOnlineArcadeGame(currentGame)) {
+            onlineMove = { x: 0, y: 0 };
+          }
           if (currentGame === "dodger") {
             dodgeMove = { x: 0, y: 0 };
           }
@@ -1761,6 +1909,26 @@
               button.setPointerCapture(event.pointerId);
             }
 
+            return;
+          }
+
+          if (currentGame === "online-pong") {
+            const direction = directions[button.dataset.direction];
+            if (direction.y !== 0) {
+              event.preventDefault();
+              pongMove = direction.y;
+              onlineLocalDirty = true;
+              button.setPointerCapture(event.pointerId);
+            }
+
+            return;
+          }
+
+          if (isOnlineArcadeGame(currentGame)) {
+            event.preventDefault();
+            onlineMove = directions[button.dataset.direction];
+            onlineLocalDirty = true;
+            button.setPointerCapture(event.pointerId);
             return;
           }
 
@@ -1788,6 +1956,16 @@
             tankMove = 0;
           }
 
+          if (currentGame === "online-pong") {
+            pongMove = 0;
+            onlineLocalDirty = true;
+          }
+
+          if (isOnlineArcadeGame(currentGame)) {
+            onlineMove = { x: 0, y: 0 };
+            onlineLocalDirty = true;
+          }
+
           if (currentGame === "catcher" || currentGame === "online-catcher") {
             catcherMove = 0;
           }
@@ -1800,6 +1978,16 @@
         button.addEventListener("pointercancel", () => {
           if (currentGame === "online-tanks") {
             tankMove = 0;
+          }
+
+          if (currentGame === "online-pong") {
+            pongMove = 0;
+            onlineLocalDirty = true;
+          }
+
+          if (isOnlineArcadeGame(currentGame)) {
+            onlineMove = { x: 0, y: 0 };
+            onlineLocalDirty = true;
           }
 
           if (currentGame === "catcher" || currentGame === "online-catcher") {
@@ -1819,19 +2007,19 @@
 
         const waitingOnline =
           waitingToPlay &&
-          (currentGame === "online-snake" || currentGame === "online-catcher" || currentGame === "online-tanks");
+          currentGame.startsWith("online-");
 
         paused = !paused;
-        pauseButton.textContent = waitingOnline ? "Pause" : paused ? "Resume" : "Pause";
+        pauseButton.textContent = "Menu";
         pauseMenu.classList.toggle("open", paused);
         pauseMenu.setAttribute("aria-hidden", String(!paused));
         resetPauseMenu();
         if (waitingToPlay) {
-          statusEl.textContent = paused ? "Paused before start." : "Press Play to start.";
-        } else {
-          statusEl.textContent = paused ? "Paused." : games[currentGame].help;
-        }
+        statusEl.textContent = paused ? "Menu open (game paused)." : "Press Play to start.";
+      } else {
+        statusEl.textContent = paused ? "Menu open (game paused)." : games[currentGame].help;
       }
+    }
 
       function resetPauseMenu() {
         pauseMenuLevel = "main";
@@ -2493,6 +2681,58 @@
           };
         }
 
+        if (gameName === "online-pong") {
+          return {
+            username,
+            skin,
+            color,
+            x: slot === "p1" ? 34 : canvas.width - 50,
+            y: canvas.height / 2 - 42,
+            width: 16,
+            height: 84,
+            score: 0,
+            alive: true
+          };
+        }
+
+        if (isOnlineArcadeGame(gameName)) {
+          const starts = {
+            "online-racing": {
+              p1: { x: 200, y: canvas.height - 54 },
+              p2: { x: 320, y: canvas.height - 54 }
+            },
+            "online-tag": {
+              p1: { x: 150, y: canvas.height / 2 },
+              p2: { x: canvas.width - 170, y: canvas.height / 2 }
+            },
+            "online-soccer": {
+              p1: { x: 100, y: canvas.height / 2 },
+              p2: { x: canvas.width - 120, y: canvas.height / 2 }
+            },
+            "online-maze": {
+              p1: { x: 34, y: canvas.height - 52 },
+              p2: { x: 70, y: canvas.height - 52 }
+            },
+            "online-battle": {
+              p1: { x: 120, y: canvas.height / 2 },
+              p2: { x: canvas.width - 140, y: canvas.height / 2 }
+            }
+          };
+          const start = starts[gameName]?.[slot] || { x: slot === "p1" ? 120 : canvas.width - 140, y: canvas.height / 2 };
+
+          return {
+            username,
+            skin,
+            color,
+            x: start.x,
+            y: start.y,
+            size: 28,
+            score: 0,
+            alive: true,
+            powered: false
+          };
+        }
+
         return {
           username,
           skin,
@@ -2545,6 +2785,54 @@
 
       function makeOnlineApples() {
         return Array.from({ length: 4 }, () => makeOnlineApple());
+      }
+
+      function makeOnlinePongBall(direction = 1) {
+        const ySpeed = Math.random() > 0.5 ? 3.2 : -3.2;
+
+        return {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          size: 14,
+          dx: 5 * direction,
+          dy: ySpeed
+        };
+      }
+
+      function isOnlineArcadeGame(gameName) {
+        return [
+          "online-racing",
+          "online-tag",
+          "online-soccer",
+          "online-maze",
+          "online-battle"
+        ].includes(gameName);
+      }
+
+      function makeOnlineSoccerBall() {
+        return {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          size: 18,
+          dx: 0,
+          dy: 0
+        };
+      }
+
+      function makeOnlineArenaItem() {
+        return {
+          x: 40 + Math.random() * (canvas.width - 80),
+          y: 40 + Math.random() * (canvas.height - 80),
+          size: 18
+        };
+      }
+
+      function makeOnlineMazeGoal() {
+        return {
+          x: canvas.width - 56,
+          y: 34,
+          size: 22
+        };
       }
 
       function getOnlineTickDelay(gameName) {
@@ -2611,7 +2899,7 @@
         updateShootButton();
         updatePauseButton();
         hidePlayOverlay();
-        pauseButton.textContent = "Pause";
+        pauseButton.textContent = "Menu";
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
@@ -2626,7 +2914,11 @@
         onlineLocalDirty = true;
         onlineFoodsDirty = false;
         onlineApplesDirty = false;
+        onlinePongDirty = false;
+        onlineSharedDirty = false;
         tankMove = 0;
+        pongMove = 0;
+        onlineMove = { x: 0, y: 0 };
         lastTankShot = 0;
         statusEl.textContent =
           `${slot === "p1" ? "Player 1" : "Player 2"} in ${gameTitle.textContent}. Room ${code}.`;
@@ -2718,6 +3010,27 @@
           delete state.apple;
         }
 
+        if (gameName === "online-pong") {
+          state.ball = state.ball || makeOnlinePongBall(onlinePlayerSlot === "p1" ? 1 : -1);
+        }
+
+        if (gameName === "online-soccer") {
+          state.ball = state.ball || makeOnlineSoccerBall();
+        }
+
+        if (gameName === "online-tag") {
+          state.tagger = state.tagger || "p1";
+        }
+
+        if (gameName === "online-maze") {
+          state.goal = state.goal || makeOnlineMazeGoal();
+        }
+
+        if (gameName === "online-battle") {
+          state.orb = state.orb || makeOnlineArenaItem();
+          state.poweredSlot = state.poweredSlot || "";
+        }
+
         return state;
       }
 
@@ -2773,6 +3086,27 @@
           onlineState = prepareOnlineState(room, currentGame, onlinePlayerSlot);
           const resetPlayer = makeOnlinePlayer(onlinePlayerSlot, currentGame);
           onlineState.playersState[onlinePlayerSlot] = resetPlayer;
+          if (currentGame === "online-pong") {
+            onlineState.ball = makeOnlinePongBall(onlinePlayerSlot === "p1" ? 1 : -1);
+            onlinePongDirty = true;
+          }
+          if (currentGame === "online-soccer") {
+            onlineState.ball = makeOnlineSoccerBall();
+          }
+          if (currentGame === "online-tag") {
+            onlineState.tagger = "p1";
+          }
+          if (currentGame === "online-maze") {
+            onlineState.goal = makeOnlineMazeGoal();
+          }
+          if (currentGame === "online-battle") {
+            onlineState.orb = makeOnlineArenaItem();
+            onlineState.poweredSlot = "";
+            onlineState.playersState.p1.powered = false;
+            if (onlineState.playersState.p2) {
+              onlineState.playersState.p2.powered = false;
+            }
+          }
           onlineDirection = resetPlayer.dir || { x: 1, y: 0 };
           score = 0;
           scoreEl.textContent = "0";
@@ -2782,15 +3116,30 @@
           lastOnlineSnakeMove = 0;
           lastOnlineHeartbeat = 0;
           onlineLocalDirty = true;
+          onlinePongDirty = currentGame === "online-pong";
+          onlineSharedDirty = isOnlineArcadeGame(currentGame);
           tankMove = 0;
+          pongMove = 0;
+          onlineMove = { x: 0, y: 0 };
           lastTankShot = 0;
           hidePlayOverlay();
-          pauseButton.textContent = "Pause";
+          pauseButton.textContent = "Menu";
           statusEl.textContent = `Restarted in room ${onlineRoomCode}.`;
-          await patchRoom(onlineRoomCode, {
+          const restartPatch = {
             [`playersState/${onlinePlayerSlot}`]: resetPlayer,
             updatedAt: Date.now()
-          });
+          };
+          if (currentGame === "online-pong") {
+            restartPatch.ball = onlineState.ball;
+          }
+          if (isOnlineArcadeGame(currentGame)) {
+            restartPatch.ball = onlineState.ball || null;
+            restartPatch.tagger = onlineState.tagger || null;
+            restartPatch.goal = onlineState.goal || null;
+            restartPatch.orb = onlineState.orb || null;
+            restartPatch.poweredSlot = onlineState.poweredSlot || null;
+          }
+          await patchRoom(onlineRoomCode, restartPatch);
           updateOnlineScoreboard();
           drawOnlineGame();
 
@@ -2889,6 +3238,8 @@
           onlineState = null;
           catcherMove = 0;
           tankMove = 0;
+          pongMove = 0;
+          onlineMove = { x: 0, y: 0 };
           leaveRoomButton.disabled = false;
           startGame("snake");
         }
@@ -2904,6 +3255,10 @@
           updateOnlineSnake();
         } else if (currentGame === "online-tanks") {
           updateOnlineTanks();
+        } else if (currentGame === "online-pong") {
+          updateOnlinePong();
+        } else if (isOnlineArcadeGame(currentGame)) {
+          updateOnlineArcade();
         } else {
           updateOnlineCatcher();
         }
@@ -2924,6 +3279,8 @@
           onlineLocalDirty ||
           onlineFoodsDirty ||
           onlineApplesDirty ||
+          onlinePongDirty ||
+          onlineSharedDirty ||
           now - lastOnlineHeartbeat > 3200;
 
         if (shouldPush && !onlinePushBusy && now - lastOnlinePush > pushDelay) {
@@ -2932,6 +3289,13 @@
           const patch = buildOnlinePatch();
           const pushedFoods = Object.prototype.hasOwnProperty.call(patch, "foods");
           const pushedApples = Object.prototype.hasOwnProperty.call(patch, "apples");
+          const pushedPong = Object.prototype.hasOwnProperty.call(patch, "ball");
+          const pushedShared =
+            (isOnlineArcadeGame(currentGame) && Object.prototype.hasOwnProperty.call(patch, "ball")) ||
+            Object.prototype.hasOwnProperty.call(patch, "tagger") ||
+            Object.prototype.hasOwnProperty.call(patch, "goal") ||
+            Object.prototype.hasOwnProperty.call(patch, "orb") ||
+            Object.prototype.hasOwnProperty.call(patch, "poweredSlot");
 
           patchRoom(onlineRoomCode, patch)
             .then(() => {
@@ -2940,6 +3304,12 @@
               }
               if (pushedApples) {
                 onlineApplesDirty = false;
+              }
+              if (pushedPong) {
+                onlinePongDirty = false;
+              }
+              if (pushedShared) {
+                onlineSharedDirty = false;
               }
               onlineLocalDirty = false;
               lastOnlineHeartbeat = Date.now();
@@ -2985,6 +3355,40 @@
           }
         }
 
+        if (currentGame === "online-pong" && onlinePongDirty) {
+          patch.ball = onlineState.ball || null;
+          if (onlineState.playersState.p1) {
+            patch["playersState/p1/score"] = onlineState.playersState.p1.score || 0;
+          }
+          if (onlineState.playersState.p2) {
+            patch["playersState/p2/score"] = onlineState.playersState.p2.score || 0;
+          }
+        }
+
+        if (isOnlineArcadeGame(currentGame) && onlineSharedDirty) {
+          if (currentGame === "online-soccer") {
+            patch.ball = onlineState.ball || null;
+          }
+          if (currentGame === "online-tag") {
+            patch.tagger = onlineState.tagger || "p1";
+          }
+          if (currentGame === "online-maze") {
+            patch.goal = onlineState.goal || null;
+          }
+          if (currentGame === "online-battle") {
+            patch.orb = onlineState.orb || null;
+            patch.poweredSlot = onlineState.poweredSlot || null;
+          }
+          if (onlineState.playersState.p1) {
+            patch["playersState/p1/score"] = onlineState.playersState.p1.score || 0;
+            patch["playersState/p1/powered"] = Boolean(onlineState.playersState.p1.powered);
+          }
+          if (onlineState.playersState.p2) {
+            patch["playersState/p2/score"] = onlineState.playersState.p2.score || 0;
+            patch["playersState/p2/powered"] = Boolean(onlineState.playersState.p2.powered);
+          }
+        }
+
         return patch;
       }
 
@@ -2997,6 +3401,10 @@
         if (localPlayer && remotePlayer) {
           localPlayer.adminPoints = remotePlayer.adminPoints || 0;
           localPlayer.username = remotePlayer.username || localPlayer.username;
+          if ((currentGame === "online-pong" && !onlinePongDirty) || (isOnlineArcadeGame(currentGame) && !onlineSharedDirty)) {
+            localPlayer.score = remotePlayer.score || 0;
+            localPlayer.powered = Boolean(remotePlayer.powered);
+          }
           score = getPlayerTotalScore(localPlayer);
           scoreEl.textContent = score;
         }
@@ -3024,6 +3432,18 @@
             onlineApplesDirty = true;
           }
           onlineState.apples = remoteState.apples;
+        }
+
+        if (currentGame === "online-pong" && remoteState.ball && !onlinePongDirty) {
+          onlineState.ball = remoteState.ball;
+        }
+
+        if (isOnlineArcadeGame(currentGame) && !onlineSharedDirty) {
+          onlineState.ball = remoteState.ball || onlineState.ball;
+          onlineState.tagger = remoteState.tagger || onlineState.tagger;
+          onlineState.goal = remoteState.goal || onlineState.goal;
+          onlineState.orb = remoteState.orb || onlineState.orb;
+          onlineState.poweredSlot = remoteState.poweredSlot || "";
         }
       }
 
@@ -3126,6 +3546,279 @@
         score = getPlayerTotalScore(player);
         scoreEl.textContent = score;
         updateOnlineScoreboard();
+      }
+
+      function updateOnlinePong() {
+        const player = onlineState.playersState[onlinePlayerSlot];
+        const p1 = onlineState.playersState.p1;
+        const p2 = onlineState.playersState.p2;
+
+        if (!player || !p1 || !p2) {
+          return;
+        }
+
+        if (pongMove !== 0) {
+          player.y = Math.max(10, Math.min(canvas.height - player.height - 10, player.y + pongMove * 7.5));
+          onlineLocalDirty = true;
+        }
+
+        if (onlinePlayerSlot !== "p1") {
+          score = getPlayerTotalScore(player);
+          scoreEl.textContent = score;
+          return;
+        }
+
+        const ball = onlineState.ball || makeOnlinePongBall(1);
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        if (ball.y - ball.size / 2 <= 0 || ball.y + ball.size / 2 >= canvas.height) {
+          ball.dy *= -1;
+          ball.y = Math.max(ball.size / 2, Math.min(canvas.height - ball.size / 2, ball.y));
+        }
+
+        const hitsPaddle = (paddle) =>
+          ball.x + ball.size / 2 >= paddle.x &&
+          ball.x - ball.size / 2 <= paddle.x + paddle.width &&
+          ball.y + ball.size / 2 >= paddle.y &&
+          ball.y - ball.size / 2 <= paddle.y + paddle.height;
+
+        if (ball.dx < 0 && hitsPaddle(p1)) {
+          ball.dx = Math.abs(ball.dx) + 0.15;
+          ball.dy += ((ball.y - (p1.y + p1.height / 2)) / (p1.height / 2)) * 1.6;
+          ball.x = p1.x + p1.width + ball.size / 2;
+        }
+
+        if (ball.dx > 0 && hitsPaddle(p2)) {
+          ball.dx = -Math.abs(ball.dx) - 0.15;
+          ball.dy += ((ball.y - (p2.y + p2.height / 2)) / (p2.height / 2)) * 1.6;
+          ball.x = p2.x - ball.size / 2;
+        }
+
+        if (ball.x < -ball.size) {
+          p2.score = (p2.score || 0) + 1;
+          onlineState.ball = makeOnlinePongBall(-1);
+        } else if (ball.x > canvas.width + ball.size) {
+          p1.score = (p1.score || 0) + 1;
+          onlineState.ball = makeOnlinePongBall(1);
+        } else {
+          onlineState.ball = ball;
+        }
+
+        onlinePongDirty = true;
+        if ((p1.score || 0) >= 5 || (p2.score || 0) >= 5) {
+          const winner = (p1.score || 0) >= 5 ? (p1.username || "P1") : (p2.username || "P2");
+          statusEl.textContent = `${winner} wins. Press Restart for rematch.`;
+          onlineState.ball = makeOnlinePongBall((p1.score || 0) >= 5 ? -1 : 1);
+        }
+        score = getPlayerTotalScore(player);
+        scoreEl.textContent = score;
+        updateOnlineScoreboard();
+      }
+
+      function updateOnlineArcade() {
+        const player = onlineState.playersState[onlinePlayerSlot];
+        const p1 = onlineState.playersState.p1;
+        const p2 = onlineState.playersState.p2;
+
+        if (!player || !p1 || !p2) {
+          return;
+        }
+
+        if (onlineMove.x !== 0 || onlineMove.y !== 0) {
+          const speed = currentGame === "online-racing" ? 5.5 : 4.8;
+          moveOnlineArcadePlayer(player, onlineMove.x * speed, onlineMove.y * speed);
+          onlineLocalDirty = true;
+        }
+
+        if (currentGame === "online-racing") {
+          if (player.y < 32) {
+            player.score = (player.score || 0) + 1;
+            player.y = canvas.height - 54;
+            player.x = onlinePlayerSlot === "p1" ? 200 : 320;
+            onlineLocalDirty = true;
+          }
+        } else if (onlinePlayerSlot === "p1") {
+          updateOnlineTagGame(p1, p2);
+          updateOnlineSoccerGame(p1, p2);
+          updateOnlineMazeGame(p1, p2);
+          updateOnlineBattleGame(p1, p2);
+        } else if (currentGame === "online-maze") {
+          updateOnlineMazePlayer(player);
+        }
+
+        score = getPlayerTotalScore(player);
+        scoreEl.textContent = score;
+        updateOnlineScoreboard();
+      }
+
+      function moveOnlineArcadePlayer(player, dx, dy) {
+        const size = player.size || 28;
+        const nextX = Math.max(8, Math.min(canvas.width - size - 8, player.x + dx));
+        const nextY = Math.max(8, Math.min(canvas.height - size - 8, player.y + dy));
+
+        if (currentGame === "online-maze" && hitsMazeWall(nextX, player.y, size)) {
+          player.y = nextY;
+          return;
+        }
+
+        if (currentGame === "online-maze" && hitsMazeWall(nextX, nextY, size)) {
+          return;
+        }
+
+        player.x = nextX;
+        player.y = nextY;
+      }
+
+      function updateOnlineTagGame(p1, p2) {
+        if (currentGame !== "online-tag") {
+          return;
+        }
+
+        const taggerSlot = onlineState.tagger || "p1";
+        const tagger = taggerSlot === "p1" ? p1 : p2;
+        const runner = taggerSlot === "p1" ? p2 : p1;
+
+        if (playersTouch(tagger, runner)) {
+          tagger.score = (tagger.score || 0) + 1;
+          onlineState.tagger = taggerSlot === "p1" ? "p2" : "p1";
+          p1.x = 150;
+          p1.y = canvas.height / 2;
+          p2.x = canvas.width - 170;
+          p2.y = canvas.height / 2;
+          onlineSharedDirty = true;
+        }
+      }
+
+      function updateOnlineSoccerGame(p1, p2) {
+        if (currentGame !== "online-soccer") {
+          return;
+        }
+
+        const ball = onlineState.ball || makeOnlineSoccerBall();
+        [p1, p2].forEach((player) => {
+          if (circleRectTouch(ball, player)) {
+            const center = getPlayerCenter(player);
+            const angle = Math.atan2(ball.y - center.y, ball.x - center.x);
+            ball.dx += Math.cos(angle) * 2.2;
+            ball.dy += Math.sin(angle) * 2.2;
+          }
+        });
+
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+        ball.dx *= 0.96;
+        ball.dy *= 0.96;
+
+        if (ball.y - ball.size / 2 < 0 || ball.y + ball.size / 2 > canvas.height) {
+          ball.dy *= -1;
+          ball.y = Math.max(ball.size / 2, Math.min(canvas.height - ball.size / 2, ball.y));
+        }
+
+        if (ball.x < 0) {
+          p2.score = (p2.score || 0) + 1;
+          onlineState.ball = makeOnlineSoccerBall();
+        } else if (ball.x > canvas.width) {
+          p1.score = (p1.score || 0) + 1;
+          onlineState.ball = makeOnlineSoccerBall();
+        } else {
+          onlineState.ball = ball;
+        }
+
+        onlineSharedDirty = true;
+      }
+
+      function updateOnlineMazeGame(p1, p2) {
+        if (currentGame !== "online-maze") {
+          return;
+        }
+
+        updateOnlineMazePlayer(p1);
+        updateOnlineMazePlayer(p2);
+      }
+
+      function updateOnlineMazePlayer(player) {
+        if (!onlineState.goal) {
+          onlineState.goal = makeOnlineMazeGoal();
+        }
+
+        if (rectsTouch(player.x, player.y, player.size || 28, player.size || 28, onlineState.goal.x, onlineState.goal.y, onlineState.goal.size, onlineState.goal.size)) {
+          player.score = (player.score || 0) + 1;
+          onlineState.goal = makeOnlineMazeGoal();
+          player.x = player === onlineState.playersState.p1 ? 34 : 70;
+          player.y = canvas.height - 52;
+          onlineSharedDirty = true;
+          onlineLocalDirty = true;
+        }
+      }
+
+      function updateOnlineBattleGame(p1, p2) {
+        if (currentGame !== "online-battle") {
+          return;
+        }
+
+        onlineState.orb = onlineState.orb || makeOnlineArenaItem();
+        [p1, p2].forEach((player, index) => {
+          const slot = index === 0 ? "p1" : "p2";
+          if (rectsTouch(player.x, player.y, player.size || 28, player.size || 28, onlineState.orb.x, onlineState.orb.y, onlineState.orb.size, onlineState.orb.size)) {
+            onlineState.poweredSlot = slot;
+            p1.powered = slot === "p1";
+            p2.powered = slot === "p2";
+            onlineState.orb = makeOnlineArenaItem();
+            onlineSharedDirty = true;
+          }
+        });
+
+        if (playersTouch(p1, p2) && onlineState.poweredSlot) {
+          const powered = onlineState.poweredSlot === "p1" ? p1 : p2;
+          powered.score = (powered.score || 0) + 1;
+          onlineState.poweredSlot = "";
+          p1.powered = false;
+          p2.powered = false;
+          p1.x = 120;
+          p1.y = canvas.height / 2;
+          p2.x = canvas.width - 140;
+          p2.y = canvas.height / 2;
+          onlineSharedDirty = true;
+        }
+      }
+
+      function getPlayerCenter(player) {
+        const size = player.size || 28;
+        return {
+          x: player.x + size / 2,
+          y: player.y + size / 2
+        };
+      }
+
+      function playersTouch(a, b) {
+        return rectsTouch(a.x, a.y, a.size || 28, a.size || 28, b.x, b.y, b.size || 28, b.size || 28);
+      }
+
+      function rectsTouch(ax, ay, aw, ah, bx, by, bw, bh) {
+        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+      }
+
+      function circleRectTouch(circle, rect) {
+        const size = rect.size || 28;
+        const nearestX = Math.max(rect.x, Math.min(circle.x, rect.x + size));
+        const nearestY = Math.max(rect.y, Math.min(circle.y, rect.y + size));
+        return Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.size / 2;
+      }
+
+      function getMazeWalls() {
+        return [
+          { x: 95, y: 78, width: 24, height: 330 },
+          { x: 190, y: 0, width: 24, height: 270 },
+          { x: 285, y: 150, width: 24, height: 330 },
+          { x: 380, y: 0, width: 24, height: 280 },
+          { x: 95, y: 408, width: 330, height: 24 },
+          { x: 190, y: 270, width: 250, height: 24 }
+        ];
+      }
+
+      function hitsMazeWall(x, y, size) {
+        return getMazeWalls().some((wall) => rectsTouch(x, y, size, size, wall.x, wall.y, wall.width, wall.height));
       }
 
       function moveOnlineTank(player, speed) {
@@ -3282,6 +3975,10 @@
           drawOnlineSnake();
         } else if (currentGame === "online-tanks") {
           drawOnlineTanks();
+        } else if (currentGame === "online-pong") {
+          drawOnlinePong();
+        } else if (isOnlineArcadeGame(currentGame)) {
+          drawOnlineArcade();
         } else {
           drawOnlineCatcher();
         }
@@ -3350,6 +4047,149 @@
         drawTankPlayer(onlineState.playersState.p2, "orange", "p2");
       }
 
+      function drawOnlinePong() {
+        ctx.strokeStyle = "rgba(248, 250, 252, 0.16)";
+        ctx.setLineDash([10, 10]);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(canvas.width / 2, canvas.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        drawPongPlayer(onlineState.playersState.p1, "teal");
+        drawPongPlayer(onlineState.playersState.p2, "orange");
+
+        const ball = onlineState.ball;
+        if (ball) {
+          ctx.fillStyle = "#f8fafc";
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, ball.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawPongPlayer(player, fallbackColor) {
+        if (!player) {
+          return;
+        }
+
+        const theme = getTheme(player.color || fallbackColor);
+        ctx.fillStyle = theme.body;
+        ctx.beginPath();
+        ctx.roundRect(player.x, player.y, player.width || 16, player.height || 84, 8);
+        ctx.fill();
+      }
+
+      function drawOnlineArcade() {
+        if (currentGame === "online-racing") {
+          drawRacingTrack();
+        } else if (currentGame === "online-soccer") {
+          drawSoccerField();
+        } else if (currentGame === "online-maze") {
+          drawMazeField();
+        } else if (currentGame === "online-battle") {
+          drawBattleField();
+        }
+
+        if (currentGame === "online-soccer" && onlineState.ball) {
+          ctx.fillStyle = "#f8fafc";
+          ctx.beginPath();
+          ctx.arc(onlineState.ball.x, onlineState.ball.y, onlineState.ball.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (currentGame === "online-maze" && onlineState.goal) {
+          drawDiamond(onlineState.goal.x, onlineState.goal.y, onlineState.goal.size, "#facc15");
+        }
+
+        if (currentGame === "online-battle" && onlineState.orb) {
+          ctx.fillStyle = "#a78bfa";
+          ctx.beginPath();
+          ctx.arc(onlineState.orb.x + onlineState.orb.size / 2, onlineState.orb.y + onlineState.orb.size / 2, onlineState.orb.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        drawArcadePlayer(onlineState.playersState.p1, "teal", "p1");
+        drawArcadePlayer(onlineState.playersState.p2, "orange", "p2");
+      }
+
+      function drawArcadePlayer(player, fallbackColor, slot) {
+        if (!player) {
+          return;
+        }
+
+        const theme = getTheme(player.color || fallbackColor);
+        const size = player.size || 28;
+        const isTagger = currentGame === "online-tag" && (onlineState.tagger || "p1") === slot;
+        const powered = currentGame === "online-battle" && onlineState.poweredSlot === slot;
+
+        ctx.fillStyle = isTagger ? "#ef4444" : theme.body;
+        if (powered) {
+          ctx.shadowColor = "#a78bfa";
+          ctx.shadowBlur = 16;
+        }
+        ctx.beginPath();
+        ctx.roundRect(player.x, player.y, size, size, 8);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = theme.head;
+        ctx.beginPath();
+        ctx.arc(player.x + size / 2, player.y + size / 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawRacingTrack() {
+        ctx.fillStyle = "rgba(250, 204, 21, 0.9)";
+        ctx.fillRect(0, 22, canvas.width, 8);
+        ctx.strokeStyle = "rgba(248, 250, 252, 0.22)";
+        ctx.lineWidth = 3;
+        [170, 260, 350].forEach((x) => {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        });
+      }
+
+      function drawSoccerField() {
+        ctx.strokeStyle = "rgba(94, 234, 212, 0.35)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(10, canvas.height / 2 - 70, 18, 140);
+        ctx.strokeRect(canvas.width - 28, canvas.height / 2 - 70, 18, 140);
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 64, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function drawMazeField() {
+        ctx.fillStyle = "rgba(248, 250, 252, 0.18)";
+        getMazeWalls().forEach((wall) => {
+          ctx.beginPath();
+          ctx.roundRect(wall.x, wall.y, wall.width, wall.height, 6);
+          ctx.fill();
+        });
+      }
+
+      function drawBattleField() {
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.28)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 120, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function drawDiamond(x, y, size, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x + size / 2, y);
+        ctx.lineTo(x + size, y + size / 2);
+        ctx.lineTo(x + size / 2, y + size);
+        ctx.lineTo(x, y + size / 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+
       function drawTankPlayer(player, fallbackColor, slot) {
         if (!player) {
           return;
@@ -3409,7 +4249,16 @@
               p1: makeOnlinePlayer("p1", selectedOnlineGame)
             },
             foods: null,
-            apples: selectedOnlineGame === "online-catcher" ? makeOnlineApples() : null
+            apples: selectedOnlineGame === "online-catcher" ? makeOnlineApples() : null,
+            ball: selectedOnlineGame === "online-pong"
+              ? makeOnlinePongBall(1)
+              : selectedOnlineGame === "online-soccer"
+                ? makeOnlineSoccerBall()
+                : null,
+            tagger: selectedOnlineGame === "online-tag" ? "p1" : null,
+            goal: selectedOnlineGame === "online-maze" ? makeOnlineMazeGoal() : null,
+            orb: selectedOnlineGame === "online-battle" ? makeOnlineArenaItem() : null,
+            poweredSlot: ""
           };
 
           if (selectedOnlineGame === "online-snake") {

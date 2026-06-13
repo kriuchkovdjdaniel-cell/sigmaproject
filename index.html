@@ -1858,6 +1858,53 @@
           overflow: hidden;
         }
 
+        .start-screen {
+          place-items: stretch;
+          padding: 0;
+        }
+
+        .start-panel {
+          width: 100vw;
+          min-height: 100dvh;
+          max-height: 100dvh;
+          border: 0;
+          border-radius: 0;
+          padding: 0.85rem;
+          align-content: start;
+          background:
+            linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px) 0 0 / 24px 24px,
+            linear-gradient(0deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+            radial-gradient(circle at 50% 16%, rgba(94, 234, 212, 0.12), transparent 14rem),
+            linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(5, 46, 22, 0.82));
+        }
+
+        .start-panel h2 {
+          font-size: clamp(2.5rem, 12vw, 4.4rem);
+        }
+
+        .start-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.65rem;
+          padding: 0.65rem;
+          border-radius: 24px;
+        }
+
+        .start-actions button,
+        .start-submenu button {
+          min-height: 48px;
+          font-size: 0.9rem;
+        }
+
+        .start-submenu {
+          max-height: calc(100dvh - 1.7rem);
+          overflow: auto;
+          border-radius: 24px;
+        }
+
+        .start-showcase {
+          grid-template-columns: 7rem 1fr;
+        }
+
         main {
           width: 100vw;
           height: 100dvh;
@@ -2125,6 +2172,49 @@
       }
 
       body.phone-preview-mode .start-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      body.phone-device-mode .start-screen {
+        place-items: stretch;
+        padding: 0;
+      }
+
+      body.phone-device-mode .start-panel {
+        width: 100vw;
+        min-height: 100dvh;
+        max-height: 100dvh;
+        border: 0;
+        border-radius: 0;
+        padding: 0.85rem;
+        align-content: start;
+        background:
+          linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px) 0 0 / 24px 24px,
+          linear-gradient(0deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+          radial-gradient(circle at 50% 16%, rgba(94, 234, 212, 0.12), transparent 14rem),
+          linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(5, 46, 22, 0.82));
+      }
+
+      body.phone-device-mode .start-actions {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        padding: 0.75rem;
+        border-radius: 24px;
+      }
+
+      body.phone-device-mode .start-actions button,
+      body.phone-device-mode .start-submenu button {
+        min-height: 60px;
+        font-size: 1rem;
+      }
+
+      body.phone-device-mode .start-submenu {
+        max-height: calc(100dvh - 1.7rem);
+        overflow: auto;
+        border-radius: 24px;
+      }
+
+      body.phone-device-mode .start-showcase {
         grid-template-columns: 1fr;
       }
 
@@ -3134,6 +3224,17 @@
         { id: "premium", name: "Premium Donate", price: "$5", perk: "Premium cosmetics idea" },
         { id: "legend", name: "Sigma Legend", price: "$10", perk: "Special profile frame idea" }
       ];
+
+      function updatePhoneDeviceMode() {
+        const isTouch = navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches;
+        const looksLikePhone = Math.max(window.innerWidth, window.innerHeight) <= 950;
+
+        document.body.classList.toggle("phone-device-mode", Boolean(isTouch && looksLikePhone));
+      }
+
+      updatePhoneDeviceMode();
+      window.addEventListener("resize", updatePhoneDeviceMode);
+      window.addEventListener("orientationchange", updatePhoneDeviceMode);
       const achievementDefs = [
         { id: "score10", name: "Score 10", check: () => score >= 10, xp: 50, coins: 20 },
         { id: "score50", name: "Score 50", check: () => score >= 50, xp: 140, coins: 60 },

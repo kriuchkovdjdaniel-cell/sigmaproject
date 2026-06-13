@@ -15,22 +15,60 @@
 
       * {
         box-sizing: border-box;
+        scrollbar-width: none;
+      }
+
+      *::-webkit-scrollbar {
+        display: none;
       }
 
       body {
+        position: relative;
         margin: 0;
         min-height: 100vh;
         display: grid;
         place-items: center;
+        user-select: none;
+        -webkit-user-select: none;
         background:
-          radial-gradient(circle at top left, rgba(20, 184, 166, 0.28), transparent 32rem),
-          linear-gradient(135deg, #111827 0%, #172033 55%, #0f172a 100%);
+          radial-gradient(circle at top left, rgba(34, 197, 94, 0.32), transparent 32rem),
+          linear-gradient(135deg, #052e16 0%, #12331e 55%, #020617 100%);
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        background:
+          linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 42px 42px,
+          linear-gradient(0deg, rgba(34, 197, 94, 0.07) 1px, transparent 1px) 0 0 / 42px 42px,
+          radial-gradient(circle at 82% 16%, rgba(20, 184, 166, 0.18), transparent 18rem),
+          radial-gradient(circle at 18% 88%, rgba(132, 204, 22, 0.15), transparent 19rem);
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.36));
+      }
+
+      body::after {
+        background:
+          linear-gradient(120deg, transparent 0 18%, rgba(255, 255, 255, 0.035) 19%, transparent 20% 48%, rgba(255, 255, 255, 0.028) 49%, transparent 50%),
+          radial-gradient(circle at center, transparent 0, rgba(0, 0, 0, 0.34) 74%);
+      }
+
+      input,
+      textarea {
+        user-select: text;
+        -webkit-user-select: text;
       }
 
       body[data-theme="midnight"] {
         background:
-          radial-gradient(circle at top left, rgba(20, 184, 166, 0.28), transparent 32rem),
-          linear-gradient(135deg, #111827 0%, #172033 55%, #0f172a 100%);
+          radial-gradient(circle at top left, rgba(34, 197, 94, 0.32), transparent 32rem),
+          linear-gradient(135deg, #052e16 0%, #12331e 55%, #020617 100%);
       }
 
       body[data-theme="forest"] {
@@ -46,9 +84,21 @@
       }
 
       main {
+        position: relative;
+        z-index: 1;
         width: min(92vw, var(--app-width));
         display: grid;
         gap: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(134, 239, 172, 0.18);
+        border-radius: 24px;
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.64), rgba(5, 46, 22, 0.42));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 24px 80px rgba(0, 0, 0, 0.34),
+          0 0 44px rgba(34, 197, 94, 0.08);
+        backdrop-filter: blur(10px);
       }
 
       header {
@@ -63,6 +113,11 @@
         font-size: clamp(2rem, 9vw, 4.5rem);
         line-height: 1;
         letter-spacing: 0;
+        color: #f8fafc;
+        text-shadow:
+          0 2px 0 #052e16,
+          0 0 18px rgba(94, 234, 212, 0.28),
+          0 16px 34px rgba(0, 0, 0, 0.38);
       }
 
       .scoreboard {
@@ -78,10 +133,14 @@
       .stat {
         min-width: 5rem;
         padding: 0.65rem 0.75rem;
-        border: 1px solid rgba(248, 250, 252, 0.2);
-        border-radius: 8px;
-        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 14px;
+        background:
+          linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(5, 46, 22, 0.56));
         text-align: center;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.09),
+          0 10px 26px rgba(0, 0, 0, 0.22);
       }
 
       .stat span {
@@ -89,6 +148,7 @@
         margin-top: 0.15rem;
         color: #5eead4;
         font-size: 1.35rem;
+        text-shadow: 0 0 16px rgba(94, 234, 212, 0.42);
       }
 
       .game {
@@ -104,8 +164,11 @@
         display: none;
         place-items: center;
         padding: 1rem;
-        border-radius: 8px;
-        background: rgba(2, 6, 23, 0.64);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at center, rgba(20, 184, 166, 0.12), transparent 16rem),
+          rgba(2, 6, 23, 0.68);
+        backdrop-filter: blur(4px);
       }
 
       .play-overlay.open {
@@ -116,6 +179,14 @@
         width: min(74vw, 260px);
         display: grid;
         gap: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 20px;
+        background:
+          linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(5, 46, 22, 0.76));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 18px 40px rgba(0, 0, 0, 0.32);
         text-align: center;
       }
 
@@ -130,41 +201,504 @@
         font-weight: 800;
       }
 
+      .start-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+        background:
+          linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%) 0 0 / 32px 32px,
+          linear-gradient(-45deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%) 0 0 / 32px 32px,
+          radial-gradient(circle at 50% 12%, rgba(94, 234, 212, 0.16), transparent 20rem),
+          radial-gradient(circle at 50% 92%, rgba(34, 197, 94, 0.18), transparent 22rem),
+          linear-gradient(180deg, #16230f 0%, #0f1b0b 42%, #060b05 100%);
+      }
+
+      .start-screen.closed {
+        display: none;
+      }
+
+      .start-panel {
+        position: relative;
+        width: min(88vw, 360px);
+        max-height: 92vh;
+        overflow: auto;
+        display: grid;
+        gap: 0.85rem;
+        text-align: center;
+        image-rendering: pixelated;
+        padding: 1rem;
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 28px;
+        background:
+          linear-gradient(145deg, rgba(15, 23, 42, 0.38), rgba(5, 46, 22, 0.32));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 26px 48px rgba(0, 0, 0, 0.34),
+          0 0 64px rgba(34, 197, 94, 0.12);
+        backdrop-filter: blur(8px);
+        animation: menuArrive 420ms ease both;
+      }
+
+      .start-panel::before,
+      .start-panel::after {
+        content: "";
+        position: absolute;
+        width: 84px;
+        height: 84px;
+        border: 2px solid rgba(94, 234, 212, 0.42);
+        pointer-events: none;
+      }
+
+      .start-panel::before {
+        top: 0.55rem;
+        left: 0.55rem;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 22px 0 0 0;
+      }
+
+      .start-panel::after {
+        right: 0.55rem;
+        bottom: 0.55rem;
+        border-left: 0;
+        border-top: 0;
+        border-radius: 0 0 22px 0;
+      }
+
+      .start-panel h2 {
+        margin: 0;
+        font-family: Impact, Arial Black, Arial, sans-serif;
+        font-size: clamp(2.8rem, 13vw, 5rem);
+        line-height: 1;
+        color: #f8fafc;
+        filter: drop-shadow(0 0 18px rgba(94, 234, 212, 0.18));
+        text-shadow:
+          3px 3px 0 #0f766e,
+          -2px -2px 0 #5eead4,
+          0 7px 0 #000000;
+        text-transform: uppercase;
+        animation: titlePulse 2.2s ease-in-out infinite alternate;
+      }
+
+      .start-splash {
+        color: #ffff55;
+        font-size: 1.05rem;
+        font-weight: 900;
+        transform: rotate(-8deg);
+        text-shadow: 2px 2px 0 #000;
+        animation: splashBounce 900ms ease-in-out infinite alternate;
+      }
+
+      .start-panel p {
+        min-height: 1.3rem;
+        margin: 0;
+        color: #ffff55;
+        font-weight: 800;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      #startStatus {
+        justify-self: center;
+        min-width: min(100%, 260px);
+        padding: 0.35rem 0.75rem;
+        border: 1px solid rgba(250, 204, 21, 0.38);
+        border-radius: 999px;
+        background:
+          linear-gradient(135deg, rgba(2, 6, 23, 0.72), rgba(20, 83, 45, 0.48));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 10px 22px rgba(0, 0, 0, 0.22),
+          0 0 18px rgba(250, 204, 21, 0.08);
+      }
+
+      .loading-bar {
+        height: 18px;
+        overflow: hidden;
+        border: 3px solid #000;
+        border-radius: 0;
+        background: #2a2a2a;
+        box-shadow: inset 0 0 0 2px #555;
+      }
+
+      .loading-fill {
+        width: 42%;
+        height: 100%;
+        border-radius: 0;
+        background:
+          repeating-linear-gradient(90deg, #55ff55 0 12px, #33aa33 12px 24px);
+        animation: loadingSlide 900ms ease-in-out infinite alternate;
+      }
+
+      .start-actions {
+        display: none;
+        gap: 0.75rem;
+        padding: 0.65rem;
+        border: 1px solid rgba(134, 239, 172, 0.16);
+        border-radius: 22px;
+        background: rgba(2, 6, 23, 0.18);
+      }
+
+      .start-submenu {
+        display: none;
+        gap: 0.75rem;
+        padding: 0.65rem;
+        border: 1px solid rgba(134, 239, 172, 0.18);
+        border-radius: 22px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.24), rgba(20, 83, 45, 0.2));
+      }
+
+      .start-submenu.open {
+        display: grid;
+        animation: submenuIn 180ms ease both;
+      }
+
+      .start-submenu h3 {
+        margin: 0.2rem 0 0;
+        color: #ecfeff;
+        text-shadow: 2px 2px 0 #000;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .start-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      .start-submenu input,
+      .start-submenu select {
+        border-color: rgba(134, 239, 172, 0.32);
+        border-radius: 16px;
+        background:
+          linear-gradient(180deg, rgba(2, 6, 23, 0.88), rgba(20, 83, 45, 0.36));
+        color: #ecfeff;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 10px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .start-showcase {
+        display: grid;
+        gap: 0.65rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.46);
+        border-radius: 18px;
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.68), rgba(21, 128, 61, 0.46));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.16),
+          0 12px 28px rgba(0, 0, 0, 0.26);
+        text-align: left;
+      }
+
+      .showcase-thumb {
+        min-height: 112px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid rgba(220, 252, 231, 0.28);
+        background:
+          radial-gradient(circle at 24% 28%, rgba(250, 204, 21, 0.9) 0 9px, transparent 10px),
+          radial-gradient(circle at 76% 34%, rgba(20, 184, 166, 0.9) 0 12px, transparent 13px),
+          linear-gradient(135deg, transparent 0 46%, rgba(255, 255, 255, 0.08) 47% 53%, transparent 54%),
+          linear-gradient(90deg, rgba(34, 197, 94, 0.18) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(0deg, rgba(34, 197, 94, 0.18) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(135deg, #052e16, #020617);
+      }
+
+      .showcase-thumb[data-mode="online"] {
+        border-color: rgba(216, 180, 254, 0.42);
+        background:
+          radial-gradient(circle at 25% 30%, rgba(168, 85, 247, 0.9) 0 12px, transparent 13px),
+          radial-gradient(circle at 73% 66%, rgba(59, 130, 246, 0.92) 0 13px, transparent 14px),
+          linear-gradient(90deg, rgba(216, 180, 254, 0.16) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(0deg, rgba(216, 180, 254, 0.16) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(135deg, #3b0764, #020617);
+      }
+
+      .showcase-icon {
+        width: 4.4rem;
+        height: 4.4rem;
+        display: grid;
+        place-items: center;
+        border-radius: 24px;
+        background: rgba(2, 6, 23, 0.62);
+        color: #ecfeff;
+        font-family: Impact, Arial Black, Arial, sans-serif;
+        font-size: 1.45rem;
+        letter-spacing: 0;
+        text-shadow: 2px 2px 0 #000;
+        box-shadow: 0 0 22px rgba(94, 234, 212, 0.28);
+      }
+
+      .showcase-copy {
+        display: grid;
+        gap: 0.25rem;
+      }
+
+      .showcase-copy strong {
+        color: #ecfeff;
+        font-size: 1.15rem;
+        text-transform: uppercase;
+        text-shadow: 2px 2px 0 #000;
+      }
+
+      .showcase-copy span,
+      .showcase-copy p {
+        margin: 0;
+        color: #d1fae5;
+        font-size: 0.9rem;
+        font-weight: 800;
+        line-height: 1.25;
+        text-shadow: 1px 1px 0 #000;
+      }
+
+      .start-submenu input,
+      .start-submenu select {
+        text-transform: none;
+      }
+
+      .start-screen.loaded .loading-bar {
+        display: none;
+      }
+
+      .start-screen.loaded .start-actions {
+        display: grid;
+      }
+
+      .start-screen.submenu-open .start-actions {
+        display: none;
+      }
+
+      .start-actions button,
+      .start-submenu button {
+        min-height: 50px;
+        border: 1px solid rgba(94, 234, 212, 0.7);
+        border-radius: 999px;
+        background:
+          linear-gradient(135deg, rgba(20, 184, 166, 0.98), rgba(59, 130, 246, 0.88));
+        color: #ecfeff;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.32),
+          inset 0 -4px 0 rgba(2, 6, 23, 0.22),
+          0 10px 24px rgba(8, 47, 73, 0.34),
+          0 0 22px rgba(20, 184, 166, 0.22);
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+        text-transform: uppercase;
+        transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .start-actions button::before,
+      .start-submenu button::before,
+      button::before {
+        content: "";
+        position: absolute;
+        inset: 2px auto auto 12%;
+        width: 44%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.45);
+        opacity: 0.65;
+      }
+
+      .start-actions button:hover,
+      .start-submenu button:hover {
+        filter: brightness(1.12) saturate(1.08);
+        transform: translateY(-3px) scale(1.015);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.38),
+          0 14px 28px rgba(8, 47, 73, 0.42),
+          0 0 34px rgba(45, 212, 191, 0.32);
+      }
+
+      .start-actions button:active,
+      .start-submenu button:active {
+        transform: translateY(1px) scale(0.99);
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.32),
+          0 6px 16px rgba(8, 47, 73, 0.28);
+      }
+
+      .start-submenu button[data-start-game],
+      .start-submenu button[data-start-online-game] {
+        border-color: rgba(134, 239, 172, 0.76);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.82));
+        box-shadow:
+          inset 0 1px 0 rgba(220, 252, 231, 0.32),
+          0 10px 24px rgba(20, 83, 45, 0.34),
+          0 0 22px rgba(34, 197, 94, 0.2);
+      }
+
+      #startPlayButton {
+        border-color: rgba(250, 204, 21, 0.72);
+        background:
+          linear-gradient(135deg, rgba(34, 197, 94, 0.98), rgba(250, 204, 21, 0.74));
+        color: #052e16;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.42),
+          inset 0 -4px 0 rgba(20, 83, 45, 0.26),
+          0 14px 30px rgba(20, 83, 45, 0.42),
+          0 0 30px rgba(250, 204, 21, 0.2);
+      }
+
+      #startGamesButton {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.96), rgba(20, 184, 166, 0.86));
+      }
+
+      #startSettingsButton {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.96), rgba(14, 165, 233, 0.86));
+      }
+
+      #startAccountButton {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.94), rgba(139, 92, 246, 0.82));
+      }
+
+      #startBackFromGames,
+      #startBackFromSettings,
+      #startBackFromAccount {
+        min-height: 44px;
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(22, 101, 52, 0.76));
+      }
+
+      #startCreateRoomButton,
+      #startJoinRoomButton {
+        border-color: rgba(216, 180, 254, 0.82);
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.96), rgba(126, 34, 206, 0.86));
+        box-shadow:
+          inset 0 1px 0 rgba(243, 232, 255, 0.32),
+          0 10px 24px rgba(88, 28, 135, 0.38),
+          0 0 24px rgba(168, 85, 247, 0.28);
+      }
+
+      @keyframes loadingSlide {
+        from {
+          transform: translateX(-35%);
+        }
+
+        to {
+          transform: translateX(170%);
+        }
+      }
+
+      @keyframes splashBounce {
+        from {
+          transform: rotate(-8deg) scale(0.96);
+        }
+
+        to {
+          transform: rotate(-8deg) scale(1.08);
+        }
+      }
+
+      @keyframes menuArrive {
+        from {
+          opacity: 0;
+          transform: translateY(18px) scale(0.98);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes submenuIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes titlePulse {
+        from {
+          filter: drop-shadow(0 0 10px rgba(94, 234, 212, 0.12));
+        }
+
+        to {
+          filter: drop-shadow(0 0 24px rgba(94, 234, 212, 0.26));
+        }
+      }
+
       canvas {
         width: 100%;
         aspect-ratio: 1;
         display: block;
-        border: 2px solid rgba(248, 250, 252, 0.22);
-        border-radius: 8px;
+        border: 2px solid rgba(134, 239, 172, 0.28);
+        border-radius: 18px;
         background: #020617;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+        box-shadow:
+          inset 0 0 32px rgba(34, 197, 94, 0.08),
+          0 18px 50px rgba(0, 0, 0, 0.34),
+          0 0 34px rgba(20, 184, 166, 0.08);
       }
 
       .controls {
         display: flex;
         justify-content: space-between;
         gap: 0.75rem;
+        padding: 0.35rem;
+        border: 1px solid rgba(134, 239, 172, 0.14);
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.28);
       }
 
       button {
+        position: relative;
+        overflow: hidden;
         min-height: 44px;
-        border: 0;
-        border-radius: 8px;
+        border: 1px solid rgba(94, 234, 212, 0.65);
+        border-radius: 999px;
         padding: 0.7rem 0.95rem;
-        background: #14b8a6;
-        color: #042f2e;
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.95), rgba(59, 130, 246, 0.82));
+        color: #ecfeff;
         cursor: pointer;
         font: inherit;
         font-weight: 800;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.28),
+          0 8px 18px rgba(8, 47, 73, 0.28),
+          0 0 18px rgba(20, 184, 166, 0.16);
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+        transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
       }
 
       button:hover {
-        background: #2dd4bf;
+        filter: brightness(1.12) saturate(1.08);
+        transform: translateY(-2px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.36),
+          0 12px 24px rgba(8, 47, 73, 0.36),
+          0 0 28px rgba(45, 212, 191, 0.26);
+      }
+
+      button:active {
+        transform: translateY(1px) scale(0.99);
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.32),
+          0 5px 14px rgba(8, 47, 73, 0.24);
       }
 
       button.selected {
-        outline: 3px solid #f97316;
+        outline: 3px solid #facc15;
         outline-offset: 2px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.34),
+          0 0 0 6px rgba(250, 204, 21, 0.13),
+          0 16px 30px rgba(20, 83, 45, 0.34);
       }
 
       .pad {
@@ -178,7 +712,8 @@
       .pad button {
         aspect-ratio: 1.25;
         padding: 0;
-        background: rgba(248, 250, 252, 0.12);
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.86), rgba(20, 83, 45, 0.5));
         color: #f8fafc;
       }
 
@@ -205,21 +740,26 @@
       .status {
         min-height: 1.5rem;
         margin: 0;
-        color: #cbd5e1;
+        color: #d1fae5;
         text-align: center;
         font-weight: 700;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.38);
       }
 
       .pause-menu {
         position: fixed;
         inset: 0;
+        z-index: 15;
         display: grid;
         place-items: center;
         padding: 1rem;
-        background: rgba(2, 6, 23, 0.74);
+        background:
+          radial-gradient(circle at center, rgba(34, 197, 94, 0.1), transparent 22rem),
+          rgba(2, 6, 23, 0.76);
         opacity: 0;
         pointer-events: none;
         transition: opacity 160ms ease;
+        backdrop-filter: blur(6px);
       }
 
       .pause-menu.open {
@@ -232,10 +772,14 @@
         display: grid;
         gap: 0.75rem;
         padding: 1rem;
-        border: 1px solid rgba(248, 250, 252, 0.18);
-        border-radius: 8px;
-        background: #111827;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 20px;
+        background:
+          linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(5, 46, 22, 0.88));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 24px 60px rgba(0, 0, 0, 0.42),
+          0 0 34px rgba(34, 197, 94, 0.12);
       }
 
       .pause-panel h2 {
@@ -271,15 +815,19 @@
       select {
         width: 100%;
         min-height: 44px;
-        border: 1px solid rgba(248, 250, 252, 0.22);
-        border-radius: 8px;
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 14px;
         padding: 0.7rem 0.95rem;
-        background: #020617;
+        background:
+          linear-gradient(180deg, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.76));
         color: #f8fafc;
         font: inherit;
         font-weight: 700;
         text-align: center;
         text-transform: uppercase;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          0 8px 18px rgba(0, 0, 0, 0.18);
       }
 
       .room-code {
@@ -304,8 +852,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
-        color: #cbd5e1;
+        color: #d1fae5;
         font-weight: 800;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.16);
+        border-radius: 16px;
+        background: rgba(2, 6, 23, 0.32);
       }
 
       .account-bar button {
@@ -332,10 +884,14 @@
         display: grid;
         gap: 0.75rem;
         padding: 1rem;
-        border: 1px solid rgba(248, 250, 252, 0.18);
-        border-radius: 8px;
-        background: #111827;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+        border: 1px solid rgba(134, 239, 172, 0.28);
+        border-radius: 20px;
+        background:
+          linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(5, 46, 22, 0.86));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 24px 60px rgba(0, 0, 0, 0.42),
+          0 0 34px rgba(34, 197, 94, 0.1);
       }
 
       .auth-panel h2 {
@@ -362,9 +918,13 @@
         display: none;
         gap: 0.75rem;
         padding: 1rem;
-        border: 1px solid rgba(248, 250, 252, 0.18);
-        border-radius: 8px;
-        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(134, 239, 172, 0.24);
+        border-radius: 20px;
+        background:
+          linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(5, 46, 22, 0.5));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 18px 44px rgba(0, 0, 0, 0.22);
       }
 
       .admin-panel.open {
@@ -374,22 +934,174 @@
       .admin-panel h2 {
         margin: 0;
         font-size: 1.25rem;
+        text-shadow: 0 0 14px rgba(94, 234, 212, 0.2);
       }
 
       .admin-stats {
         display: grid;
-        gap: 0.4rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.65rem;
         color: #cbd5e1;
         font-weight: 800;
       }
 
+      .admin-stat-card {
+        display: grid;
+        gap: 0.2rem;
+        padding: 0.65rem;
+        border: 1px solid rgba(134, 239, 172, 0.2);
+        border-radius: 16px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.58), rgba(20, 83, 45, 0.34));
+        text-align: center;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 10px 24px rgba(0, 0, 0, 0.18);
+      }
+
+      .admin-stat-card strong {
+        color: #5eead4;
+        font-size: 1.35rem;
+        text-shadow: 0 0 14px rgba(94, 234, 212, 0.3);
+      }
+
       .admin-users {
-        max-height: 8rem;
+        max-height: 16rem;
         overflow: auto;
         display: grid;
-        gap: 0.35rem;
+        gap: 0.55rem;
         color: #f8fafc;
         font-weight: 700;
+        padding-right: 0.35rem;
+        scrollbar-width: thin;
+        scrollbar-color: #5eead4 rgba(2, 6, 23, 0.52);
+      }
+
+      .admin-users::-webkit-scrollbar {
+        display: block;
+        width: 10px;
+      }
+
+      .admin-users::-webkit-scrollbar-track {
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.52);
+      }
+
+      .admin-users::-webkit-scrollbar-thumb {
+        border: 2px solid rgba(2, 6, 23, 0.52);
+        border-radius: 999px;
+        background:
+          linear-gradient(180deg, #5eead4, #22c55e);
+      }
+
+      .admin-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.65rem;
+      }
+
+      .admin-section-title {
+        margin: 0.2rem 0 0;
+        color: #ecfeff;
+        font-size: 1rem;
+        text-transform: uppercase;
+        text-shadow: 0 0 14px rgba(94, 234, 212, 0.22);
+      }
+
+      .admin-rooms {
+        max-height: 12rem;
+        overflow: auto;
+        display: grid;
+        gap: 0.55rem;
+        padding-right: 0.35rem;
+        scrollbar-width: thin;
+        scrollbar-color: #a78bfa rgba(2, 6, 23, 0.52);
+      }
+
+      .admin-rooms::-webkit-scrollbar {
+        display: block;
+        width: 10px;
+      }
+
+      .admin-rooms::-webkit-scrollbar-track {
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.52);
+      }
+
+      .admin-rooms::-webkit-scrollbar-thumb {
+        border: 2px solid rgba(2, 6, 23, 0.52);
+        border-radius: 999px;
+        background:
+          linear-gradient(180deg, #c084fc, #3b82f6);
+      }
+
+      .admin-user-card {
+        display: grid;
+        gap: 0.55rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.2);
+        border-radius: 16px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.64), rgba(15, 23, 42, 0.44));
+      }
+
+      .admin-user-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .admin-user-name {
+        color: #ecfeff;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+      }
+
+      .admin-badge {
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        background: rgba(250, 204, 21, 0.16);
+        color: #fde68a;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      .admin-user-meta {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+
+      .admin-user-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+
+      .admin-room-card {
+        display: grid;
+        gap: 0.55rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(196, 181, 253, 0.24);
+        border-radius: 16px;
+        background:
+          linear-gradient(145deg, rgba(30, 27, 75, 0.6), rgba(2, 6, 23, 0.54));
+      }
+
+      .admin-room-code {
+        color: #ddd6fe;
+        font-weight: 900;
+      }
+
+      .admin-user-actions button {
+        min-height: 38px;
+        padding: 0.45rem 0.65rem;
+        font-size: 0.85rem;
+      }
+
+      .admin-danger {
+        border-color: rgba(248, 113, 113, 0.58);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.92), rgba(190, 18, 60, 0.78));
       }
 
       .admin-points {
@@ -447,6 +1159,18 @@
           grid-template-columns: 1fr;
         }
 
+        .admin-stats {
+          grid-template-columns: 1fr;
+        }
+
+        .admin-user-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .admin-quick-actions {
+          grid-template-columns: 1fr;
+        }
+
         .settings-controls {
           grid-template-columns: 1fr;
         }
@@ -454,6 +1178,114 @@
     </style>
   </head>
   <body>
+    <div class="start-screen" id="startScreen" aria-label="Start menu">
+      <div class="start-panel">
+        <h2>Sigma Studio</h2>
+        <div class="start-splash">Danya editor!</div>
+        <p id="startStatus">Loading...</p>
+        <div class="loading-bar" aria-hidden="true">
+          <div class="loading-fill"></div>
+        </div>
+        <div class="start-actions">
+          <button type="button" id="startPlayButton">Play</button>
+          <button type="button" id="startGamesButton">Games</button>
+          <button type="button" id="startSettingsButton">Settings</button>
+          <button type="button" id="startAccountButton">Account</button>
+        </div>
+        <div class="start-submenu" id="startGamesMenu" aria-label="Main menu games">
+          <button type="button" id="startBackFromGames">Back</button>
+          <div class="start-showcase" id="startGameShowcase" aria-live="polite">
+            <div class="showcase-thumb" id="startShowcaseThumb" data-mode="solo">
+              <span class="showcase-icon" id="startShowcaseIcon">SN</span>
+            </div>
+            <div class="showcase-copy">
+              <strong id="startShowcaseTitle">Snake Classic</strong>
+              <span id="startShowcaseType">Solo Game</span>
+              <p id="startShowcaseDescription">Use arrow keys or WASD to play.</p>
+              <p id="startShowcaseAction">Click Play to start.</p>
+            </div>
+          </div>
+          <h3>Games</h3>
+          <button type="button" class="selected" data-start-game="snake">Snake Classic</button>
+          <button type="button" data-start-game="catcher">Apple Catcher</button>
+          <button type="button" data-start-game="dodger">Gem Runner</button>
+          <button type="button" data-start-game="solo-pong">Brick Pong</button>
+          <button type="button" data-start-game="coin-rush">Coin Rush</button>
+          <button type="button" data-start-game="laser-dodge">Laser Dodge</button>
+          <h3>Online</h3>
+          <button type="button" data-start-online-game="online-snake">Online Snake</button>
+          <button type="button" data-start-online-game="online-tanks">Online Tanks</button>
+          <button type="button" data-start-online-game="online-pong">Online Pong</button>
+          <button type="button" data-start-online-game="online-tag">Online Tag</button>
+          <button type="button" data-start-online-game="online-soccer">Online Soccer</button>
+          <button type="button" data-start-online-game="online-maze">Online Maze Race</button>
+          <button type="button" data-start-online-game="online-battle">Online Battle Arena</button>
+          <div class="start-grid">
+            <button type="button" id="startCreateRoomButton">Create Room</button>
+            <button type="button" id="startJoinRoomButton">Join Room</button>
+          </div>
+          <input id="startRoomCodeInput" type="text" maxlength="8" placeholder="Room code">
+          <p class="room-note" id="startRoomNote"></p>
+        </div>
+        <div class="start-submenu" id="startSettingsMenu" aria-label="Main menu settings">
+          <h3>Settings</h3>
+          <div class="start-grid">
+            <select id="startSoundSelect" aria-label="Sound">
+              <option value="on">Sound On</option>
+              <option value="off">Sound Off</option>
+            </select>
+            <select id="startThemeSelect" aria-label="Theme">
+              <option value="midnight">Midnight</option>
+              <option value="forest">Forest</option>
+              <option value="purple">Purple</option>
+            </select>
+            <select id="startFieldSizeSelect" aria-label="Field size">
+              <option value="normal">Normal Field</option>
+              <option value="small">Small Field</option>
+              <option value="large">Large Field</option>
+            </select>
+            <select id="startControlsSelect" aria-label="Controls">
+              <option value="all">WASD + Arrows</option>
+              <option value="wasd">WASD</option>
+              <option value="arrows">Arrows</option>
+            </select>
+            <select id="startSkinSelect" aria-label="Skin">
+              <option value="classic">Classic Skin</option>
+              <option value="round">Round Skin</option>
+              <option value="neon">Neon Skin</option>
+              <option value="block">Block Skin</option>
+            </select>
+            <select id="startColorSelect" aria-label="Color">
+              <option value="teal">Teal</option>
+              <option value="green">Green</option>
+              <option value="blue">Blue</option>
+              <option value="purple">Purple</option>
+              <option value="pink">Pink</option>
+              <option value="orange">Orange</option>
+            </select>
+          </div>
+          <button type="button" id="startResetRecordButton">Reset Record</button>
+          <p class="room-note" id="startSettingsMessage"></p>
+          <button type="button" id="startBackFromSettings">Back</button>
+        </div>
+        <div class="start-submenu" id="startAccountMenu" aria-label="Main menu account">
+          <h3>Account</h3>
+          <input id="startUsernameInput" type="text" maxlength="18" placeholder="Username" autocomplete="username">
+          <input id="startPasswordInput" type="password" maxlength="32" placeholder="Password" autocomplete="current-password">
+          <input id="startGmailInput" type="email" maxlength="64" placeholder="Gmail" autocomplete="email">
+          <div class="start-grid">
+            <button type="button" id="startLoginButton">Log in</button>
+            <button type="button" id="startRegisterButton">Register</button>
+          </div>
+          <input id="startRecoveryGmailInput" type="email" maxlength="64" placeholder="Recovery Gmail" autocomplete="email">
+          <button type="button" id="startRecoveryButton">Send Recovery Email</button>
+          <button type="button" id="startLogoutButton">Log out</button>
+          <p class="room-note" id="startAccountMessage"></p>
+          <button type="button" id="startBackFromAccount">Back</button>
+        </div>
+      </div>
+    </div>
+
     <main>
       <div class="account-bar">
         <span id="accountStatus">Not logged in</span>
@@ -463,7 +1295,9 @@
       <section class="admin-panel" id="adminPanel" aria-label="Admin panel">
         <h2>Admin Panel</h2>
         <div class="admin-stats">
-          <span id="adminRoomCount">Rooms: 0</span>
+          <div class="admin-stat-card">Rooms <strong id="adminRoomCount">0</strong></div>
+          <div class="admin-stat-card">Online <strong id="adminOnlineCount">0</strong></div>
+          <div class="admin-stat-card">Users <strong id="adminUserCount">0</strong></div>
         </div>
         <div class="admin-points">
           <select id="pointsTargetSelect" aria-label="Points target">
@@ -474,6 +1308,16 @@
         </div>
         <button type="button" id="refreshAdminButton">Refresh</button>
         <button type="button" id="clearRoomsButton">Clear Rooms</button>
+        <div class="admin-quick-actions">
+          <button type="button" id="addPointsAllButton">Add Points To All</button>
+          <button type="button" id="clearUserPointsButton">Clear User Points</button>
+          <button type="button" id="resetAllScoresButton" class="admin-danger">Reset All Scores</button>
+        </div>
+        <h3 class="admin-section-title">Users</h3>
+        <input id="adminUserSearchInput" type="text" maxlength="24" placeholder="Search users" aria-label="Search users">
+        <div class="admin-users" id="adminUsersList" aria-label="Admin users list"></div>
+        <h3 class="admin-section-title">Rooms</h3>
+        <div class="admin-rooms" id="adminRoomsList" aria-label="Admin rooms list"></div>
         <p class="room-note" id="adminMessage"></p>
       </section>
 
@@ -517,7 +1361,8 @@
     <div class="pause-menu" id="pauseMenu" aria-hidden="true">
       <div class="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
         <h2 id="pauseTitle">Menu</h2>
-        <button type="button" id="resume">Close Menu</button>
+        <button type="button" id="resume">Resume</button>
+        <button type="button" id="returnMainMenu">Return to Main Menu</button>
         <button type="button" id="leaveRoom" hidden>Leave Room</button>
         <button type="button" id="back" hidden>Back</button>
         <button type="button" id="games">Games</button>
@@ -597,12 +1442,14 @@
           <button type="button" id="snakeClassic">Snake Classic</button>
           <button type="button" id="appleCatcher">Apple Catcher</button>
           <button type="button" id="dodgeBlocks">Gem Runner</button>
+          <button type="button" id="soloPong">Solo Pong</button>
+          <button type="button" id="coinRush">Coin Rush</button>
+          <button type="button" id="laserDodge">Laser Dodge</button>
         </div>
         <div class="game-list" id="onlineGames" aria-label="Online games">
           <button type="button" class="selected" data-online-game="online-snake">Online Snake</button>
           <button type="button" data-online-game="online-tanks">Online Tanks</button>
           <button type="button" data-online-game="online-pong">Online Pong</button>
-          <button type="button" data-online-game="online-racing">Online Racing</button>
           <button type="button" data-online-game="online-tag">Online Tag</button>
           <button type="button" data-online-game="online-soccer">Online Soccer</button>
           <button type="button" data-online-game="online-maze">Online Maze Race</button>
@@ -663,6 +1510,45 @@
       const playMessage = document.getElementById("playMessage");
       const playButton = document.getElementById("playButton");
       const cancelWaitButton = document.getElementById("cancelWaitButton");
+      const startScreen = document.getElementById("startScreen");
+      const startStatus = document.getElementById("startStatus");
+      const startPlayButton = document.getElementById("startPlayButton");
+      const startGamesButton = document.getElementById("startGamesButton");
+      const startSettingsButton = document.getElementById("startSettingsButton");
+      const startAccountButton = document.getElementById("startAccountButton");
+      const startGamesMenu = document.getElementById("startGamesMenu");
+      const startSettingsMenu = document.getElementById("startSettingsMenu");
+      const startAccountMenu = document.getElementById("startAccountMenu");
+      const startBackFromGames = document.getElementById("startBackFromGames");
+      const startShowcaseThumb = document.getElementById("startShowcaseThumb");
+      const startShowcaseIcon = document.getElementById("startShowcaseIcon");
+      const startShowcaseTitle = document.getElementById("startShowcaseTitle");
+      const startShowcaseType = document.getElementById("startShowcaseType");
+      const startShowcaseDescription = document.getElementById("startShowcaseDescription");
+      const startShowcaseAction = document.getElementById("startShowcaseAction");
+      const startBackFromSettings = document.getElementById("startBackFromSettings");
+      const startBackFromAccount = document.getElementById("startBackFromAccount");
+      const startSoundSelect = document.getElementById("startSoundSelect");
+      const startThemeSelect = document.getElementById("startThemeSelect");
+      const startFieldSizeSelect = document.getElementById("startFieldSizeSelect");
+      const startControlsSelect = document.getElementById("startControlsSelect");
+      const startSkinSelect = document.getElementById("startSkinSelect");
+      const startColorSelect = document.getElementById("startColorSelect");
+      const startResetRecordButton = document.getElementById("startResetRecordButton");
+      const startSettingsMessage = document.getElementById("startSettingsMessage");
+      const startUsernameInput = document.getElementById("startUsernameInput");
+      const startPasswordInput = document.getElementById("startPasswordInput");
+      const startGmailInput = document.getElementById("startGmailInput");
+      const startLoginButton = document.getElementById("startLoginButton");
+      const startRegisterButton = document.getElementById("startRegisterButton");
+      const startRecoveryGmailInput = document.getElementById("startRecoveryGmailInput");
+      const startRecoveryButton = document.getElementById("startRecoveryButton");
+      const startLogoutButton = document.getElementById("startLogoutButton");
+      const startAccountMessage = document.getElementById("startAccountMessage");
+      const startCreateRoomButton = document.getElementById("startCreateRoomButton");
+      const startJoinRoomButton = document.getElementById("startJoinRoomButton");
+      const startRoomCodeInput = document.getElementById("startRoomCodeInput");
+      const startRoomNote = document.getElementById("startRoomNote");
       const scoreEl = document.getElementById("score");
       const bestEl = document.getElementById("best");
       const localScoreboard = document.getElementById("localScoreboard");
@@ -675,9 +1561,17 @@
       const logoutButton = document.getElementById("logoutButton");
       const adminPanel = document.getElementById("adminPanel");
       const adminRoomCount = document.getElementById("adminRoomCount");
+      const adminOnlineCount = document.getElementById("adminOnlineCount");
+      const adminUserCount = document.getElementById("adminUserCount");
+      const adminUserSearchInput = document.getElementById("adminUserSearchInput");
+      const adminUsersList = document.getElementById("adminUsersList");
+      const adminRoomsList = document.getElementById("adminRoomsList");
       const pointsTargetSelect = document.getElementById("pointsTargetSelect");
       const pointsInput = document.getElementById("pointsInput");
       const addPointsButton = document.getElementById("addPointsButton");
+      const addPointsAllButton = document.getElementById("addPointsAllButton");
+      const clearUserPointsButton = document.getElementById("clearUserPointsButton");
+      const resetAllScoresButton = document.getElementById("resetAllScoresButton");
       const refreshAdminButton = document.getElementById("refreshAdminButton");
       const clearRoomsButton = document.getElementById("clearRoomsButton");
       const adminMessage = document.getElementById("adminMessage");
@@ -698,6 +1592,7 @@
       const pauseButton = document.getElementById("pause");
       const pauseMenu = document.getElementById("pauseMenu");
       const resumeButton = document.getElementById("resume");
+      const returnMainMenuButton = document.getElementById("returnMainMenu");
       const leaveRoomButton = document.getElementById("leaveRoom");
       const backButton = document.getElementById("back");
       const gamesButton = document.getElementById("games");
@@ -711,12 +1606,17 @@
       const snakeClassicButton = document.getElementById("snakeClassic");
       const appleCatcherButton = document.getElementById("appleCatcher");
       const dodgeBlocksButton = document.getElementById("dodgeBlocks");
+      const soloPongButton = document.getElementById("soloPong");
+      const coinRushButton = document.getElementById("coinRush");
+      const laserDodgeButton = document.getElementById("laserDodge");
       const createRoomButton = document.getElementById("createRoom");
       const joinRoomButton = document.getElementById("joinRoom");
       const roomCodeInput = document.getElementById("roomCodeInput");
       const roomCodeEl = document.getElementById("roomCode");
       const roomNoteEl = document.getElementById("roomNote");
       const onlineGameButtons = document.querySelectorAll("[data-online-game]");
+      const startSoloGameButtons = document.querySelectorAll("[data-start-game]");
+      const startOnlineGameButtons = document.querySelectorAll("[data-start-online-game]");
       const soundSelect = document.getElementById("soundSelect");
       const themeSelect = document.getElementById("themeSelect");
       const fieldSizeSelect = document.getElementById("fieldSizeSelect");
@@ -754,6 +1654,21 @@
           bestKey: "dodger-best",
           help: "Move with WASD/arrows, collect gems, and dodge the red guards."
         },
+        "solo-pong": {
+          title: "Brick Pong",
+          bestKey: "solo-pong-best",
+          help: "Break bricks, catch falling upgrades, and keep the ball alive."
+        },
+        "coin-rush": {
+          title: "Coin Rush",
+          bestKey: "coin-rush-best",
+          help: "Collect coins and avoid the red chaser."
+        },
+        "laser-dodge": {
+          title: "Laser Dodge",
+          bestKey: "laser-dodge-best",
+          help: "Move with WASD/arrows and dodge the lasers."
+        },
         "online-snake": {
           title: "Online Snake",
           bestKey: "online-snake-best",
@@ -774,11 +1689,6 @@
           bestKey: "online-pong-best",
           help: "Move your paddle with Up/Down or W/S. First to 5 wins."
         },
-        "online-racing": {
-          title: "Online Racing",
-          bestKey: "online-racing-best",
-          help: "Race to the yellow finish line."
-        },
         "online-tag": {
           title: "Online Tag",
           bestKey: "online-tag-best",
@@ -792,7 +1702,7 @@
         "online-maze": {
           title: "Online Maze Race",
           bestKey: "online-maze-best",
-          help: "Reach the yellow gem before your friend."
+          help: "Reach the yellow gem. The maze gets harder every 2 points."
         },
         "online-battle": {
           title: "Online Battle Arena",
@@ -805,7 +1715,6 @@
         "online-catcher": "Online Apple Catcher",
         "online-tanks": "Online Tanks",
         "online-pong": "Online Pong",
-        "online-racing": "Online Racing",
         "online-tag": "Online Tag",
         "online-soccer": "Online Soccer",
         "online-maze": "Online Maze Race",
@@ -813,6 +1722,8 @@
       };
 
       let currentGame = "snake";
+      let selectedStartGame = "snake";
+      let selectedStartMode = "solo";
       let selectedOnlineGame = "online-snake";
       let snake;
       let food;
@@ -825,6 +1736,13 @@
       let dodgeGem;
       let dodgeMove = { x: 0, y: 0 };
       let dodgeTicks = 0;
+      let soloPong;
+      let coinPlayer;
+      let coinTarget;
+      let coinEnemy;
+      let laserPlayer;
+      let lasers;
+      let laserTicks = 0;
       let catcherMove = 0;
       let tankMove = 0;
       let pongMove = 0;
@@ -840,6 +1758,7 @@
       let pauseMenuLevel = "main";
       let onlineRoomCode = "";
       let onlinePlayerSlot = "";
+      let onlineSpectating = false;
       let onlineDirection = { x: 1, y: 0 };
       let onlineState = null;
       let onlineRoomUnsubscribe = null;
@@ -858,11 +1777,18 @@
       const accountStorageKey = "snake-account";
       const styleStorageKey = "snake-player-style";
       const settingsStorageKey = "snake-settings";
+      const brickPongProgressKey = "brick-pong-progress";
       const playerId = getPlayerId();
       let currentAccount = getStoredAccount();
       let playerStyle = getStoredPlayerStyle();
       let gameSettings = getStoredGameSettings();
       let createdRoomCode = "";
+      let adminUsersCache = {};
+      let musicContext = null;
+      let musicGain = null;
+      let musicTimer = null;
+      let musicStep = 0;
+      let musicUnlocked = false;
       const colorThemes = {
         teal: { head: "#5eead4", body: "#14b8a6", top: "#99f6e4" },
         green: { head: "#86efac", body: "#22c55e", top: "#bbf7d0" },
@@ -883,11 +1809,12 @@
       };
 
       function startGame(gameName) {
-        if (gameName === "snake" || gameName === "catcher" || gameName === "dodger") {
+        if (isSinglePlayerGame(gameName)) {
           clearInterval(waitingTimer);
           unsubscribeFromRoom();
           onlineRoomCode = "";
           onlinePlayerSlot = "";
+          onlineSpectating = false;
           onlineState = null;
           tankMove = 0;
           pongMove = 0;
@@ -896,6 +1823,7 @@
         }
 
         currentGame = gameName;
+        musicStep = 0;
         updateShootButton();
         gameTitle.textContent = games[currentGame].title;
         best = getLocalBestScore(currentGame);
@@ -905,7 +1833,7 @@
       }
 
       function isSinglePlayerGame(gameName) {
-        return gameName === "snake" || gameName === "catcher" || gameName === "dodger";
+        return ["snake", "catcher", "dodger", "solo-pong", "coin-rush", "laser-dodge"].includes(gameName);
       }
 
       function getLocalBestScore(gameName) {
@@ -914,6 +1842,34 @@
 
       function setLocalBestScore(gameName, value) {
         localStorage.setItem(games[gameName].bestKey, String(value));
+      }
+
+      function getBrickPongProgressStorageKey() {
+        return currentAccount?.username
+          ? `${brickPongProgressKey}-${usernameKey(currentAccount.username)}`
+          : brickPongProgressKey;
+      }
+
+      function getBrickPongSavedLevel() {
+        return Math.max(1, Number(localStorage.getItem(getBrickPongProgressStorageKey()) || 1));
+      }
+
+      function setBrickPongSavedLevel(level) {
+        localStorage.setItem(getBrickPongProgressStorageKey(), String(Math.max(1, level)));
+      }
+
+      function saveBrickPongProgress(level) {
+        setBrickPongSavedLevel(level);
+
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        patchUser(usernameKey(currentAccount.username), {
+          "progress/solo-pong/level": Math.max(1, level)
+        }).catch(() => {
+          statusEl.textContent = "Level saved on this device. Cloud save failed.";
+        });
       }
 
       function getStoredPlayerStyle() {
@@ -963,6 +1919,8 @@
       function applyPlayerStyleControls() {
         skinSelect.value = playerStyle.skin;
         colorSelect.value = playerStyle.color;
+        startSkinSelect.value = playerStyle.skin;
+        startColorSelect.value = playerStyle.color;
       }
 
       function applyGameSettingsControls() {
@@ -970,6 +1928,10 @@
         themeSelect.value = gameSettings.theme;
         fieldSizeSelect.value = gameSettings.fieldSize;
         controlsSelect.value = gameSettings.controls;
+        startSoundSelect.value = gameSettings.sound;
+        startThemeSelect.value = gameSettings.theme;
+        startFieldSizeSelect.value = gameSettings.fieldSize;
+        startControlsSelect.value = gameSettings.controls;
         document.body.dataset.theme = gameSettings.theme;
         document.documentElement.style.setProperty("--app-width", appWidths[gameSettings.fieldSize] || appWidths.normal);
       }
@@ -1000,6 +1962,7 @@
         };
         saveGameSettings();
         applyGameSettingsControls();
+        syncBackgroundMusic();
         draw();
       }
 
@@ -1011,19 +1974,76 @@
         return boardThemeColors[gameSettings.theme] || boardThemeColors.midnight;
       }
 
-      function isKeyAllowedForControls(key) {
+      function getInputControlType(eventOrKey) {
+        const key = typeof eventOrKey === "string" ? eventOrKey : eventOrKey.key;
+        const code = typeof eventOrKey === "string" ? "" : eventOrKey.code;
         const arrowKey = key.startsWith("Arrow");
-        const wasdKey = ["w", "W", "a", "A", "s", "S", "d", "D"].includes(key);
+        const wasdKey = ["w", "W", "a", "A", "s", "S", "d", "D"].includes(key) ||
+          ["KeyW", "KeyA", "KeyS", "KeyD"].includes(code);
+
+        if (arrowKey) {
+          return "arrows";
+        }
+
+        if (wasdKey) {
+          return "wasd";
+        }
+
+        return "";
+      }
+
+      function isKeyAllowedForControls(eventOrKey) {
+        const controlType = getInputControlType(eventOrKey);
 
         if (gameSettings.controls === "arrows") {
-          return arrowKey;
+          return controlType === "arrows";
         }
 
         if (gameSettings.controls === "wasd") {
-          return wasdKey;
+          return controlType === "wasd";
         }
 
-        return arrowKey || wasdKey;
+        return Boolean(controlType);
+      }
+
+      function getDirectionFromKey(event) {
+        const directionsByKey = {
+          ArrowUp: { x: 0, y: -1 },
+          w: { x: 0, y: -1 },
+          W: { x: 0, y: -1 },
+          ArrowDown: { x: 0, y: 1 },
+          s: { x: 0, y: 1 },
+          S: { x: 0, y: 1 },
+          ArrowLeft: { x: -1, y: 0 },
+          a: { x: -1, y: 0 },
+          A: { x: -1, y: 0 },
+          ArrowRight: { x: 1, y: 0 },
+          d: { x: 1, y: 0 },
+          D: { x: 1, y: 0 }
+        };
+        const directionsByCode = {
+          KeyW: { x: 0, y: -1 },
+          KeyS: { x: 0, y: 1 },
+          KeyA: { x: -1, y: 0 },
+          KeyD: { x: 1, y: 0 }
+        };
+
+        if (!isKeyAllowedForControls(event)) {
+          return null;
+        }
+
+        return directionsByKey[event.key] || directionsByCode[event.code] || null;
+      }
+
+      function releasedDirection(event, currentMove) {
+        const direction = getDirectionFromKey(event);
+
+        if (!direction) {
+          return false;
+        }
+
+        return (direction.x !== 0 && direction.x === currentMove.x) ||
+          (direction.y !== 0 && direction.y === currentMove.y);
       }
 
       function playSound(type) {
@@ -1055,6 +2075,187 @@
         }
       }
 
+      function getMusicContext() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) {
+          return null;
+        }
+
+        if (!musicContext) {
+          musicContext = new AudioContextClass();
+          musicGain = musicContext.createGain();
+          musicGain.gain.value = 0.35;
+          musicGain.connect(musicContext.destination);
+        }
+
+        return musicContext;
+      }
+
+      function playMusicTone(frequency, duration, type = "triangle", volume = 0.18) {
+        const audioContext = getMusicContext();
+
+        if (!audioContext || !musicGain || frequency <= 0) {
+          return;
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(volume, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        oscillator.connect(gain);
+        gain.connect(musicGain);
+        oscillator.start(now);
+        oscillator.stop(now + duration + 0.03);
+      }
+
+      function getMusicPattern() {
+        const patterns = {
+          snake: {
+            melody: [392, 494, 523, 587, 0, 523, 494, 392, 330, 392, 440, 494, 0, 440, 392, 330],
+            bass: [196, 196, 165, 165, 220, 220, 147, 147],
+            wave: "triangle",
+            delay: 260
+          },
+          catcher: {
+            melody: [523, 659, 784, 659, 587, 659, 523, 0, 494, 587, 659, 587, 523, 440, 392, 0],
+            bass: [262, 262, 220, 220, 196, 196, 247, 247],
+            wave: "sine",
+            delay: 230
+          },
+          dodger: {
+            melody: [330, 392, 330, 440, 0, 466, 440, 392, 330, 392, 494, 392, 0, 330, 294, 330],
+            bass: [165, 175, 196, 220, 165, 175, 196, 147],
+            wave: "square",
+            delay: 210
+          },
+          "solo-pong": {
+            melody: [294, 370, 440, 587, 554, 440, 370, 294, 330, 392, 494, 659, 587, 494, 392, 330],
+            bass: [147, 147, 185, 185, 220, 220, 196, 196],
+            wave: "triangle",
+            delay: 240
+          },
+          "coin-rush": {
+            melody: [659, 784, 880, 784, 659, 0, 587, 659, 740, 880, 988, 880, 740, 0, 659, 587],
+            bass: [330, 330, 294, 294, 247, 247, 262, 262],
+            wave: "sine",
+            delay: 190
+          },
+          "laser-dodge": {
+            melody: [220, 0, 330, 0, 440, 466, 440, 330, 247, 0, 370, 0, 494, 523, 494, 370],
+            bass: [110, 123, 110, 147, 110, 123, 165, 147],
+            wave: "sawtooth",
+            delay: 180
+          },
+          "online-snake": {
+            melody: [440, 523, 587, 659, 587, 523, 440, 0, 392, 494, 523, 587, 523, 494, 392, 0],
+            bass: [220, 196, 220, 247, 220, 196, 165, 196],
+            wave: "triangle",
+            delay: 220
+          },
+          "online-tanks": {
+            melody: [196, 247, 294, 247, 196, 0, 220, 262, 330, 262, 220, 0, 196, 247, 294, 330],
+            bass: [98, 98, 123, 123, 110, 110, 147, 147],
+            wave: "square",
+            delay: 240
+          },
+          "online-pong": {
+            melody: [523, 0, 659, 0, 784, 659, 523, 0, 494, 0, 587, 0, 740, 587, 494, 0],
+            bass: [262, 196, 247, 196, 262, 196, 247, 196],
+            wave: "triangle",
+            delay: 205
+          },
+          "online-tag": {
+            melody: [330, 392, 440, 392, 330, 294, 330, 0, 392, 440, 494, 440, 392, 330, 392, 0],
+            bass: [165, 165, 147, 147, 196, 196, 175, 175],
+            wave: "square",
+            delay: 200
+          },
+          "online-soccer": {
+            melody: [392, 392, 494, 587, 659, 587, 494, 0, 440, 440, 523, 659, 784, 659, 523, 0],
+            bass: [196, 196, 220, 220, 247, 247, 220, 220],
+            wave: "sine",
+            delay: 215
+          },
+          "online-maze": {
+            melody: [262, 330, 392, 494, 392, 330, 262, 0, 294, 370, 440, 554, 440, 370, 294, 0],
+            bass: [131, 147, 165, 196, 131, 147, 165, 196],
+            wave: "triangle",
+            delay: 250
+          },
+          "online-battle": {
+            melody: [247, 294, 370, 440, 494, 440, 370, 294, 277, 330, 415, 494, 554, 494, 415, 330],
+            bass: [123, 123, 147, 147, 185, 185, 165, 165],
+            wave: "sawtooth",
+            delay: 190
+          }
+        };
+
+        return patterns[currentGame] || patterns.snake;
+      }
+
+      function startBackgroundMusic() {
+        if (!musicUnlocked || gameSettings.sound !== "on" || musicTimer) {
+          return;
+        }
+
+        const audioContext = getMusicContext();
+
+        if (!audioContext) {
+          return;
+        }
+
+        audioContext.resume?.();
+
+        const tickMusic = () => {
+          if (gameSettings.sound !== "on") {
+            stopBackgroundMusic();
+            return;
+          }
+
+          const pattern = getMusicPattern();
+          const melody = pattern.melody;
+          const bass = pattern.bass;
+          const note = melody[musicStep % melody.length];
+
+          if (note) {
+            playMusicTone(note, Math.min(0.28, pattern.delay / 1000), pattern.wave, 0.28);
+          }
+
+          if (musicStep % 4 === 0) {
+            playMusicTone(bass[Math.floor(musicStep / 4) % bass.length], 0.42, "sine", 0.2);
+          }
+
+          musicStep += 1;
+          musicTimer = setTimeout(tickMusic, getMusicPattern().delay);
+        };
+
+        tickMusic();
+      }
+
+      function stopBackgroundMusic() {
+        clearTimeout(musicTimer);
+        musicTimer = null;
+      }
+
+      function syncBackgroundMusic() {
+        if (gameSettings.sound === "on") {
+          startBackgroundMusic();
+        } else {
+          stopBackgroundMusic();
+        }
+      }
+
+      function unlockBackgroundMusic() {
+        musicUnlocked = true;
+        syncBackgroundMusic();
+      }
+
       async function resetCurrentRecord() {
         if (!isSinglePlayerGame(currentGame)) {
           settingsMessage.textContent = "Open a single player game first.";
@@ -1064,12 +2265,19 @@
         best = 0;
         bestEl.textContent = "0";
         setLocalBestScore(currentGame, 0);
+        if (currentGame === "solo-pong") {
+          setBrickPongSavedLevel(1);
+        }
 
         if (currentAccount?.username) {
           try {
-            await patchUser(usernameKey(currentAccount.username), {
+            const resetPatch = {
               [`bestScores/${currentGame}`]: 0
-            });
+            };
+            if (currentGame === "solo-pong") {
+              resetPatch["progress/solo-pong/level"] = 1;
+            }
+            await patchUser(usernameKey(currentAccount.username), resetPatch);
           } catch {
             settingsMessage.textContent = "Local record reset. Cloud reset failed.";
             return;
@@ -1223,6 +2431,8 @@
       }
 
       function resetGame() {
+        const restartAfterDeath = gameOver;
+
         if (currentGame.startsWith("online-")) {
           if (waitingToPlay) {
             leaveOnlineRoom();
@@ -1234,7 +2444,7 @@
 
         score = 0;
         gameOver = false;
-        waitingToPlay = true;
+        waitingToPlay = !restartAfterDeath;
         paused = false;
         updateShootButton();
         updatePauseButton();
@@ -1243,8 +2453,13 @@
         pauseMenu.classList.remove("open");
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
-        showPlayOverlay();
-        statusEl.textContent = "Press Play to start.";
+        if (waitingToPlay) {
+          showPlayOverlay();
+          statusEl.textContent = "Press Play to start.";
+        } else {
+          hidePlayOverlay();
+          statusEl.textContent = games[currentGame].help;
+        }
         clearInterval(timer);
 
         if (currentGame === "snake") {
@@ -1253,6 +2468,15 @@
         } else if (currentGame === "dodger") {
           resetDodger();
           timer = setInterval(tickDodger, 34);
+        } else if (currentGame === "solo-pong") {
+          resetSoloPong();
+          timer = setInterval(tickSoloPong, 28);
+        } else if (currentGame === "coin-rush") {
+          resetCoinRush();
+          timer = setInterval(tickCoinRush, 34);
+        } else if (currentGame === "laser-dodge") {
+          resetLaserDodge();
+          timer = setInterval(tickLaserDodge, 34);
         } else {
           resetCatcher();
           timer = setInterval(tickCatcher, 28);
@@ -1315,6 +2539,137 @@
           Math.abs(dodgeGem.x - dodger.x) < 60 &&
           Math.abs(dodgeGem.y - dodger.y) < 60
         );
+      }
+
+      function resetSoloPong() {
+        const savedLevel = getBrickPongSavedLevel();
+        dodgeMove = { x: 0, y: 0 };
+        soloPong = {
+          level: savedLevel,
+          paddleX: canvas.width / 2 - 52,
+          paddleY: canvas.height - 34,
+          paddleWidth: Math.max(70, 110 - (savedLevel - 1) * 6),
+          paddleHeight: 16,
+          ballX: canvas.width / 2,
+          ballY: canvas.height - 58,
+          ballSize: 14,
+          dx: 4 + Math.min(savedLevel * 0.35, 2.4),
+          dy: -5 - Math.min(savedLevel * 0.25, 2.2),
+          extraBalls: [],
+          basePaddleWidth: Math.max(70, 110 - (savedLevel - 1) * 6),
+          powerups: [],
+          boostTicks: 0,
+          bricks: makeSoloPongBricks(savedLevel)
+        };
+      }
+
+      function makeSoloPongBricks(level) {
+        const bricks = [];
+        const rows = Math.min(7 + level, 13);
+        const columns = 18;
+        const brickWidth = 22;
+        const brickHeight = 14;
+        const gap = 6;
+        const startX = 16;
+        const startY = 22;
+        const pattern = (level - 1) % 5;
+        const colors = ["#22c55e", "#14b8a6", "#a3e635", "#38bdf8", "#facc15"];
+
+        for (let row = 0; row < rows; row += 1) {
+          for (let column = 0; column < columns; column += 1) {
+            let hasBrick = false;
+
+            if (pattern === 0) {
+              hasBrick = row < 2 || column < 2 || column > columns - 3 || (row > 4 && column < columns - 4);
+            } else if (pattern === 1) {
+              hasBrick = row < 3 || (row + column) % 2 === 0;
+            } else if (pattern === 2) {
+              hasBrick = column < 2 || column > columns - 3 || Math.abs(column - Math.floor(columns / 2)) <= row % 5;
+            } else if (pattern === 3) {
+              hasBrick = row < 2 || row === rows - 1 || column % 3 !== 1;
+            } else {
+              hasBrick = row < 2 || column < 2 || column > columns - 3 || (row > 3 && column > 3 && column < columns - 4 && (row + column) % 3 !== 0);
+            }
+
+            if (hasBrick) {
+              bricks.push({
+                x: startX + column * (brickWidth + gap),
+                y: startY + row * (brickHeight + gap),
+                width: brickWidth,
+                height: brickHeight,
+                color: colors[(row + column + level) % colors.length],
+                alive: true
+              });
+            }
+          }
+        }
+
+        return bricks;
+      }
+
+      function makeSoloPongPowerup(brick) {
+        const types = ["wide", "slow", "bonus", "multi"];
+        const type = types[Math.floor(Math.random() * types.length)];
+
+        return {
+          type,
+          x: brick.x + brick.width / 2 - 9,
+          y: brick.y + brick.height,
+          size: 18,
+          speed: 2.4
+        };
+      }
+
+      function resetCoinRush() {
+        dodgeMove = { x: 0, y: 0 };
+        coinPlayer = {
+          x: canvas.width / 2 - 14,
+          y: canvas.height / 2 - 14,
+          size: 28
+        };
+        coinEnemy = {
+          x: 42,
+          y: 42,
+          size: 28,
+          speed: 2.2
+        };
+        placeCoinTarget();
+      }
+
+      function placeCoinTarget() {
+        coinTarget = {
+          x: 24 + Math.random() * (canvas.width - 48),
+          y: 24 + Math.random() * (canvas.height - 48),
+          size: 18
+        };
+      }
+
+      function resetLaserDodge() {
+        dodgeMove = { x: 0, y: 0 };
+        laserTicks = 0;
+        laserPlayer = {
+          x: canvas.width / 2 - 14,
+          y: canvas.height / 2 - 14,
+          size: 28
+        };
+        lasers = [
+          makeLaser(0),
+          makeLaser(70),
+          makeLaser(140)
+        ];
+      }
+
+      function makeLaser(delay = 0) {
+        const horizontal = Math.random() > 0.5;
+
+        return {
+          horizontal,
+          position: 40 + Math.random() * (canvas.width - 80),
+          timer: -delay,
+          warning: 34,
+          active: 24,
+          cooldown: 70 + Math.floor(Math.random() * 45)
+        };
       }
 
       function resetApple() {
@@ -1394,6 +2749,18 @@
         if (currentGame === "dodger") {
           dodgeMove = newDirection;
           moveDodger();
+          return;
+        }
+
+        if (currentGame === "solo-pong") {
+          if (newDirection.x !== 0) {
+            dodgeMove = { x: newDirection.x, y: 0 };
+          }
+          return;
+        }
+
+        if (currentGame === "coin-rush" || currentGame === "laser-dodge") {
+          dodgeMove = newDirection;
           return;
         }
 
@@ -1542,6 +2909,241 @@
         draw();
       }
 
+      function tickSoloPong() {
+        if (waitingToPlay || paused || gameOver) {
+          return;
+        }
+
+        soloPong.paddleX = Math.max(0, Math.min(canvas.width - soloPong.paddleWidth, soloPong.paddleX + dodgeMove.x * 8));
+        const activeBalls = [
+          { x: soloPong.ballX, y: soloPong.ballY, dx: soloPong.dx, dy: soloPong.dy },
+          ...soloPong.extraBalls
+        ]
+          .map(updateSoloPongBall)
+          .filter(Boolean);
+
+        if (!activeBalls.length) {
+          endGame();
+          return;
+        }
+
+        const mainBall = activeBalls[0];
+        soloPong.ballX = mainBall.x;
+        soloPong.ballY = mainBall.y;
+        soloPong.dx = mainBall.dx;
+        soloPong.dy = mainBall.dy;
+        soloPong.extraBalls = activeBalls.slice(1);
+
+        soloPong.powerups = soloPong.powerups
+          .map((powerup) => ({
+            ...powerup,
+            y: powerup.y + powerup.speed
+          }))
+          .filter((powerup) => powerup.y < canvas.height + powerup.size);
+
+        const caughtPowerup = soloPong.powerups.find((powerup) =>
+          powerup.y + powerup.size >= soloPong.paddleY &&
+          powerup.y <= soloPong.paddleY + soloPong.paddleHeight &&
+          powerup.x + powerup.size >= soloPong.paddleX &&
+          powerup.x <= soloPong.paddleX + soloPong.paddleWidth
+        );
+
+        if (caughtPowerup) {
+          applySoloPongPowerup(caughtPowerup.type);
+          soloPong.powerups = soloPong.powerups.filter((powerup) => powerup !== caughtPowerup);
+        }
+
+        if (soloPong.boostTicks > 0) {
+          soloPong.boostTicks -= 1;
+          if (soloPong.boostTicks === 0) {
+            soloPong.paddleWidth = soloPong.basePaddleWidth;
+          }
+        }
+
+        if (soloPong.bricks.every((brick) => !brick.alive)) {
+          soloPong.level += 1;
+          saveBrickPongProgress(soloPong.level);
+          soloPong.bricks = makeSoloPongBricks(soloPong.level);
+          soloPong.ballX = canvas.width / 2;
+          soloPong.ballY = canvas.height - 58;
+          soloPong.dx = 4 + Math.min(soloPong.level * 0.35, 2.4);
+          soloPong.dy = -5 - Math.min(soloPong.level * 0.25, 2.2);
+          soloPong.basePaddleWidth = Math.max(70, 110 - (soloPong.level - 1) * 6);
+          soloPong.paddleWidth = soloPong.basePaddleWidth;
+          soloPong.extraBalls = [];
+          soloPong.powerups = [];
+          soloPong.boostTicks = 0;
+          statusEl.textContent = `Level ${soloPong.level}.`;
+        }
+
+        draw();
+      }
+
+      function updateSoloPongBall(ball) {
+        const nextBall = { ...ball };
+        nextBall.x += nextBall.dx;
+        nextBall.y += nextBall.dy;
+
+        if (nextBall.x - soloPong.ballSize / 2 <= 0 || nextBall.x + soloPong.ballSize / 2 >= canvas.width) {
+          nextBall.dx *= -1;
+        }
+
+        if (nextBall.y - soloPong.ballSize / 2 <= 0) {
+          nextBall.dy = Math.abs(nextBall.dy);
+        }
+
+        const hitBrick = soloPong.bricks.find((brick) =>
+          brick.alive &&
+          nextBall.x + soloPong.ballSize / 2 >= brick.x &&
+          nextBall.x - soloPong.ballSize / 2 <= brick.x + brick.width &&
+          nextBall.y + soloPong.ballSize / 2 >= brick.y &&
+          nextBall.y - soloPong.ballSize / 2 <= brick.y + brick.height
+        );
+
+        if (hitBrick) {
+          hitBrick.alive = false;
+          nextBall.dy *= -1;
+          addPoint();
+
+          if (Math.random() < 0.12) {
+            soloPong.powerups.push(makeSoloPongPowerup(hitBrick));
+          }
+        }
+
+        const hitPaddle =
+          nextBall.y + soloPong.ballSize / 2 >= soloPong.paddleY &&
+          nextBall.y - soloPong.ballSize / 2 <= soloPong.paddleY + soloPong.paddleHeight &&
+          nextBall.x >= soloPong.paddleX &&
+          nextBall.x <= soloPong.paddleX + soloPong.paddleWidth;
+
+        if (hitPaddle && nextBall.dy > 0) {
+          nextBall.dy = -Math.abs(nextBall.dy) - 0.12;
+          nextBall.dx += ((nextBall.x - (soloPong.paddleX + soloPong.paddleWidth / 2)) / (soloPong.paddleWidth / 2)) * 1.1;
+        }
+
+        return nextBall.y > canvas.height + soloPong.ballSize ? null : nextBall;
+      }
+
+      function applySoloPongPowerup(type) {
+        if (type === "wide") {
+          soloPong.paddleWidth = Math.min(150, soloPong.basePaddleWidth + 42);
+          soloPong.boostTicks = 320;
+          statusEl.textContent = "Upgrade: wide paddle.";
+          return;
+        }
+
+        if (type === "slow") {
+          soloPong.dx *= 0.78;
+          soloPong.dy *= 0.78;
+          soloPong.extraBalls = soloPong.extraBalls.map((ball) => ({
+            ...ball,
+            dx: ball.dx * 0.78,
+            dy: ball.dy * 0.78
+          }));
+          statusEl.textContent = "Upgrade: slow ball.";
+          return;
+        }
+
+        if (type === "multi") {
+          const baseSpeedX = Math.max(3.5, Math.abs(soloPong.dx));
+          const baseSpeedY = -Math.max(4.2, Math.abs(soloPong.dy));
+          soloPong.extraBalls.push(
+            { x: soloPong.ballX - 12, y: soloPong.ballY, dx: -baseSpeedX, dy: baseSpeedY },
+            { x: soloPong.ballX + 12, y: soloPong.ballY, dx: baseSpeedX, dy: baseSpeedY },
+            { x: soloPong.ballX, y: soloPong.ballY - 12, dx: baseSpeedX * 0.4, dy: baseSpeedY * 1.05 }
+          );
+          statusEl.textContent = "Upgrade: 3 extra balls.";
+          return;
+        }
+
+        for (let point = 0; point < 3; point += 1) {
+          addPoint();
+        }
+        statusEl.textContent = "Upgrade: bonus points.";
+      }
+
+      function tickCoinRush() {
+        if (waitingToPlay || paused || gameOver) {
+          return;
+        }
+
+        moveRectPlayer(coinPlayer, dodgeMove.x * 5.8, dodgeMove.y * 5.8);
+
+        const enemyCenter = {
+          x: coinEnemy.x + coinEnemy.size / 2,
+          y: coinEnemy.y + coinEnemy.size / 2
+        };
+        const playerCenter = {
+          x: coinPlayer.x + coinPlayer.size / 2,
+          y: coinPlayer.y + coinPlayer.size / 2
+        };
+        const angle = Math.atan2(playerCenter.y - enemyCenter.y, playerCenter.x - enemyCenter.x);
+        coinEnemy.x += Math.cos(angle) * (coinEnemy.speed + Math.min(score * 0.07, 2.4));
+        coinEnemy.y += Math.sin(angle) * (coinEnemy.speed + Math.min(score * 0.07, 2.4));
+
+        if (rectsTouch(coinPlayer.x, coinPlayer.y, coinPlayer.size, coinPlayer.size, coinTarget.x, coinTarget.y, coinTarget.size, coinTarget.size)) {
+          addPoint();
+          placeCoinTarget();
+        }
+
+        if (rectsTouch(coinPlayer.x, coinPlayer.y, coinPlayer.size, coinPlayer.size, coinEnemy.x, coinEnemy.y, coinEnemy.size, coinEnemy.size)) {
+          endGame();
+          return;
+        }
+
+        draw();
+      }
+
+      function tickLaserDodge() {
+        if (waitingToPlay || paused || gameOver) {
+          return;
+        }
+
+        moveRectPlayer(laserPlayer, dodgeMove.x * 5.5, dodgeMove.y * 5.5);
+        laserTicks += 1;
+
+        lasers = lasers.map((laser) => {
+          const nextLaser = { ...laser, timer: laser.timer + 1 };
+          const cycle = nextLaser.warning + nextLaser.active + nextLaser.cooldown;
+
+          if (nextLaser.timer > cycle) {
+            return makeLaser();
+          }
+
+          return nextLaser;
+        });
+
+        const hit = lasers.some((laser) => {
+          const active = laser.timer >= laser.warning && laser.timer <= laser.warning + laser.active;
+
+          if (!active) {
+            return false;
+          }
+
+          if (laser.horizontal) {
+            return laserPlayer.y < laser.position + 10 && laserPlayer.y + laserPlayer.size > laser.position - 10;
+          }
+
+          return laserPlayer.x < laser.position + 10 && laserPlayer.x + laserPlayer.size > laser.position - 10;
+        });
+
+        if (hit) {
+          endGame();
+          return;
+        }
+
+        if (laserTicks % 30 === 0) {
+          addPoint();
+        }
+
+        draw();
+      }
+
+      function moveRectPlayer(player, dx, dy) {
+        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x + dx));
+        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y + dy));
+      }
+
       function addPoint() {
         score += 1;
         scoreEl.textContent = score;
@@ -1591,7 +3193,7 @@
       }
 
       function updateShootButton() {
-        shootButton.hidden = currentGame !== "online-tanks" || waitingToPlay;
+        shootButton.hidden = currentGame !== "online-tanks" || waitingToPlay || onlineSpectating;
       }
 
       function updatePauseButton() {
@@ -1614,6 +3216,182 @@
         statusEl.textContent = games[currentGame].help;
       }
 
+      function closeStartScreen() {
+        startScreen.classList.add("closed");
+        startScreen.setAttribute("aria-hidden", "true");
+      }
+
+      function showMainMenu() {
+        startScreen.classList.remove("closed");
+        startScreen.classList.add("loaded");
+        startScreen.classList.remove("submenu-open");
+        startScreen.setAttribute("aria-hidden", "false");
+        startStatus.textContent = selectedStartMode === "online"
+          ? `${onlineGameNames[selectedOnlineGame]} selected`
+          : `${games[selectedStartGame].title} selected`;
+        showStartSection("main");
+      }
+
+      function showStartSection(section) {
+        startGamesMenu.classList.toggle("open", section === "games");
+        startSettingsMenu.classList.toggle("open", section === "settings");
+        startAccountMenu.classList.toggle("open", section === "account");
+        startScreen.classList.toggle("submenu-open", section !== "main");
+        if (section === "settings") {
+          startSettingsMessage.textContent = "";
+          applyPlayerStyleControls();
+          applyGameSettingsControls();
+        }
+        if (section === "games") {
+          updateStartGameShowcase();
+        }
+        if (section === "account") {
+          startAccountMessage.textContent = currentAccount?.username
+            ? `Logged in as ${currentAccount.username}.`
+            : "";
+        }
+      }
+
+      function showLoadedStartMenu() {
+        showMainMenu();
+      }
+
+      function playFromStartMenu() {
+        if (selectedStartMode === "online") {
+          showStartSection("games");
+          startRoomNote.textContent = `${onlineGameNames[selectedOnlineGame]} selected. Create a room or enter a code and join.`;
+          return;
+        }
+
+        startGame(selectedStartGame);
+        closeStartScreen();
+        if (waitingToPlay && isSinglePlayerGame(currentGame)) {
+          playLocalGame();
+        }
+      }
+
+      function updateGameSettingsFromStart() {
+        soundSelect.value = startSoundSelect.value;
+        themeSelect.value = startThemeSelect.value;
+        fieldSizeSelect.value = startFieldSizeSelect.value;
+        controlsSelect.value = startControlsSelect.value;
+        updateGameSettings();
+      }
+
+      function updatePlayerStyleFromStart() {
+        skinSelect.value = startSkinSelect.value;
+        colorSelect.value = startColorSelect.value;
+        updatePlayerStyle();
+      }
+
+      async function resetRecordFromStart() {
+        await resetCurrentRecord();
+        startSettingsMessage.textContent = settingsMessage.textContent;
+      }
+
+      async function loginFromStart() {
+        usernameInput.value = startUsernameInput.value;
+        passwordInput.value = startPasswordInput.value;
+        gmailInput.value = startGmailInput.value;
+        await loginAccount();
+        startAccountMessage.textContent = authMessage.textContent || (currentAccount?.username ? `Logged in as ${currentAccount.username}.` : "");
+      }
+
+      async function registerFromStart() {
+        usernameInput.value = startUsernameInput.value;
+        passwordInput.value = startPasswordInput.value;
+        gmailInput.value = startGmailInput.value;
+        await registerAccount();
+        startAccountMessage.textContent = authMessage.textContent || (currentAccount?.username ? `Logged in as ${currentAccount.username}.` : "");
+      }
+
+      async function recoverFromStart() {
+        changeGmailInput.value = startRecoveryGmailInput.value || startGmailInput.value;
+        await sendPasswordRecoveryEmail("account");
+        startAccountMessage.textContent = authMessage.textContent;
+      }
+
+      function selectOnlineGameFromStart(gameName) {
+        selectedStartMode = "online";
+        selectedOnlineGame = gameName;
+        updateOnlineGameSelection();
+        updateStartGameSelection();
+        updateStartGameShowcase();
+        startStatus.textContent = `${onlineGameNames[gameName]} selected`;
+        startRoomNote.textContent = `${onlineGameNames[gameName]} selected.`;
+      }
+
+      function selectSoloGameFromStart(gameName) {
+        selectedStartMode = "solo";
+        selectedStartGame = gameName;
+        updateStartGameSelection();
+        updateStartGameShowcase();
+        startStatus.textContent = `${games[gameName].title} selected`;
+        startRoomNote.textContent = `${games[gameName].title} selected. Click Play to start.`;
+      }
+
+      function getGameInitials(title) {
+        return title
+          .split(/\s+/)
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+      }
+
+      function updateStartGameShowcase() {
+        const gameName = selectedStartMode === "online" ? selectedOnlineGame : selectedStartGame;
+        const title = selectedStartMode === "online" ? onlineGameNames[gameName] : games[gameName].title;
+        const description = games[gameName]?.help || "Play with your friend.";
+
+        startShowcaseThumb.dataset.mode = selectedStartMode;
+        startShowcaseIcon.textContent = getGameInitials(title);
+        startShowcaseTitle.textContent = title;
+        startShowcaseType.textContent = selectedStartMode === "online" ? "Online Game" : "Solo Game";
+        startShowcaseDescription.textContent = description;
+        startShowcaseAction.textContent = selectedStartMode === "online"
+          ? "Create a room or enter a code to join."
+          : "Click Play to start.";
+      }
+
+      async function createRoomFromStart() {
+        closeStartScreen();
+        await createRoom();
+      }
+
+      async function joinRoomFromStart() {
+        roomCodeInput.value = startRoomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        closeStartScreen();
+        await joinRoom();
+      }
+
+      function logoutFromStart() {
+        firebaseAuth.signOut();
+        gmailInput.value = "";
+        changeGmailInput.value = "";
+        settingsGmailInput.value = "";
+        settingsCurrentPasswordInput.value = "";
+        settingsRecoveryGmailInput.value = "";
+        setStoredAccount(null);
+        startAccountMessage.textContent = "Logged out.";
+      }
+
+      async function returnToMainMenu() {
+        pauseMenu.classList.remove("open");
+        pauseMenu.setAttribute("aria-hidden", "true");
+        resetPauseMenu();
+        paused = false;
+
+        if (onlineRoomCode) {
+          await leaveOnlineRoom();
+        } else {
+          startGame("snake");
+        }
+
+        showMainMenu();
+        statusEl.textContent = "Main menu.";
+      }
+
       function draw() {
         drawBoard();
         if (currentGame === "snake") {
@@ -1622,6 +3400,12 @@
           drawCatcher();
         } else if (currentGame === "dodger") {
           drawDodger();
+        } else if (currentGame === "solo-pong") {
+          drawSoloPong();
+        } else if (currentGame === "coin-rush") {
+          drawCoinRush();
+        } else if (currentGame === "laser-dodge") {
+          drawLaserDodge();
         } else {
           drawOnlineGame();
         }
@@ -1713,6 +3497,111 @@
         ctx.fill();
       }
 
+      function drawSoloPong() {
+        soloPong.bricks.forEach((brick) => {
+          if (!brick.alive) {
+            return;
+          }
+
+          ctx.fillStyle = brick.color || "#22c55e";
+          ctx.beginPath();
+          ctx.roundRect(brick.x, brick.y, brick.width, brick.height, 2);
+          ctx.fill();
+        });
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.roundRect(soloPong.paddleX, soloPong.paddleY, soloPong.paddleWidth, soloPong.paddleHeight, 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.arc(soloPong.ballX, soloPong.ballY, soloPong.ballSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+        soloPong.extraBalls.forEach((ball) => {
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, soloPong.ballSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        soloPong.powerups.forEach((powerup) => {
+          const colors = {
+            wide: "#38bdf8",
+            slow: "#a78bfa",
+            bonus: "#facc15",
+            multi: "#fb7185"
+          };
+          const labels = {
+            wide: "W",
+            slow: "S",
+            bonus: "+",
+            multi: "B"
+          };
+
+          ctx.fillStyle = colors[powerup.type] || "#f8fafc";
+          ctx.beginPath();
+          ctx.roundRect(powerup.x, powerup.y, powerup.size, powerup.size, 4);
+          ctx.fill();
+          ctx.fillStyle = "#020617";
+          ctx.font = "700 12px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(labels[powerup.type] || "?", powerup.x + powerup.size / 2, powerup.y + powerup.size / 2 + 1);
+          ctx.textAlign = "start";
+          ctx.textBaseline = "alphabetic";
+        });
+
+        ctx.fillStyle = "rgba(248, 250, 252, 0.78)";
+        ctx.font = "700 16px Arial";
+        ctx.fillText(`Level ${soloPong.level}`, 16, canvas.height - 16);
+      }
+
+      function drawCoinRush() {
+        const theme = getTheme(playerStyle.color);
+
+        drawDiamond(coinTarget.x, coinTarget.y, coinTarget.size, "#facc15");
+
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.roundRect(coinEnemy.x, coinEnemy.y, coinEnemy.size, coinEnemy.size, 8);
+        ctx.fill();
+
+        ctx.fillStyle = theme.body;
+        ctx.beginPath();
+        ctx.roundRect(coinPlayer.x, coinPlayer.y, coinPlayer.size, coinPlayer.size, 8);
+        ctx.fill();
+      }
+
+      function drawLaserDodge() {
+        const theme = getTheme(playerStyle.color);
+
+        lasers.forEach((laser) => {
+          const warning = laser.timer >= 0 && laser.timer < laser.warning;
+          const active = laser.timer >= laser.warning && laser.timer <= laser.warning + laser.active;
+
+          if (!warning && !active) {
+            return;
+          }
+
+          ctx.strokeStyle = active ? "#ef4444" : "rgba(239, 68, 68, 0.38)";
+          ctx.lineWidth = active ? 12 : 4;
+          ctx.beginPath();
+          if (laser.horizontal) {
+            ctx.moveTo(0, laser.position);
+            ctx.lineTo(canvas.width, laser.position);
+          } else {
+            ctx.moveTo(laser.position, 0);
+            ctx.lineTo(laser.position, canvas.height);
+          }
+          ctx.stroke();
+        });
+
+        ctx.fillStyle = theme.body;
+        ctx.beginPath();
+        ctx.roundRect(laserPlayer.x, laserPlayer.y, laserPlayer.size, laserPlayer.size, 8);
+        ctx.fill();
+      }
+
       function drawSnakeTile(part, color, skin, isHead) {
         const radiusBySkin = {
           classic: isHead ? 7 : 5,
@@ -1767,24 +3656,15 @@
           return;
         }
 
-        const keys = {
-          ArrowUp: { x: 0, y: -1 },
-          w: { x: 0, y: -1 },
-          W: { x: 0, y: -1 },
-          ArrowDown: { x: 0, y: 1 },
-          s: { x: 0, y: 1 },
-          S: { x: 0, y: 1 },
-          ArrowLeft: { x: -1, y: 0 },
-          a: { x: -1, y: 0 },
-          A: { x: -1, y: 0 },
-          ArrowRight: { x: 1, y: 0 },
-          d: { x: 1, y: 0 },
-          D: { x: 1, y: 0 }
-        };
+        if (!startScreen.classList.contains("closed")) {
+          return;
+        }
 
-        if (keys[event.key] && isKeyAllowedForControls(event.key)) {
+        const direction = getDirectionFromKey(event);
+
+        if (direction) {
           event.preventDefault();
-          changeDirection(keys[event.key]);
+          changeDirection(direction);
         }
 
         if (event.key === " ") {
@@ -1802,9 +3682,12 @@
           return;
         }
 
+        if (!startScreen.classList.contains("closed")) {
+          return;
+        }
+
         if (currentGame === "online-tanks") {
-          const movementKey = ["ArrowUp", "w", "W", "ArrowDown", "s", "S", "ArrowLeft", "a", "A", "ArrowRight", "d", "D"].includes(event.key) &&
-            isKeyAllowedForControls(event.key);
+          const movementKey = Boolean(getDirectionFromKey(event));
 
           if (movementKey) {
             tankMove = 0;
@@ -1814,10 +3697,7 @@
         }
 
         if (currentGame === "online-pong") {
-          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && pongMove < 0;
-          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && pongMove > 0;
-
-          if ((upReleased || downReleased) && isKeyAllowedForControls(event.key)) {
+          if (releasedDirection(event, { x: 0, y: pongMove })) {
             pongMove = 0;
             onlineLocalDirty = true;
           }
@@ -1826,12 +3706,7 @@
         }
 
         if (isOnlineArcadeGame(currentGame)) {
-          const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && onlineMove.x < 0;
-          const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && onlineMove.x > 0;
-          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && onlineMove.y < 0;
-          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && onlineMove.y > 0;
-
-          if ((leftReleased || rightReleased || upReleased || downReleased) && isKeyAllowedForControls(event.key)) {
+          if (releasedDirection(event, onlineMove)) {
             onlineMove = { x: 0, y: 0 };
             onlineLocalDirty = true;
           }
@@ -1839,13 +3714,16 @@
           return;
         }
 
-        if (currentGame === "dodger") {
-          const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && dodgeMove.x < 0;
-          const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && dodgeMove.x > 0;
-          const upReleased = ["ArrowUp", "w", "W"].includes(event.key) && dodgeMove.y < 0;
-          const downReleased = ["ArrowDown", "s", "S"].includes(event.key) && dodgeMove.y > 0;
+        if (currentGame === "dodger" || currentGame === "coin-rush" || currentGame === "laser-dodge") {
+          if (releasedDirection(event, dodgeMove)) {
+            dodgeMove = { x: 0, y: 0 };
+          }
 
-          if (leftReleased || rightReleased || upReleased || downReleased) {
+          return;
+        }
+
+        if (currentGame === "solo-pong") {
+          if (releasedDirection(event, dodgeMove)) {
             dodgeMove = { x: 0, y: 0 };
           }
 
@@ -1856,10 +3734,7 @@
           return;
         }
 
-        const leftReleased = ["ArrowLeft", "a", "A"].includes(event.key) && catcherMove < 0;
-        const rightReleased = ["ArrowRight", "d", "D"].includes(event.key) && catcherMove > 0;
-
-        if (leftReleased || rightReleased) {
+        if (releasedDirection(event, { x: catcherMove, y: 0 })) {
           catcherMove = 0;
         }
       });
@@ -1892,7 +3767,7 @@
           if (isOnlineArcadeGame(currentGame)) {
             onlineMove = { x: 0, y: 0 };
           }
-          if (currentGame === "dodger") {
+          if (currentGame === "dodger" || currentGame === "solo-pong" || currentGame === "coin-rush" || currentGame === "laser-dodge") {
             dodgeMove = { x: 0, y: 0 };
           }
         });
@@ -1932,10 +3807,20 @@
             return;
           }
 
-          if (currentGame === "dodger") {
+          if (currentGame === "dodger" || currentGame === "coin-rush" || currentGame === "laser-dodge") {
             event.preventDefault();
             dodgeMove = directions[button.dataset.direction];
             button.setPointerCapture(event.pointerId);
+            return;
+          }
+
+          if (currentGame === "solo-pong") {
+            const direction = directions[button.dataset.direction];
+            if (direction.x !== 0) {
+              event.preventDefault();
+              dodgeMove = { x: direction.x, y: 0 };
+              button.setPointerCapture(event.pointerId);
+            }
             return;
           }
 
@@ -1970,7 +3855,7 @@
             catcherMove = 0;
           }
 
-          if (currentGame === "dodger") {
+          if (currentGame === "dodger" || currentGame === "solo-pong" || currentGame === "coin-rush" || currentGame === "laser-dodge") {
             dodgeMove = { x: 0, y: 0 };
           }
         });
@@ -1994,40 +3879,35 @@
             catcherMove = 0;
           }
 
-          if (currentGame === "dodger") {
+          if (currentGame === "dodger" || currentGame === "solo-pong" || currentGame === "coin-rush" || currentGame === "laser-dodge") {
             dodgeMove = { x: 0, y: 0 };
           }
         });
       });
 
       function togglePause() {
-        if (gameOver) {
-          return;
-        }
-
-        const waitingOnline =
-          waitingToPlay &&
-          currentGame.startsWith("online-");
-
         paused = !paused;
         pauseButton.textContent = "Menu";
         pauseMenu.classList.toggle("open", paused);
         pauseMenu.setAttribute("aria-hidden", String(!paused));
         resetPauseMenu();
-        if (waitingToPlay) {
-        statusEl.textContent = paused ? "Menu open (game paused)." : "Press Play to start.";
-      } else {
-        statusEl.textContent = paused ? "Menu open (game paused)." : games[currentGame].help;
+        if (gameOver) {
+          statusEl.textContent = paused ? "Menu open." : "Game over. Press Restart to play again.";
+        } else if (waitingToPlay) {
+          statusEl.textContent = paused ? "Menu open (game paused)." : "Press Play to start.";
+        } else {
+          statusEl.textContent = paused ? "Menu open (game paused)." : games[currentGame].help;
+        }
       }
-    }
 
       function resetPauseMenu() {
         pauseMenuLevel = "main";
         resumeButton.hidden = false;
-        leaveRoomButton.hidden = !onlineRoomCode;
+        returnMainMenuButton.hidden = false;
+        leaveRoomButton.hidden = true;
         backButton.hidden = true;
-        gamesButton.hidden = false;
-        settingsButton.hidden = false;
+        gamesButton.hidden = true;
+        settingsButton.hidden = true;
         gameOptions.classList.remove("open");
         settingsMenu.classList.remove("open");
         singlePlayerGames.classList.remove("open");
@@ -2037,6 +3917,7 @@
       function showGameModeMenu() {
         pauseMenuLevel = "modes";
         resumeButton.hidden = true;
+        returnMainMenuButton.hidden = true;
         backButton.hidden = false;
         gamesButton.hidden = true;
         settingsButton.hidden = true;
@@ -2051,6 +3932,7 @@
         settingsMessage.textContent = "";
         loadAccountGmail();
         resumeButton.hidden = true;
+        returnMainMenuButton.hidden = true;
         backButton.hidden = false;
         gamesButton.hidden = true;
         settingsButton.hidden = true;
@@ -2063,6 +3945,7 @@
       function showGameList(list) {
         pauseMenuLevel = list;
         resumeButton.hidden = true;
+        returnMainMenuButton.hidden = true;
         backButton.hidden = false;
         gamesButton.hidden = true;
         settingsButton.hidden = true;
@@ -2260,7 +4143,10 @@
         return {
           snake: getLocalBestScore("snake"),
           catcher: getLocalBestScore("catcher"),
-          dodger: getLocalBestScore("dodger")
+          dodger: getLocalBestScore("dodger"),
+          "solo-pong": getLocalBestScore("solo-pong"),
+          "coin-rush": getLocalBestScore("coin-rush"),
+          "laser-dodge": getLocalBestScore("laser-dodge")
         };
       }
 
@@ -2288,19 +4174,29 @@
         try {
           const user = await getUser(usernameKey(currentAccount.username));
           const remoteScores = user?.bestScores || {};
+          const remoteBrickPongLevel = Math.max(1, Number(user?.progress?.["solo-pong"]?.level || 1));
+          const localBrickPongLevel = getBrickPongSavedLevel();
           const localScores = getLocalBestScores();
           const mergedScores = {
             snake: Math.max(Number(remoteScores.snake || 0), localScores.snake),
             catcher: Math.max(Number(remoteScores.catcher || 0), localScores.catcher),
-            dodger: Math.max(Number(remoteScores.dodger || 0), localScores.dodger)
+            dodger: Math.max(Number(remoteScores.dodger || 0), localScores.dodger),
+            "solo-pong": Math.max(Number(remoteScores["solo-pong"] || 0), localScores["solo-pong"]),
+            "coin-rush": Math.max(Number(remoteScores["coin-rush"] || 0), localScores["coin-rush"]),
+            "laser-dodge": Math.max(Number(remoteScores["laser-dodge"] || 0), localScores["laser-dodge"])
           };
 
           setLocalBestScore("snake", mergedScores.snake);
           setLocalBestScore("catcher", mergedScores.catcher);
           setLocalBestScore("dodger", mergedScores.dodger);
+          setLocalBestScore("solo-pong", mergedScores["solo-pong"]);
+          setLocalBestScore("coin-rush", mergedScores["coin-rush"]);
+          setLocalBestScore("laser-dodge", mergedScores["laser-dodge"]);
+          setBrickPongSavedLevel(Math.max(remoteBrickPongLevel, localBrickPongLevel));
 
           await patchUser(usernameKey(currentAccount.username), {
-            bestScores: mergedScores
+            bestScores: mergedScores,
+            "progress/solo-pong/level": getBrickPongSavedLevel()
           });
 
           if (isSinglePlayerGame(currentGame)) {
@@ -2413,17 +4309,110 @@
         }
 
         adminMessage.textContent = "Loading...";
-        updatePointsTargetOptions();
 
         try {
-          const rooms = await getAllRooms();
-          const roomEntries = Object.entries(rooms || {});
+          const [rooms, usersResponse] = await Promise.all([
+            getAllRooms(),
+            fetch(`${firebaseDatabaseUrl}/users.json`)
+          ]);
 
-          adminRoomCount.textContent = `Rooms: ${roomEntries.length}`;
+          if (!usersResponse.ok) {
+            throw new Error("Could not load users.");
+          }
+
+          const users = await usersResponse.json();
+          const roomEntries = Object.entries(rooms || {});
+          const activeRoomEntries = roomEntries.filter(([, room]) => Number(room?.players || 0) > 0);
+          const userEntries = Object.entries(users || {});
+
+          adminUsersCache = users || {};
+
+          adminRoomCount.textContent = roomEntries.length;
+          adminOnlineCount.textContent = activeRoomEntries.length;
+          adminUserCount.textContent = userEntries.length;
+          renderAdminUsers(userEntries);
+          renderAdminRooms(roomEntries);
+          updatePointsTargetOptions();
           adminMessage.textContent = "Admin data loaded.";
         } catch {
           adminMessage.textContent = "Could not load admin data.";
         }
+      }
+
+      function renderAdminUsers(userEntries) {
+        adminUsersList.innerHTML = "";
+        const search = adminUserSearchInput.value.trim().toLowerCase();
+        const filteredEntries = userEntries.filter(([key, user]) => {
+          const username = String(user?.username || key).toLowerCase();
+
+          return !search || username.includes(search) || key.toLowerCase().includes(search);
+        });
+
+        if (!filteredEntries.length) {
+          adminUsersList.textContent = search ? "No users found." : "No users yet.";
+          return;
+        }
+
+        filteredEntries
+          .sort(([, a], [, b]) => (b?.isAdmin ? 1 : 0) - (a?.isAdmin ? 1 : 0) || String(a?.username || "").localeCompare(String(b?.username || "")))
+          .forEach(([key, user]) => {
+            const totalBest = Object.values(user?.bestScores || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+            const card = document.createElement("div");
+            card.className = "admin-user-card";
+            card.innerHTML = `
+              <div class="admin-user-top">
+                <span class="admin-user-name">${escapeHtml(user?.username || key)}</span>
+                ${user?.isAdmin ? '<span class="admin-badge">Admin</span>' : '<span class="admin-badge">User</span>'}
+              </div>
+              <div class="admin-user-meta">Points: ${Number(user?.points || 0)} | Best total: ${totalBest}</div>
+              <div class="admin-user-actions">
+                <button type="button" data-admin-action="${user?.isAdmin ? "remove-admin" : "make-admin"}" data-user-key="${escapeHtml(key)}">${user?.isAdmin ? "Remove Admin" : "Make Admin"}</button>
+                <button type="button" data-admin-action="reset-scores" data-user-key="${escapeHtml(key)}">Reset Scores</button>
+                <button type="button" data-admin-action="delete-user" data-user-key="${escapeHtml(key)}" class="admin-danger">Delete User</button>
+                <button type="button" data-admin-action="copy-name" data-user-key="${escapeHtml(key)}">Use Name</button>
+              </div>
+            `;
+            adminUsersList.appendChild(card);
+          });
+      }
+
+      function renderAdminRooms(roomEntries) {
+        adminRoomsList.innerHTML = "";
+
+        if (!roomEntries.length) {
+          adminRoomsList.textContent = "No rooms.";
+          return;
+        }
+
+        roomEntries
+          .sort(([a], [b]) => a.localeCompare(b))
+          .forEach(([code, room]) => {
+            const p1 = room?.playersState?.p1?.username || "P1";
+            const p2 = room?.playersState?.p2?.username || "P2";
+            const card = document.createElement("div");
+            card.className = "admin-room-card";
+            card.innerHTML = `
+              <div class="admin-user-top">
+                <span class="admin-room-code">${escapeHtml(code)}</span>
+                <span class="admin-badge">${Number(room?.players || 0)} players</span>
+              </div>
+              <div class="admin-user-meta">${escapeHtml(room?.gameName || room?.game || "Online game")} | ${escapeHtml(p1)} vs ${escapeHtml(p2)}</div>
+              <div class="admin-user-actions">
+                <button type="button" data-room-action="use-code" data-room-code="${escapeHtml(code)}">Use Code</button>
+                <button type="button" data-room-action="spectate-room" data-room-code="${escapeHtml(code)}">Spectate</button>
+                <button type="button" data-room-action="delete-room" data-room-code="${escapeHtml(code)}" class="admin-danger">Delete Room</button>
+              </div>
+            `;
+            adminRoomsList.appendChild(card);
+          });
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
       }
 
       async function clearAllRooms() {
@@ -2459,9 +4448,33 @@
 
         const points = Math.max(1, Math.floor(Number(pointsInput.value) || 1));
         pointsInput.value = points;
+        const selectedTarget = pointsTargetSelect.value || "local";
+
+        if (selectedTarget.startsWith("user:")) {
+          const userKey = selectedTarget.slice(5);
+          const user = adminUsersCache[userKey];
+
+          if (!user) {
+            adminMessage.textContent = "User not found. Click Refresh.";
+            return;
+          }
+
+          try {
+            const nextPoints = Number(user.points || 0) + points;
+            await patchUser(userKey, { points: nextPoints });
+            adminUsersCache[userKey] = { ...user, points: nextPoints };
+            renderAdminUsers(Object.entries(adminUsersCache));
+            updatePointsTargetOptions();
+            adminMessage.textContent = `Added ${points} points to ${user.username || userKey}.`;
+          } catch {
+            adminMessage.textContent = "Could not add points to user.";
+          }
+
+          return;
+        }
 
         if (currentGame.startsWith("online-")) {
-          const targetSlot = pointsTargetSelect.value || onlinePlayerSlot;
+          const targetSlot = selectedTarget === "local" ? onlinePlayerSlot : selectedTarget;
 
           if (!onlineRoomCode || !targetSlot || !onlineState?.playersState?.[targetSlot]) {
             adminMessage.textContent = "No online player to add points to.";
@@ -2499,6 +4512,174 @@
           saveBestScore(currentGame, best);
         }
         adminMessage.textContent = `Added ${points} points.`;
+      }
+
+      async function handleAdminUserAction(event) {
+        const button = event.target.closest("[data-admin-action]");
+
+        if (!button || !currentAccount?.isAdmin) {
+          return;
+        }
+
+        const action = button.dataset.adminAction;
+        const userKey = button.dataset.userKey;
+        const user = adminUsersCache[userKey];
+
+        if (!user) {
+          adminMessage.textContent = "User not found. Click Refresh.";
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          if (action === "copy-name") {
+            pointsTargetSelect.value = `user:${userKey}`;
+            adminMessage.textContent = `${user.username || userKey} selected for points.`;
+            return;
+          }
+
+          if (action === "make-admin") {
+            await patchUser(userKey, { isAdmin: true });
+            adminMessage.textContent = `${user.username || userKey} is admin now.`;
+          } else if (action === "remove-admin") {
+            if (usernameKey(currentAccount.username) === userKey) {
+              adminMessage.textContent = "You cannot remove your own admin here.";
+              return;
+            }
+
+            await patchUser(userKey, { isAdmin: false });
+            adminMessage.textContent = `${user.username || userKey} admin removed.`;
+          } else if (action === "reset-scores") {
+            await patchUser(userKey, {
+              bestScores: null,
+              progress: null,
+              points: 0
+            });
+            adminMessage.textContent = `${user.username || userKey} scores reset.`;
+          } else if (action === "delete-user") {
+            if (usernameKey(currentAccount.username) === userKey) {
+              adminMessage.textContent = "You cannot delete your own account here.";
+              return;
+            }
+
+            const response = await fetch(`${firebaseDatabaseUrl}/users/${userKey}.json`, {
+              method: "DELETE"
+            });
+
+            if (!response.ok) {
+              throw new Error("Could not delete user.");
+            }
+
+            adminMessage.textContent = `${user.username || userKey} deleted.`;
+          }
+
+          await loadAdminPanel();
+        } catch {
+          adminMessage.textContent = "Admin action failed.";
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      async function handleAdminRoomAction(event) {
+        const button = event.target.closest("[data-room-action]");
+
+        if (!button || !currentAccount?.isAdmin) {
+          return;
+        }
+
+        const action = button.dataset.roomAction;
+        const code = button.dataset.roomCode;
+
+        if (action === "use-code") {
+          roomCodeInput.value = code;
+          startRoomCodeInput.value = code;
+          adminMessage.textContent = `${code} copied to room code inputs.`;
+          return;
+        }
+
+        if (action === "spectate-room") {
+          button.disabled = true;
+
+          try {
+            await spectateOnlineRoom(code);
+          } catch {
+            adminMessage.textContent = "Could not spectate room.";
+          } finally {
+            button.disabled = false;
+          }
+
+          return;
+        }
+
+        if (action === "delete-room") {
+          button.disabled = true;
+
+          try {
+            const response = await fetch(`${firebaseDatabaseUrl}/rooms/${code}.json`, {
+              method: "DELETE"
+            });
+
+            if (!response.ok) {
+              throw new Error("Could not delete room.");
+            }
+
+            adminMessage.textContent = `${code} deleted.`;
+            await loadAdminPanel();
+          } catch {
+            adminMessage.textContent = "Could not delete room.";
+          } finally {
+            button.disabled = false;
+          }
+        }
+      }
+
+      async function patchAllUsers(makePatch, doneMessage) {
+        if (!currentAccount?.isAdmin) {
+          return;
+        }
+
+        const entries = Object.entries(adminUsersCache || {});
+
+        if (!entries.length) {
+          adminMessage.textContent = "No users loaded. Click Refresh.";
+          return;
+        }
+
+        adminMessage.textContent = "Updating users...";
+
+        try {
+          await Promise.all(entries.map(([key, user]) => patchUser(key, makePatch(user, key))));
+          adminMessage.textContent = doneMessage;
+          await loadAdminPanel();
+        } catch {
+          adminMessage.textContent = "Could not update all users.";
+        }
+      }
+
+      async function addPointsToAllUsers() {
+        const points = Math.max(1, Math.floor(Number(pointsInput.value) || 1));
+        pointsInput.value = points;
+        await patchAllUsers(
+          (user) => ({ points: Number(user?.points || 0) + points }),
+          `Added ${points} points to all users.`
+        );
+      }
+
+      async function clearAllUserPoints() {
+        await patchAllUsers(() => ({ points: 0 }), "All user points cleared.");
+      }
+
+      async function resetAllUserScores() {
+        await patchAllUsers(
+          () => ({
+            bestScores: null,
+            progress: null,
+            points: 0
+          }),
+          "All user scores reset."
+        );
       }
 
       async function registerAccount() {
@@ -2697,10 +4878,6 @@
 
         if (isOnlineArcadeGame(gameName)) {
           const starts = {
-            "online-racing": {
-              p1: { x: 200, y: canvas.height - 54 },
-              p2: { x: 320, y: canvas.height - 54 }
-            },
             "online-tag": {
               p1: { x: 150, y: canvas.height / 2 },
               p2: { x: canvas.width - 170, y: canvas.height / 2 }
@@ -2801,7 +4978,6 @@
 
       function isOnlineArcadeGame(gameName) {
         return [
-          "online-racing",
           "online-tag",
           "online-soccer",
           "online-maze",
@@ -2869,6 +5045,7 @@
         unsubscribeFromRoom();
         onlineRoomCode = "";
         onlinePlayerSlot = "";
+        onlineSpectating = false;
         onlineState = null;
         onlinePushBusy = false;
         waitingToPlay = false;
@@ -2885,7 +5062,9 @@
         unsubscribeFromRoom();
         onlineRoomCode = code;
         onlinePlayerSlot = slot;
+        onlineSpectating = false;
         currentGame = gameName;
+        musicStep = 0;
         updateShootButton();
         gameTitle.textContent = onlineGameNames[gameName] || games[gameName].title;
         showOnlineScoreboard();
@@ -2936,6 +5115,68 @@
           mergeOnlineState(latestRoom);
           updateOnlineScoreboard();
         });
+        drawOnlineGame();
+        timer = setInterval(tickOnlineGame, getOnlineTickDelay(gameName));
+      }
+
+      async function spectateOnlineRoom(code) {
+        if (!currentAccount?.isAdmin) {
+          return;
+        }
+
+        const room = await getRoom(code);
+
+        if (!room) {
+          adminMessage.textContent = "Room not found.";
+          await loadAdminPanel();
+          return;
+        }
+
+        const gameName = room.game || "online-snake";
+        clearInterval(timer);
+        clearInterval(waitingTimer);
+        unsubscribeFromRoom();
+        onlineRoomCode = code;
+        onlinePlayerSlot = "";
+        onlineSpectating = true;
+        currentGame = gameName;
+        musicStep = 0;
+        gameTitle.textContent = `${onlineGameNames[gameName] || games[gameName].title} Spectate`;
+        showOnlineScoreboard();
+        best = 0;
+        score = 0;
+        scoreEl.textContent = "0";
+        bestEl.textContent = "0";
+        gameOver = false;
+        paused = false;
+        waitingToPlay = false;
+        closeStartScreen();
+        hidePlayOverlay();
+        pauseMenu.classList.remove("open");
+        pauseMenu.setAttribute("aria-hidden", "true");
+        resetPauseMenu();
+        updateShootButton();
+        updatePauseButton();
+        onlineState = prepareOnlineState(room, gameName, "p1");
+        updateOnlineScoreboard();
+        statusEl.textContent = `Spectating ${code}.`;
+        adminMessage.textContent = `Spectating ${code}.`;
+
+        subscribeToRoom(code, (latestRoom) => {
+          if (!onlineRoomCode || code !== onlineRoomCode) {
+            return;
+          }
+
+          if (!latestRoom) {
+            closeOnlineRoomLocally("Spectated room closed.");
+            return;
+          }
+
+          onlineState = prepareOnlineState(latestRoom, gameName, "p1");
+          updateOnlineScoreboard();
+          drawOnlineGame();
+        });
+
         drawOnlineGame();
         timer = setInterval(tickOnlineGame, getOnlineTickDelay(gameName));
       }
@@ -3156,7 +5397,9 @@
         unsubscribeFromRoom();
         onlineRoomCode = code;
         onlinePlayerSlot = "p1";
+        onlineSpectating = false;
         currentGame = gameName;
+        musicStep = 0;
         updateShootButton();
         gameTitle.textContent = onlineGameNames[gameName];
         showOnlineScoreboard();
@@ -3208,6 +5451,19 @@
           return;
         }
 
+        if (onlineSpectating) {
+          clearInterval(timer);
+          clearInterval(waitingTimer);
+          unsubscribeFromRoom();
+          onlineRoomCode = "";
+          onlinePlayerSlot = "";
+          onlineSpectating = false;
+          onlineState = null;
+          startGame("snake");
+          statusEl.textContent = "Stopped spectating.";
+          return;
+        }
+
         const roomToLeave = onlineRoomCode;
         const slotToLeave = onlinePlayerSlot;
         const wasCreator = slotToLeave === "p1";
@@ -3235,6 +5491,7 @@
         } finally {
           onlineRoomCode = "";
           onlinePlayerSlot = "";
+          onlineSpectating = false;
           onlineState = null;
           catcherMove = 0;
           tankMove = 0;
@@ -3247,6 +5504,12 @@
 
       function tickOnlineGame() {
         if (paused || gameOver || !onlineRoomCode) {
+          return;
+        }
+
+        if (onlineSpectating) {
+          updateOnlineScoreboard();
+          drawOnlineGame();
           return;
         }
 
@@ -3269,7 +5532,7 @@
       }
 
       function syncOnlineState() {
-        if (document.hidden || !onlineRoomCode || !onlineState) {
+        if (document.hidden || onlineSpectating || !onlineRoomCode || !onlineState) {
           return;
         }
 
@@ -3626,19 +5889,12 @@
         }
 
         if (onlineMove.x !== 0 || onlineMove.y !== 0) {
-          const speed = currentGame === "online-racing" ? 5.5 : 4.8;
+          const speed = 4.8;
           moveOnlineArcadePlayer(player, onlineMove.x * speed, onlineMove.y * speed);
           onlineLocalDirty = true;
         }
 
-        if (currentGame === "online-racing") {
-          if (player.y < 32) {
-            player.score = (player.score || 0) + 1;
-            player.y = canvas.height - 54;
-            player.x = onlinePlayerSlot === "p1" ? 200 : 320;
-            onlineLocalDirty = true;
-          }
-        } else if (onlinePlayerSlot === "p1") {
+        if (onlinePlayerSlot === "p1") {
           updateOnlineTagGame(p1, p2);
           updateOnlineSoccerGame(p1, p2);
           updateOnlineMazeGame(p1, p2);
@@ -3806,8 +6062,14 @@
         return Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.size / 2;
       }
 
+      function getMazeLevel() {
+        const p1Score = onlineState?.playersState?.p1?.score || 0;
+        const p2Score = onlineState?.playersState?.p2?.score || 0;
+        return Math.min(6, Math.floor((p1Score + p2Score) / 2));
+      }
+
       function getMazeWalls() {
-        return [
+        const baseWalls = [
           { x: 95, y: 78, width: 24, height: 330 },
           { x: 190, y: 0, width: 24, height: 270 },
           { x: 285, y: 150, width: 24, height: 330 },
@@ -3815,6 +6077,16 @@
           { x: 95, y: 408, width: 330, height: 24 },
           { x: 190, y: 270, width: 250, height: 24 }
         ];
+        const hardWalls = [
+          { x: 20, y: 330, width: 120, height: 22 },
+          { x: 430, y: 95, width: 22, height: 170 },
+          { x: 235, y: 70, width: 116, height: 22 },
+          { x: 24, y: 168, width: 98, height: 22 },
+          { x: 335, y: 360, width: 150, height: 22 },
+          { x: 145, y: 340, width: 22, height: 130 }
+        ];
+
+        return [...baseWalls, ...hardWalls.slice(0, getMazeLevel())];
       }
 
       function hitsMazeWall(x, y, size) {
@@ -3955,6 +6227,15 @@
           pointsTargetSelect.appendChild(option);
         }
 
+        Object.entries(adminUsersCache || {})
+          .sort(([, a], [, b]) => String(a?.username || "").localeCompare(String(b?.username || "")))
+          .forEach(([key, user]) => {
+            const option = document.createElement("option");
+            option.value = `user:${key}`;
+            option.textContent = `User: ${user?.username || key}`;
+            pointsTargetSelect.appendChild(option);
+          });
+
         const values = Array.from(pointsTargetSelect.options).map((option) => option.value);
 
         if (values.includes(previousValue)) {
@@ -4081,9 +6362,7 @@
       }
 
       function drawOnlineArcade() {
-        if (currentGame === "online-racing") {
-          drawRacingTrack();
-        } else if (currentGame === "online-soccer") {
+        if (currentGame === "online-soccer") {
           drawSoccerField();
         } else if (currentGame === "online-maze") {
           drawMazeField();
@@ -4139,19 +6418,6 @@
         ctx.fill();
       }
 
-      function drawRacingTrack() {
-        ctx.fillStyle = "rgba(250, 204, 21, 0.9)";
-        ctx.fillRect(0, 22, canvas.width, 8);
-        ctx.strokeStyle = "rgba(248, 250, 252, 0.22)";
-        ctx.lineWidth = 3;
-        [170, 260, 350].forEach((x) => {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-        });
-      }
-
       function drawSoccerField() {
         ctx.strokeStyle = "rgba(94, 234, 212, 0.35)";
         ctx.lineWidth = 3;
@@ -4169,6 +6435,10 @@
           ctx.roundRect(wall.x, wall.y, wall.width, wall.height, 6);
           ctx.fill();
         });
+
+        ctx.fillStyle = "rgba(248, 250, 252, 0.72)";
+        ctx.font = "700 16px Arial";
+        ctx.fillText(`Maze level ${getMazeLevel() + 1}`, 16, 24);
       }
 
       function drawBattleField() {
@@ -4355,8 +6625,61 @@
         onlineGameButtons.forEach((button) => {
           button.classList.toggle("selected", button.dataset.onlineGame === selectedOnlineGame);
         });
+        startOnlineGameButtons.forEach((button) => {
+          button.classList.toggle("selected", selectedStartMode === "online" && button.dataset.startOnlineGame === selectedOnlineGame);
+        });
       }
 
+      function updateStartGameSelection() {
+        startSoloGameButtons.forEach((button) => {
+          button.classList.toggle("selected", selectedStartMode === "solo" && button.dataset.startGame === selectedStartGame);
+        });
+        startOnlineGameButtons.forEach((button) => {
+          button.classList.toggle("selected", selectedStartMode === "online" && button.dataset.startOnlineGame === selectedOnlineGame);
+        });
+      }
+
+      document.addEventListener("pointerdown", unlockBackgroundMusic, { once: true });
+      document.addEventListener("keydown", unlockBackgroundMusic, { once: true });
+      startPlayButton.addEventListener("click", playFromStartMenu);
+      startGamesButton.addEventListener("click", () => {
+        showStartSection("games");
+      });
+      startSettingsButton.addEventListener("click", () => {
+        showStartSection("settings");
+      });
+      startAccountButton.addEventListener("click", () => {
+        showStartSection("account");
+      });
+      startBackFromGames.addEventListener("click", () => showStartSection("main"));
+      startBackFromSettings.addEventListener("click", () => showStartSection("main"));
+      startBackFromAccount.addEventListener("click", () => showStartSection("main"));
+      startSoloGameButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          selectSoloGameFromStart(button.dataset.startGame);
+        });
+      });
+      startOnlineGameButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          selectOnlineGameFromStart(button.dataset.startOnlineGame);
+        });
+      });
+      startCreateRoomButton.addEventListener("click", createRoomFromStart);
+      startJoinRoomButton.addEventListener("click", joinRoomFromStart);
+      startRoomCodeInput.addEventListener("input", () => {
+        startRoomCodeInput.value = startRoomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      });
+      [startSoundSelect, startThemeSelect, startFieldSizeSelect, startControlsSelect].forEach((select) => {
+        select.addEventListener("change", updateGameSettingsFromStart);
+      });
+      [startSkinSelect, startColorSelect].forEach((select) => {
+        select.addEventListener("change", updatePlayerStyleFromStart);
+      });
+      startResetRecordButton.addEventListener("click", resetRecordFromStart);
+      startLoginButton.addEventListener("click", loginFromStart);
+      startRegisterButton.addEventListener("click", registerFromStart);
+      startRecoveryButton.addEventListener("click", recoverFromStart);
+      startLogoutButton.addEventListener("click", logoutFromStart);
       restartButton.addEventListener("click", resetGame);
       playButton.addEventListener("click", playLocalGame);
       cancelWaitButton.addEventListener("click", leaveOnlineRoom);
@@ -4380,6 +6703,14 @@
       refreshAdminButton.addEventListener("click", loadAdminPanel);
       clearRoomsButton.addEventListener("click", clearAllRooms);
       addPointsButton.addEventListener("click", addAdminPoint);
+      addPointsAllButton.addEventListener("click", addPointsToAllUsers);
+      clearUserPointsButton.addEventListener("click", clearAllUserPoints);
+      resetAllScoresButton.addEventListener("click", resetAllUserScores);
+      adminUsersList.addEventListener("click", handleAdminUserAction);
+      adminUserSearchInput.addEventListener("input", () => {
+        renderAdminUsers(Object.entries(adminUsersCache || {}));
+      });
+      adminRoomsList.addEventListener("click", handleAdminRoomAction);
       soundSelect.addEventListener("change", updateGameSettings);
       themeSelect.addEventListener("change", updateGameSettings);
       fieldSizeSelect.addEventListener("change", updateGameSettings);
@@ -4395,6 +6726,9 @@
       });
       pauseButton.addEventListener("click", togglePause);
       resumeButton.addEventListener("click", togglePause);
+      returnMainMenuButton.addEventListener("click", () => {
+        returnToMainMenu();
+      });
       leaveRoomButton.addEventListener("click", leaveOnlineRoom);
       gamesButton.addEventListener("click", () => {
         showGameModeMenu();
@@ -4416,6 +6750,15 @@
       });
       dodgeBlocksButton.addEventListener("click", () => {
         startGame("dodger");
+      });
+      soloPongButton.addEventListener("click", () => {
+        startGame("solo-pong");
+      });
+      coinRushButton.addEventListener("click", () => {
+        startGame("coin-rush");
+      });
+      laserDodgeButton.addEventListener("click", () => {
+        startGame("laser-dodge");
       });
       onlineGameButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -4441,6 +6784,7 @@
       applyPlayerStyleControls();
       applyGameSettingsControls();
       startGame("snake");
+      window.setTimeout(showLoadedStartMenu, 900);
     </script>
   </body>
 </html>

@@ -99,6 +99,23 @@
           0 24px 80px rgba(0, 0, 0, 0.34),
           0 0 44px rgba(34, 197, 94, 0.08);
         backdrop-filter: blur(10px);
+        overflow: hidden;
+      }
+
+      main::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.08), transparent) 0 0 / 100% 1px no-repeat,
+          radial-gradient(circle at 15% 10%, rgba(94, 234, 212, 0.12), transparent 10rem),
+          radial-gradient(circle at 85% 95%, rgba(34, 197, 94, 0.1), transparent 11rem);
+      }
+
+      main > * {
+        position: relative;
+        z-index: 1;
       }
 
       header {
@@ -106,6 +123,14 @@
         align-items: end;
         justify-content: space-between;
         gap: 1rem;
+        padding: 0.85rem;
+        border: 1px solid rgba(134, 239, 172, 0.16);
+        border-radius: 20px;
+        background:
+          linear-gradient(135deg, rgba(2, 6, 23, 0.4), rgba(20, 83, 45, 0.22));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 12px 30px rgba(0, 0, 0, 0.18);
       }
 
       h1 {
@@ -151,10 +176,49 @@
         text-shadow: 0 0 16px rgba(94, 234, 212, 0.42);
       }
 
+      .game header,
+      header .scoreboard {
+        align-items: center;
+      }
+
       .game {
         position: relative;
         display: grid;
         gap: 0.9rem;
+        padding: 0.85rem;
+        border: 1px solid rgba(134, 239, 172, 0.16);
+        border-radius: 24px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.34), rgba(5, 46, 22, 0.2));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 16px 36px rgba(0, 0, 0, 0.2);
+      }
+
+      .game::before,
+      .game::after {
+        content: "";
+        position: absolute;
+        width: 74px;
+        height: 74px;
+        border: 2px solid rgba(94, 234, 212, 0.38);
+        pointer-events: none;
+      }
+
+      .game::before {
+        top: 0.45rem;
+        left: 0.45rem;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 18px 0 0 0;
+      }
+
+      .game::after {
+        right: 0.45rem;
+        bottom: 0.45rem;
+        border-left: 0;
+        border-top: 0;
+        border-radius: 0 0 18px 0;
       }
 
       .play-overlay {
@@ -222,7 +286,7 @@
 
       .start-panel {
         position: relative;
-        width: min(88vw, 360px);
+        width: min(92vw, 440px);
         max-height: 92vh;
         overflow: auto;
         display: grid;
@@ -230,14 +294,17 @@
         text-align: center;
         image-rendering: pixelated;
         padding: 1rem;
-        border: 1px solid rgba(134, 239, 172, 0.28);
-        border-radius: 28px;
+        border: 2px solid rgba(134, 239, 172, 0.34);
+        border-radius: 24px;
         background:
-          linear-gradient(145deg, rgba(15, 23, 42, 0.38), rgba(5, 46, 22, 0.32));
+          linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(0deg, rgba(34, 197, 94, 0.07) 1px, transparent 1px) 0 0 / 22px 22px,
+          linear-gradient(145deg, rgba(2, 6, 23, 0.72), rgba(5, 46, 22, 0.5));
         box-shadow:
           inset 0 1px 0 rgba(255, 255, 255, 0.12),
-          0 26px 48px rgba(0, 0, 0, 0.34),
-          0 0 64px rgba(34, 197, 94, 0.12);
+          inset 0 0 0 1px rgba(94, 234, 212, 0.1),
+          0 26px 60px rgba(0, 0, 0, 0.42),
+          0 0 70px rgba(34, 197, 94, 0.16);
         backdrop-filter: blur(8px);
         animation: menuArrive 420ms ease both;
       }
@@ -334,21 +401,31 @@
 
       .start-actions {
         display: none;
-        gap: 0.75rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
         padding: 0.65rem;
         border: 1px solid rgba(134, 239, 172, 0.16);
         border-radius: 22px;
-        background: rgba(2, 6, 23, 0.18);
+        background:
+          radial-gradient(circle at top left, rgba(250, 204, 21, 0.08), transparent 8rem),
+          linear-gradient(145deg, rgba(2, 6, 23, 0.34), rgba(20, 83, 45, 0.24));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 14px 32px rgba(0, 0, 0, 0.18);
       }
 
       .start-submenu {
         display: none;
-        gap: 0.75rem;
+        gap: 0.7rem;
         padding: 0.65rem;
         border: 1px solid rgba(134, 239, 172, 0.18);
         border-radius: 22px;
         background:
-          linear-gradient(145deg, rgba(2, 6, 23, 0.24), rgba(20, 83, 45, 0.2));
+          radial-gradient(circle at top left, rgba(94, 234, 212, 0.08), transparent 9rem),
+          linear-gradient(145deg, rgba(2, 6, 23, 0.36), rgba(20, 83, 45, 0.24));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 14px 34px rgba(0, 0, 0, 0.2);
       }
 
       .start-submenu.open {
@@ -362,6 +439,22 @@
         text-shadow: 2px 2px 0 #000;
         text-transform: uppercase;
         letter-spacing: 0.04em;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 0.7rem;
+        text-align: center;
+      }
+
+      .start-submenu h3::before,
+      .start-submenu h3::after {
+        content: "";
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.55));
+      }
+
+      .start-submenu h3::after {
+        background: linear-gradient(90deg, rgba(94, 234, 212, 0.55), transparent);
       }
 
       .start-grid {
@@ -382,8 +475,20 @@
           0 10px 24px rgba(0, 0, 0, 0.2);
       }
 
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 3px solid rgba(94, 234, 212, 0.22);
+        border-color: rgba(94, 234, 212, 0.72);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 0 0 1px rgba(94, 234, 212, 0.3),
+          0 0 24px rgba(45, 212, 191, 0.16);
+      }
+
       .start-showcase {
         display: grid;
+        grid-template-columns: 7rem 1fr;
         gap: 0.65rem;
         padding: 0.75rem;
         border: 1px solid rgba(134, 239, 172, 0.46);
@@ -397,7 +502,7 @@
       }
 
       .showcase-thumb {
-        min-height: 112px;
+        min-height: 7rem;
         display: grid;
         place-items: center;
         overflow: hidden;
@@ -478,7 +583,7 @@
 
       .start-actions button,
       .start-submenu button {
-        min-height: 50px;
+        min-height: 54px;
         border: 1px solid rgba(94, 234, 212, 0.7);
         border-radius: 999px;
         background:
@@ -562,11 +667,32 @@
       }
 
       #startBackFromGames,
+      #startBackFromProfile,
+      #startBackFromShop,
+      #startBackFromQuests,
+      #startBackFromSocial,
       #startBackFromSettings,
       #startBackFromAccount {
         min-height: 44px;
         background:
           linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(22, 101, 52, 0.76));
+      }
+
+      #startSocialButton {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.96), rgba(34, 197, 94, 0.84));
+      }
+
+      #startPremiumButton,
+      #startDonateButton,
+      #startBattlePassButton,
+      #startLeaderboardButton {
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.95), rgba(126, 34, 206, 0.82));
+        border-color: rgba(253, 224, 71, 0.74);
+      }
+
+      #startQuestsButton,
+      #startShopButton {
+        background: linear-gradient(135deg, rgba(22, 163, 74, 0.96), rgba(14, 165, 233, 0.82));
       }
 
       #startCreateRoomButton,
@@ -639,21 +765,46 @@
         display: block;
         border: 2px solid rgba(134, 239, 172, 0.28);
         border-radius: 18px;
-        background: #020617;
+        background:
+          radial-gradient(circle at center, rgba(20, 184, 166, 0.04), transparent 15rem),
+          #020617;
         box-shadow:
           inset 0 0 32px rgba(34, 197, 94, 0.08),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04),
           0 18px 50px rgba(0, 0, 0, 0.34),
-          0 0 34px rgba(20, 184, 166, 0.08);
+          0 0 34px rgba(20, 184, 166, 0.12);
       }
 
       .controls {
         display: flex;
         justify-content: space-between;
         gap: 0.75rem;
-        padding: 0.35rem;
-        border: 1px solid rgba(134, 239, 172, 0.14);
-        border-radius: 999px;
-        background: rgba(2, 6, 23, 0.28);
+        padding: 0.55rem;
+        border: 1px solid rgba(134, 239, 172, 0.18);
+        border-radius: 22px;
+        background:
+          linear-gradient(135deg, rgba(2, 6, 23, 0.42), rgba(20, 83, 45, 0.22));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          0 10px 24px rgba(0, 0, 0, 0.16);
+      }
+
+      .controls button {
+        min-width: 7rem;
+      }
+
+      #restart {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(20, 184, 166, 0.84));
+      }
+
+      #pause {
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.95), rgba(34, 197, 94, 0.82));
+        color: #052e16;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.26);
+      }
+
+      #shootButton {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(249, 115, 22, 0.84));
       }
 
       button {
@@ -702,23 +853,37 @@
       }
 
       .pad {
-        width: min(72vw, 240px);
+        width: min(78vw, 300px);
         margin: 0 auto;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.45rem;
+        gap: 0.6rem;
+        padding: 0.7rem;
+        border: 1px solid rgba(134, 239, 172, 0.12);
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at center, rgba(94, 234, 212, 0.06), transparent 7rem),
+          rgba(2, 6, 23, 0.22);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          0 12px 26px rgba(0, 0, 0, 0.16);
       }
 
       .pad button {
-        aspect-ratio: 1.25;
+        min-height: 76px;
+        aspect-ratio: 1.18;
         padding: 0;
         background:
           linear-gradient(135deg, rgba(15, 23, 42, 0.86), rgba(20, 83, 45, 0.5));
         color: #f8fafc;
+        border-radius: 18px;
+        border-color: rgba(134, 239, 172, 0.22);
+        font-size: 1.05rem;
       }
 
       .pad button:hover {
-        background: rgba(248, 250, 252, 0.2);
+        background:
+          linear-gradient(135deg, rgba(20, 184, 166, 0.86), rgba(34, 197, 94, 0.62));
       }
 
       .pad .up {
@@ -744,6 +909,13 @@
         text-align: center;
         font-weight: 700;
         text-shadow: 0 2px 12px rgba(0, 0, 0, 0.38);
+        padding: 0.55rem 0.8rem;
+        border: 1px solid rgba(134, 239, 172, 0.14);
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.3);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          0 10px 22px rgba(0, 0, 0, 0.12);
       }
 
       .pause-menu {
@@ -786,6 +958,10 @@
         margin: 0 0 0.25rem;
         font-size: 1.5rem;
         text-align: center;
+        color: #ecfeff;
+        text-shadow:
+          0 2px 0 #052e16,
+          0 0 18px rgba(94, 234, 212, 0.22);
       }
 
       .game-options {
@@ -830,6 +1006,16 @@
           0 8px 18px rgba(0, 0, 0, 0.18);
       }
 
+      select option {
+        background: #020617;
+        color: #ecfeff;
+      }
+
+      select option:checked {
+        background: #0f766e;
+        color: #ffffff;
+      }
+
       .room-code {
         min-height: 1.4rem;
         margin: 0;
@@ -845,6 +1031,9 @@
         text-align: center;
         font-size: 0.95rem;
         font-weight: 700;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.22);
       }
 
       .account-bar {
@@ -857,12 +1046,34 @@
         padding: 0.65rem 0.75rem;
         border: 1px solid rgba(134, 239, 172, 0.16);
         border-radius: 16px;
-        background: rgba(2, 6, 23, 0.32);
+        background:
+          linear-gradient(135deg, rgba(2, 6, 23, 0.46), rgba(20, 83, 45, 0.2));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          0 12px 26px rgba(0, 0, 0, 0.14);
+      }
+
+      .account-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .account-bar button {
         min-height: 36px;
         padding: 0.45rem 0.75rem;
+      }
+
+      #adminToggleButton {
+        background: linear-gradient(135deg, rgba(126, 34, 206, 0.94), rgba(37, 99, 235, 0.84));
+        border-color: rgba(216, 180, 254, 0.72);
+      }
+
+      #phoneModeButton {
+        background: linear-gradient(135deg, rgba(250, 204, 21, 0.96), rgba(249, 115, 22, 0.82));
+        border-color: rgba(253, 224, 71, 0.72);
+        color: #111827;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
       }
 
       .auth-menu {
@@ -929,6 +1140,7 @@
 
       .admin-panel.open {
         display: grid;
+        animation: submenuIn 180ms ease both;
       }
 
       .admin-panel h2 {
@@ -1045,6 +1257,19 @@
           linear-gradient(145deg, rgba(2, 6, 23, 0.64), rgba(15, 23, 42, 0.44));
       }
 
+      .admin-user-card:hover,
+      .admin-room-card:hover,
+      .profile-card:hover,
+      .shop-item:hover,
+      .quest-card:hover {
+        border-color: rgba(94, 234, 212, 0.38);
+        filter: brightness(1.04);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 14px 28px rgba(0, 0, 0, 0.2),
+          0 0 24px rgba(45, 212, 191, 0.1);
+      }
+
       .admin-user-top {
         display: flex;
         align-items: center;
@@ -1091,6 +1316,346 @@
       .admin-room-code {
         color: #ddd6fe;
         font-weight: 900;
+      }
+
+      .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+      }
+
+      .profile-card,
+      .shop-item,
+      .quest-card,
+      .chat-message {
+        display: grid;
+        gap: 0.35rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.2);
+        border-radius: 16px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.62), rgba(20, 83, 45, 0.28));
+        color: #ecfeff;
+        font-weight: 800;
+      }
+
+      .empty-card,
+      .social-card {
+        padding: 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.18);
+        border-radius: 16px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.54), rgba(20, 83, 45, 0.2));
+        color: #d1fae5;
+        font-weight: 800;
+        text-align: center;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          0 10px 22px rgba(0, 0, 0, 0.14);
+      }
+
+      .social-card {
+        text-align: left;
+      }
+
+      .social-card .admin-user-actions {
+        margin-top: 0.65rem;
+      }
+
+      .premium-showcase,
+      .donate-showcase,
+      .premium-item,
+      .donate-card,
+      .leaderboard-card {
+        border-color: rgba(253, 224, 71, 0.34);
+        background:
+          radial-gradient(circle at top right, rgba(250, 204, 21, 0.12), transparent 8rem),
+          linear-gradient(145deg, rgba(30, 27, 75, 0.62), rgba(5, 46, 22, 0.28));
+      }
+
+      .donate-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .donate-price {
+        min-width: 4rem;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #facc15, #f97316);
+        color: #111827;
+        font-weight: 1000;
+        text-align: center;
+        box-shadow: 0 0 22px rgba(250, 204, 21, 0.22);
+      }
+
+      .locked-card {
+        opacity: 0.72;
+        filter: saturate(0.75);
+      }
+
+      .battle-pass-board {
+        overflow-x: auto;
+        display: grid;
+        gap: 0.85rem;
+        padding: 0.85rem;
+        border: 2px solid rgba(216, 180, 254, 0.38);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(250, 204, 21, 0.25), transparent 9rem),
+          linear-gradient(135deg, rgba(88, 28, 135, 0.94), rgba(126, 34, 206, 0.78) 46%, rgba(30, 64, 175, 0.72));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.16),
+          0 18px 44px rgba(0, 0, 0, 0.3),
+          0 0 42px rgba(168, 85, 247, 0.18);
+        scrollbar-width: thin;
+        scrollbar-color: #fde047 rgba(2, 6, 23, 0.34);
+      }
+
+      .battle-pass-topbar {
+        min-width: 760px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.45rem 0.55rem;
+        border-radius: 12px;
+        background:
+          linear-gradient(135deg, rgba(76, 29, 149, 0.96), rgba(88, 28, 135, 0.82));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.16),
+          0 10px 22px rgba(0, 0, 0, 0.18);
+      }
+
+      .battle-pass-season-wrap {
+        display: grid;
+        grid-template-columns: 6.5rem 1fr;
+        align-items: center;
+        gap: 0.85rem;
+        flex: 1;
+      }
+
+      .battle-pass-season {
+        color: #ecfeff;
+        font-family: Arial Black, Arial, sans-serif;
+        font-weight: 900;
+        line-height: 1.15;
+        text-shadow: 1px 1px 0 #000;
+      }
+
+      .battle-pass-progress {
+        overflow: hidden;
+        height: 1.15rem;
+        max-width: 420px;
+        border: 3px solid rgba(15, 23, 42, 0.86);
+        border-radius: 999px;
+        background:
+          repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.72) 0 34px, rgba(30, 41, 59, 0.72) 34px 36px);
+        box-shadow:
+          inset 0 2px 8px rgba(0, 0, 0, 0.38),
+          0 0 12px rgba(250, 204, 21, 0.14);
+      }
+
+      .battle-pass-fill {
+        height: 100%;
+        border-radius: inherit;
+        background:
+          repeating-linear-gradient(90deg, #facc15 0 28px, #f97316 28px 32px);
+      }
+
+      .battle-pass-track {
+        min-width: 760px;
+        display: grid;
+        grid-template-columns: 8.5rem repeat(var(--battle-pass-count), 9.3rem);
+        gap: 0.65rem;
+        align-items: stretch;
+      }
+
+      .pass-label {
+        min-height: 7.4rem;
+        display: grid;
+        place-items: center;
+        padding: 0.7rem;
+        border: 3px solid rgba(255, 255, 255, 0.22);
+        border-radius: 18px;
+        color: #111827;
+        font-weight: 1000;
+        text-align: center;
+        text-transform: uppercase;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+        box-shadow:
+          inset 0 2px 0 rgba(255, 255, 255, 0.36),
+          0 0 26px rgba(250, 204, 21, 0.28);
+      }
+
+      .pass-label.gold {
+        background: linear-gradient(135deg, #fef08a, #facc15 55%, #f97316);
+      }
+
+      .pass-label.free {
+        background: linear-gradient(135deg, #67e8f9, #22d3ee 54%, #2563eb);
+      }
+
+      .pass-reward {
+        position: relative;
+        min-height: 7.4rem;
+        display: grid;
+        place-items: center;
+        gap: 0.32rem;
+        padding: 0.65rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 18px;
+        color: #ffffff;
+        text-align: center;
+        background:
+          radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.2), transparent 3rem),
+          linear-gradient(145deg, #ec4899, #a855f7);
+        box-shadow:
+          inset 0 2px 0 rgba(255, 255, 255, 0.2),
+          inset 0 -5px 0 rgba(2, 6, 23, 0.2),
+          0 12px 22px rgba(0, 0, 0, 0.24);
+      }
+
+      .pass-reward.free {
+        background:
+          radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.18), transparent 3rem),
+          linear-gradient(145deg, #06b6d4, #2563eb);
+      }
+
+      .pass-reward.locked {
+        filter: grayscale(0.2) brightness(0.72);
+      }
+
+      .pass-icon {
+        width: 3.1rem;
+        height: 3.1rem;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 1.55rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      }
+
+      .pass-reward strong {
+        font-size: 0.9rem;
+        text-shadow: 1px 1px 0 #000;
+      }
+
+      .pass-reward button {
+        min-height: 32px;
+        padding: 0.32rem 0.58rem;
+        font-size: 0.78rem;
+      }
+
+      .pass-levels {
+        min-width: 760px;
+        display: grid;
+        grid-template-columns: 8.5rem repeat(var(--battle-pass-count), 9.3rem);
+        gap: 0.65rem;
+        align-items: center;
+      }
+
+      .pass-level {
+        width: 2rem;
+        height: 2rem;
+        display: grid;
+        place-items: center;
+        justify-self: center;
+        border-radius: 999px;
+        background: linear-gradient(145deg, #64748b, #334155);
+        color: #fff;
+        font-weight: 900;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+      }
+
+      .pass-level.unlocked {
+        background: linear-gradient(145deg, #facc15, #f97316);
+        color: #111827;
+      }
+
+      .profile-card strong,
+      .shop-item strong,
+      .quest-card strong {
+        color: #5eead4;
+        font-size: 1.15rem;
+      }
+
+      .shop-list {
+        max-height: 18rem;
+        overflow: auto;
+        display: grid;
+        gap: 0.65rem;
+        padding-right: 0.35rem;
+        scrollbar-width: thin;
+        scrollbar-color: #5eead4 rgba(2, 6, 23, 0.52);
+      }
+
+      .shop-list::-webkit-scrollbar,
+      .chat-messages::-webkit-scrollbar {
+        display: block;
+        width: 10px;
+      }
+
+      .shop-list::-webkit-scrollbar-thumb,
+      .chat-messages::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: linear-gradient(180deg, #5eead4, #22c55e);
+      }
+
+      .room-chat {
+        display: grid;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(134, 239, 172, 0.22);
+        border-radius: 20px;
+        background:
+          linear-gradient(145deg, rgba(2, 6, 23, 0.48), rgba(20, 83, 45, 0.22));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 12px 28px rgba(0, 0, 0, 0.16);
+      }
+
+      .room-chat::before {
+        content: "Room Chat";
+        color: #bbf7d0;
+        font-weight: 900;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        text-shadow: 0 0 16px rgba(94, 234, 212, 0.24);
+      }
+
+      .room-chat[hidden] {
+        display: none;
+      }
+
+      .chat-messages {
+        max-height: 8rem;
+        overflow: auto;
+        display: grid;
+        gap: 0.45rem;
+        padding: 0.25rem;
+      }
+
+      .chat-message {
+        padding: 0.45rem 0.55rem;
+        border: 1px solid rgba(134, 239, 172, 0.12);
+        border-radius: 12px;
+        background: rgba(2, 6, 23, 0.34);
+      }
+
+      .chat-message span {
+        color: #cbd5e1;
+        font-size: 0.85rem;
+      }
+
+      .room-chat form,
+      .chat-input-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
       }
 
       .admin-user-actions button {
@@ -1142,6 +1707,57 @@
       }
 
       @media (max-width: 560px) {
+        .start-screen {
+          place-items: stretch;
+          padding: 0;
+        }
+
+        .start-panel {
+          width: 100vw;
+          min-height: 100dvh;
+          max-height: 100dvh;
+          border: 0;
+          border-radius: 0;
+          padding: 0.85rem;
+          align-content: start;
+          background:
+            linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px) 0 0 / 24px 24px,
+            linear-gradient(0deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+            radial-gradient(circle at 50% 16%, rgba(94, 234, 212, 0.12), transparent 14rem),
+            linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(5, 46, 22, 0.82));
+        }
+
+        .start-panel h2 {
+          font-size: clamp(3.2rem, 18vw, 5.4rem);
+        }
+
+        .start-actions {
+          grid-template-columns: 1fr;
+          gap: 0.85rem;
+          padding: 0.75rem;
+          border-radius: 24px;
+        }
+
+        .start-actions button,
+        .start-submenu button {
+          min-height: 60px;
+          font-size: 1rem;
+        }
+
+        .start-submenu {
+          max-height: calc(100dvh - 1.7rem);
+          overflow: auto;
+          border-radius: 24px;
+        }
+
+        main {
+          width: 100vw;
+          min-height: 100vh;
+          border-radius: 0;
+          border-left: 0;
+          border-right: 0;
+        }
+
         header {
           align-items: stretch;
           flex-direction: column;
@@ -1153,6 +1769,29 @@
 
         .stat {
           flex: 1;
+        }
+
+        .game {
+          padding: 0.65rem;
+          border-radius: 18px;
+        }
+
+        canvas {
+          border-radius: 14px;
+        }
+
+        .controls {
+          flex-wrap: wrap;
+        }
+
+        .controls button {
+          flex: 1 1 8rem;
+          min-width: 0;
+        }
+
+        .room-chat form,
+        .chat-input-row {
+          grid-template-columns: 1fr;
         }
 
         .admin-points {
@@ -1171,9 +1810,500 @@
           grid-template-columns: 1fr;
         }
 
+        .profile-grid {
+          grid-template-columns: 1fr;
+        }
+
         .settings-controls {
           grid-template-columns: 1fr;
         }
+
+        .start-showcase {
+          grid-template-columns: 1fr;
+        }
+
+        .pad {
+          width: min(92vw, 360px);
+          gap: 0.75rem;
+          padding: 0.8rem;
+        }
+
+        .pad button {
+          min-height: 88px;
+          border-radius: 22px;
+          font-size: 1.18rem;
+        }
+
+        .battle-pass-board {
+          margin-inline: -0.25rem;
+          padding: 0.65rem;
+        }
+
+        .battle-pass-topbar,
+        .battle-pass-track,
+        .pass-levels {
+          min-width: 660px;
+        }
+
+        .battle-pass-track,
+        .pass-levels {
+          grid-template-columns: 7rem repeat(var(--battle-pass-count), 8rem);
+        }
+      }
+
+      @media (max-width: 950px) and (orientation: landscape) {
+        body {
+          min-height: 100dvh;
+          place-items: stretch;
+          overflow: hidden;
+        }
+
+        main {
+          width: 100vw;
+          height: 100dvh;
+          max-height: 100dvh;
+          grid-template-columns: minmax(8rem, 22vw) minmax(0, 1fr);
+          grid-template-rows: auto minmax(0, 1fr);
+          gap: 0.5rem;
+          padding: 0.5rem;
+          border: 0;
+          border-radius: 0;
+          overflow: hidden;
+        }
+
+        body:not(.admin-mode) main {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        body:not(.admin-mode) .account-bar,
+        body:not(.admin-mode) .admin-panel {
+          display: none;
+        }
+
+        .account-bar {
+          grid-column: 1;
+          grid-row: 1;
+          align-self: stretch;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0.45rem;
+          padding: 0.5rem;
+          font-size: 0.76rem;
+        }
+
+        body.admin-mode .account-bar {
+          min-height: 0;
+          align-self: start;
+          padding: 0.35rem;
+          background: transparent;
+          border: 0;
+          box-shadow: none;
+        }
+
+        body.admin-mode #accountStatus,
+        body.admin-mode #logoutButton {
+          display: none;
+        }
+
+        .account-actions {
+          flex-wrap: nowrap;
+          justify-content: stretch;
+        }
+
+        .account-bar button {
+          min-height: 32px;
+          padding: 0.3rem 0.45rem;
+          font-size: 0.72rem;
+        }
+
+        body.admin-mode #adminToggleButton {
+          width: 100%;
+          min-height: 42px;
+          font-size: 0.78rem;
+        }
+
+        .admin-panel {
+          grid-column: 1;
+          grid-row: 2;
+          max-height: 100%;
+          min-height: 0;
+          overflow: auto;
+          padding: 0.55rem;
+          gap: 0.45rem;
+          border-radius: 16px;
+        }
+
+        .admin-panel h2,
+        .admin-section-title {
+          font-size: 0.9rem;
+        }
+
+        .admin-stats,
+        .admin-points,
+        .admin-quick-actions,
+        .admin-user-actions {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          grid-column: 2;
+          grid-row: 1;
+          align-items: center;
+          flex-direction: row;
+          padding: 0.45rem;
+        }
+
+        body:not(.admin-mode) header,
+        body:not(.admin-mode) .game {
+          grid-column: 1;
+        }
+
+        h1 {
+          font-size: clamp(1.35rem, 5vw, 2.4rem);
+        }
+
+        .scoreboard {
+          gap: 0.4rem;
+        }
+
+        .stat {
+          min-width: 3.7rem;
+          padding: 0.35rem;
+          font-size: 0.72rem;
+        }
+
+        .stat span {
+          font-size: 1rem;
+        }
+
+        .game {
+          grid-column: 2;
+          grid-row: 2;
+          min-height: 0;
+          height: 100%;
+          display: grid;
+          grid-template-columns: minmax(0, min(62dvh, 46vw)) minmax(11rem, 27vw);
+          grid-template-rows: minmax(0, 1fr) auto auto auto;
+          grid-template-areas:
+            "board pad"
+            "status pad"
+            "controls pad"
+            "chat pad";
+          align-content: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          border-radius: 18px;
+        }
+
+        canvas {
+          grid-area: board;
+          width: auto;
+          height: min(62dvh, 48vw);
+          max-width: 100%;
+          justify-self: center;
+          align-self: center;
+        }
+
+        .play-overlay {
+          width: min(62dvh, 48vw);
+          max-width: calc(100% - 1rem);
+          inset: 0.5rem auto auto 0.5rem;
+        }
+
+        .status {
+          grid-area: status;
+          padding: 0.3rem 0.55rem;
+          font-size: 0.78rem;
+        }
+
+        .controls {
+          grid-area: controls;
+          justify-content: center;
+          padding: 0.35rem;
+          gap: 0.4rem;
+        }
+
+        .controls button {
+          min-width: 0;
+          min-height: 38px;
+          padding: 0.45rem 0.6rem;
+          font-size: 0.78rem;
+        }
+
+        .pad {
+          grid-area: pad;
+          width: min(31vw, 15rem);
+          align-self: center;
+          margin: 0;
+          gap: 0.65rem;
+          padding: 0.7rem;
+        }
+
+        .pad button {
+          aspect-ratio: 1;
+          min-height: 82px;
+          font-size: 0;
+          border-radius: 18px;
+        }
+
+        .pad button::after {
+          font-size: 1.38rem;
+          color: #ecfeff;
+        }
+
+        .pad .up::after {
+          content: "Up";
+        }
+
+        .pad .left::after {
+          content: "Left";
+        }
+
+        .pad .down::after {
+          content: "Down";
+        }
+
+        .pad .right::after {
+          content: "Right";
+        }
+
+        .room-chat {
+          grid-area: chat;
+          max-height: 8rem;
+          overflow: auto;
+        }
+      }
+
+      body.phone-preview-mode {
+        min-height: 100vh;
+        place-items: stretch;
+        overflow: hidden;
+      }
+
+      body.phone-preview-mode .start-screen {
+        place-items: stretch;
+        padding: 0;
+      }
+
+      body.phone-preview-mode .start-panel {
+        width: 100vw;
+        min-height: 100vh;
+        max-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        padding: 0.85rem;
+        align-content: start;
+        background:
+          linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px) 0 0 / 24px 24px,
+          linear-gradient(0deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+          radial-gradient(circle at 50% 16%, rgba(94, 234, 212, 0.12), transparent 14rem),
+          linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(5, 46, 22, 0.82));
+      }
+
+      body.phone-preview-mode .start-panel h2 {
+        font-size: clamp(3.2rem, 18vw, 5.4rem);
+      }
+
+      body.phone-preview-mode .start-actions {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        padding: 0.75rem;
+        border-radius: 24px;
+      }
+
+      body.phone-preview-mode .start-actions button,
+      body.phone-preview-mode .start-submenu button {
+        min-height: 60px;
+        font-size: 1rem;
+      }
+
+      body.phone-preview-mode .start-submenu {
+        max-height: calc(100vh - 1.7rem);
+        overflow: auto;
+        border-radius: 24px;
+      }
+
+      body.phone-preview-mode .start-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      body.phone-preview-mode main {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        grid-template-columns: minmax(8rem, 22vw) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border: 0;
+        border-radius: 0;
+        overflow: hidden;
+      }
+
+      body.phone-preview-mode .account-bar {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+        padding: 0.35rem;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        font-size: 0.76rem;
+      }
+
+      body.phone-preview-mode #accountStatus,
+      body.phone-preview-mode #logoutButton {
+        display: none;
+      }
+
+      body.phone-preview-mode .account-actions {
+        flex-wrap: wrap;
+      }
+
+      body.phone-preview-mode .account-bar button {
+        min-height: 38px;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.74rem;
+      }
+
+      body.phone-preview-mode .admin-panel {
+        grid-column: 1;
+        grid-row: 2;
+        max-height: 100%;
+        min-height: 0;
+        overflow: auto;
+        padding: 0.55rem;
+        gap: 0.45rem;
+        border-radius: 16px;
+      }
+
+      body.phone-preview-mode .admin-stats,
+      body.phone-preview-mode .admin-points,
+      body.phone-preview-mode .admin-quick-actions,
+      body.phone-preview-mode .admin-user-actions {
+        grid-template-columns: 1fr;
+      }
+
+      body.phone-preview-mode header {
+        grid-column: 2;
+        grid-row: 1;
+        align-items: center;
+        flex-direction: row;
+        padding: 0.45rem;
+      }
+
+      body.phone-preview-mode h1 {
+        font-size: clamp(1.35rem, 5vw, 2.4rem);
+      }
+
+      body.phone-preview-mode .scoreboard {
+        gap: 0.4rem;
+      }
+
+      body.phone-preview-mode .stat {
+        min-width: 3.7rem;
+        padding: 0.35rem;
+        font-size: 0.72rem;
+      }
+
+      body.phone-preview-mode .stat span {
+        font-size: 1rem;
+      }
+
+      body.phone-preview-mode .game {
+        grid-column: 2;
+        grid-row: 2;
+        min-height: 0;
+        height: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, min(62vh, 46vw)) minmax(11rem, 27vw);
+        grid-template-rows: minmax(0, 1fr) auto auto auto;
+        grid-template-areas:
+          "board pad"
+          "status pad"
+          "controls pad"
+          "chat pad";
+        align-content: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 18px;
+      }
+
+      body.phone-preview-mode canvas {
+        grid-area: board;
+        width: auto;
+        height: min(62vh, 48vw);
+        max-width: 100%;
+        justify-self: center;
+        align-self: center;
+      }
+
+      body.phone-preview-mode .status {
+        grid-area: status;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.78rem;
+      }
+
+      body.phone-preview-mode .controls {
+        grid-area: controls;
+        justify-content: center;
+        padding: 0.35rem;
+        gap: 0.4rem;
+      }
+
+      body.phone-preview-mode .controls button {
+        min-width: 0;
+        min-height: 38px;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.78rem;
+      }
+
+      body.phone-preview-mode .pad {
+        grid-area: pad;
+        width: min(31vw, 15rem);
+        align-self: center;
+        margin: 0;
+        gap: 0.65rem;
+        padding: 0.7rem;
+      }
+
+      body.phone-preview-mode .pad button {
+        aspect-ratio: 1;
+        min-height: 82px;
+        font-size: 0;
+        border-radius: 18px;
+      }
+
+      body.phone-preview-mode .pad button::after {
+        font-size: 1.38rem;
+        color: #ecfeff;
+      }
+
+      body.phone-preview-mode .pad .up::after {
+        content: "Up";
+      }
+
+      body.phone-preview-mode .pad .left::after {
+        content: "Left";
+      }
+
+      body.phone-preview-mode .pad .down::after {
+        content: "Down";
+      }
+
+      body.phone-preview-mode .pad .right::after {
+        content: "Right";
+      }
+
+      body.phone-preview-mode .room-chat {
+        grid-area: chat;
+        max-height: 8rem;
+        overflow: auto;
       }
     </style>
   </head>
@@ -1189,6 +2319,14 @@
         <div class="start-actions">
           <button type="button" id="startPlayButton">Play</button>
           <button type="button" id="startGamesButton">Games</button>
+          <button type="button" id="startProfileButton">Profile</button>
+          <button type="button" id="startShopButton">Shop</button>
+          <button type="button" id="startPremiumButton">Premium</button>
+          <button type="button" id="startDonateButton">Donate</button>
+          <button type="button" id="startBattlePassButton">Battle Pass</button>
+          <button type="button" id="startLeaderboardButton">Leaderboard</button>
+          <button type="button" id="startQuestsButton">Quests</button>
+          <button type="button" id="startSocialButton">Social</button>
           <button type="button" id="startSettingsButton">Settings</button>
           <button type="button" id="startAccountButton">Account</button>
         </div>
@@ -1224,8 +2362,86 @@
             <button type="button" id="startCreateRoomButton">Create Room</button>
             <button type="button" id="startJoinRoomButton">Join Room</button>
           </div>
+          <select id="startRoomVisibilitySelect" aria-label="Room visibility">
+            <option value="public">Public Room</option>
+            <option value="private">Private Room</option>
+          </select>
           <input id="startRoomCodeInput" type="text" maxlength="8" placeholder="Room code">
+          <button type="button" id="refreshLobbyButton">Refresh Public Rooms</button>
+          <div class="admin-rooms" id="publicRoomsList" aria-label="Public rooms list"></div>
           <p class="room-note" id="startRoomNote"></p>
+        </div>
+        <div class="start-submenu" id="startProfileMenu" aria-label="Profile">
+          <button type="button" id="startBackFromProfile">Back</button>
+          <h3>Profile</h3>
+          <div class="profile-grid" id="profileStats"></div>
+          <div class="admin-users" id="profileBestScores"></div>
+          <p class="room-note" id="profileMessage"></p>
+        </div>
+        <div class="start-submenu" id="startShopMenu" aria-label="Shop">
+          <button type="button" id="startBackFromShop">Back</button>
+          <h3>Shop</h3>
+          <div class="shop-list" id="shopList"></div>
+          <p class="room-note" id="shopMessage"></p>
+        </div>
+        <div class="start-submenu" id="startPremiumMenu" aria-label="Premium">
+          <button type="button" id="startBackFromPremium">Back</button>
+          <h3>Sigma Premium</h3>
+          <div class="start-showcase premium-showcase">
+            <div class="showcase-copy">
+              <strong>VIP + Premium cosmetics</strong>
+              <span id="premiumStatus">Log in to see premium status.</span>
+              <p>Premium unlocks special skins, colors, trails, music packs and a VIP profile badge.</p>
+            </div>
+          </div>
+          <div class="shop-list" id="premiumList"></div>
+          <p class="room-note" id="premiumMessage"></p>
+        </div>
+        <div class="start-submenu" id="startDonateMenu" aria-label="Donate">
+          <button type="button" id="startBackFromDonate">Back</button>
+          <h3>Donate</h3>
+          <div class="start-showcase donate-showcase">
+            <div class="showcase-copy">
+              <strong>Support Sigma Studio</strong>
+              <span>Donations help keep the game online and add new updates.</span>
+              <p>Connect your real donation link in the code, then these buttons will open it.</p>
+            </div>
+          </div>
+          <div class="shop-list" id="donateList"></div>
+          <p class="room-note" id="donateMessage"></p>
+        </div>
+        <div class="start-submenu" id="startBattlePassMenu" aria-label="Battle pass">
+          <button type="button" id="startBackFromBattlePass">Back</button>
+          <h3>Battle Pass</h3>
+          <div class="battle-pass-board" id="battlePassList"></div>
+          <p class="room-note" id="battlePassMessage"></p>
+        </div>
+        <div class="start-submenu" id="startLeaderboardMenu" aria-label="Leaderboard">
+          <button type="button" id="startBackFromLeaderboard">Back</button>
+          <h3>Leaderboard</h3>
+          <div class="shop-list" id="leaderboardList"></div>
+          <p class="room-note" id="leaderboardMessage"></p>
+        </div>
+        <div class="start-submenu" id="startQuestsMenu" aria-label="Quests and achievements">
+          <button type="button" id="startBackFromQuests">Back</button>
+          <h3>Quests</h3>
+          <div class="shop-list" id="questsList"></div>
+          <h3>Achievements</h3>
+          <div class="shop-list" id="achievementsList"></div>
+          <p class="room-note" id="questsMessage"></p>
+        </div>
+        <div class="start-submenu" id="startSocialMenu" aria-label="Friends">
+          <button type="button" id="startBackFromSocial">Back</button>
+          <h3>Friends</h3>
+          <input id="friendSearchInput" type="text" maxlength="18" placeholder="Username">
+          <button type="button" id="addFriendButton">Send Friend Request</button>
+          <h3>Incoming Requests</h3>
+          <div class="admin-users" id="friendRequestsList"></div>
+          <h3>Sent Requests</h3>
+          <div class="admin-users" id="sentRequestsList"></div>
+          <h3>Your Friends</h3>
+          <div class="admin-users" id="friendsList"></div>
+          <p class="room-note" id="socialMessage"></p>
         </div>
         <div class="start-submenu" id="startSettingsMenu" aria-label="Main menu settings">
           <h3>Settings</h3>
@@ -1254,6 +2470,7 @@
               <option value="round">Round Skin</option>
               <option value="neon">Neon Skin</option>
               <option value="block">Block Skin</option>
+              <option value="sigma">Sigma Skin</option>
             </select>
             <select id="startColorSelect" aria-label="Color">
               <option value="teal">Teal</option>
@@ -1262,6 +2479,7 @@
               <option value="purple">Purple</option>
               <option value="pink">Pink</option>
               <option value="orange">Orange</option>
+              <option value="gold">Gold</option>
             </select>
           </div>
           <button type="button" id="startResetRecordButton">Reset Record</button>
@@ -1289,7 +2507,11 @@
     <main>
       <div class="account-bar">
         <span id="accountStatus">Not logged in</span>
-        <button type="button" id="logoutButton" hidden>Log out</button>
+        <div class="account-actions">
+          <button type="button" id="adminToggleButton" hidden>Admin Panel</button>
+          <button type="button" id="phoneModeButton" hidden>Phone Mode</button>
+          <button type="button" id="logoutButton" hidden>Log out</button>
+        </div>
       </div>
 
       <section class="admin-panel" id="adminPanel" aria-label="Admin panel">
@@ -1344,6 +2566,14 @@
           </div>
         </div>
         <p class="status" id="status">Use arrow keys or WASD to play.</p>
+        <div class="room-chat" id="roomChat" hidden>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="room-form">
+            <input id="chatInput" type="text" maxlength="80" placeholder="Room chat">
+            <button type="button" id="sendChatButton">Send</button>
+          </div>
+          <p class="room-note" id="chatMessage"></p>
+        </div>
         <div class="controls">
           <button type="button" id="restart">Restart</button>
           <button type="button" id="shootButton">Shoot</button>
@@ -1411,6 +2641,7 @@
                 <option value="round">Round</option>
                 <option value="neon">Neon</option>
                 <option value="block">Block</option>
+                <option value="sigma">Sigma</option>
               </select>
             </label>
             <label>
@@ -1422,6 +2653,7 @@
                 <option value="purple">Purple</option>
                 <option value="pink">Pink</option>
                 <option value="orange">Orange</option>
+                <option value="gold">Gold</option>
               </select>
             </label>
           </div>
@@ -1514,12 +2746,36 @@
       const startStatus = document.getElementById("startStatus");
       const startPlayButton = document.getElementById("startPlayButton");
       const startGamesButton = document.getElementById("startGamesButton");
+      const startProfileButton = document.getElementById("startProfileButton");
+      const startShopButton = document.getElementById("startShopButton");
+      const startPremiumButton = document.getElementById("startPremiumButton");
+      const startDonateButton = document.getElementById("startDonateButton");
+      const startBattlePassButton = document.getElementById("startBattlePassButton");
+      const startLeaderboardButton = document.getElementById("startLeaderboardButton");
+      const startQuestsButton = document.getElementById("startQuestsButton");
+      const startSocialButton = document.getElementById("startSocialButton");
       const startSettingsButton = document.getElementById("startSettingsButton");
       const startAccountButton = document.getElementById("startAccountButton");
       const startGamesMenu = document.getElementById("startGamesMenu");
+      const startProfileMenu = document.getElementById("startProfileMenu");
+      const startShopMenu = document.getElementById("startShopMenu");
+      const startPremiumMenu = document.getElementById("startPremiumMenu");
+      const startDonateMenu = document.getElementById("startDonateMenu");
+      const startBattlePassMenu = document.getElementById("startBattlePassMenu");
+      const startLeaderboardMenu = document.getElementById("startLeaderboardMenu");
+      const startQuestsMenu = document.getElementById("startQuestsMenu");
+      const startSocialMenu = document.getElementById("startSocialMenu");
       const startSettingsMenu = document.getElementById("startSettingsMenu");
       const startAccountMenu = document.getElementById("startAccountMenu");
       const startBackFromGames = document.getElementById("startBackFromGames");
+      const startBackFromProfile = document.getElementById("startBackFromProfile");
+      const startBackFromShop = document.getElementById("startBackFromShop");
+      const startBackFromPremium = document.getElementById("startBackFromPremium");
+      const startBackFromDonate = document.getElementById("startBackFromDonate");
+      const startBackFromBattlePass = document.getElementById("startBackFromBattlePass");
+      const startBackFromLeaderboard = document.getElementById("startBackFromLeaderboard");
+      const startBackFromQuests = document.getElementById("startBackFromQuests");
+      const startBackFromSocial = document.getElementById("startBackFromSocial");
       const startShowcaseThumb = document.getElementById("startShowcaseThumb");
       const startShowcaseIcon = document.getElementById("startShowcaseIcon");
       const startShowcaseTitle = document.getElementById("startShowcaseTitle");
@@ -1547,8 +2803,34 @@
       const startAccountMessage = document.getElementById("startAccountMessage");
       const startCreateRoomButton = document.getElementById("startCreateRoomButton");
       const startJoinRoomButton = document.getElementById("startJoinRoomButton");
+      const startRoomVisibilitySelect = document.getElementById("startRoomVisibilitySelect");
       const startRoomCodeInput = document.getElementById("startRoomCodeInput");
+      const refreshLobbyButton = document.getElementById("refreshLobbyButton");
+      const publicRoomsList = document.getElementById("publicRoomsList");
       const startRoomNote = document.getElementById("startRoomNote");
+      const profileStats = document.getElementById("profileStats");
+      const profileBestScores = document.getElementById("profileBestScores");
+      const profileMessage = document.getElementById("profileMessage");
+      const shopList = document.getElementById("shopList");
+      const shopMessage = document.getElementById("shopMessage");
+      const premiumStatus = document.getElementById("premiumStatus");
+      const premiumList = document.getElementById("premiumList");
+      const premiumMessage = document.getElementById("premiumMessage");
+      const donateList = document.getElementById("donateList");
+      const donateMessage = document.getElementById("donateMessage");
+      const battlePassList = document.getElementById("battlePassList");
+      const battlePassMessage = document.getElementById("battlePassMessage");
+      const leaderboardList = document.getElementById("leaderboardList");
+      const leaderboardMessage = document.getElementById("leaderboardMessage");
+      const questsList = document.getElementById("questsList");
+      const achievementsList = document.getElementById("achievementsList");
+      const questsMessage = document.getElementById("questsMessage");
+      const friendSearchInput = document.getElementById("friendSearchInput");
+      const addFriendButton = document.getElementById("addFriendButton");
+      const friendsList = document.getElementById("friendsList");
+      const friendRequestsList = document.getElementById("friendRequestsList");
+      const sentRequestsList = document.getElementById("sentRequestsList");
+      const socialMessage = document.getElementById("socialMessage");
       const scoreEl = document.getElementById("score");
       const bestEl = document.getElementById("best");
       const localScoreboard = document.getElementById("localScoreboard");
@@ -1558,6 +2840,8 @@
       const playerTwoNameEl = document.getElementById("playerTwoName");
       const playerTwoScoreEl = document.getElementById("playerTwoScore");
       const accountStatus = document.getElementById("accountStatus");
+      const adminToggleButton = document.getElementById("adminToggleButton");
+      const phoneModeButton = document.getElementById("phoneModeButton");
       const logoutButton = document.getElementById("logoutButton");
       const adminPanel = document.getElementById("adminPanel");
       const adminRoomCount = document.getElementById("adminRoomCount");
@@ -1587,6 +2871,11 @@
       const accountBackButton = document.getElementById("accountBackButton");
       const authMessage = document.getElementById("authMessage");
       const statusEl = document.getElementById("status");
+      const roomChat = document.getElementById("roomChat");
+      const chatMessages = document.getElementById("chatMessages");
+      const chatInput = document.getElementById("chatInput");
+      const sendChatButton = document.getElementById("sendChatButton");
+      const chatMessage = document.getElementById("chatMessage");
       const restartButton = document.getElementById("restart");
       const shootButton = document.getElementById("shootButton");
       const pauseButton = document.getElementById("pause");
@@ -1784,6 +3073,9 @@
       let gameSettings = getStoredGameSettings();
       let createdRoomCode = "";
       let adminUsersCache = {};
+      let adminPanelOpen = false;
+      let phonePreviewMode = false;
+      let currentUserData = null;
       let musicContext = null;
       let musicGain = null;
       let musicTimer = null;
@@ -1795,7 +3087,8 @@
         blue: { head: "#93c5fd", body: "#3b82f6", top: "#bfdbfe" },
         purple: { head: "#c4b5fd", body: "#8b5cf6", top: "#ddd6fe" },
         pink: { head: "#f9a8d4", body: "#ec4899", top: "#fbcfe8" },
-        orange: { head: "#fdba74", body: "#f97316", top: "#fed7aa" }
+        orange: { head: "#fdba74", body: "#f97316", top: "#fed7aa" },
+        gold: { head: "#fde68a", body: "#f59e0b", top: "#fef3c7" }
       };
       const boardThemeColors = {
         midnight: "#020617",
@@ -1807,6 +3100,52 @@
         normal: "620px",
         large: "760px"
       };
+      const shopItems = [
+        { id: "skin-round", type: "skin", value: "round", name: "Round Skin", cost: 40 },
+        { id: "skin-neon", type: "skin", value: "neon", name: "Neon Skin", cost: 80 },
+        { id: "skin-block", type: "skin", value: "block", name: "Block Skin", cost: 60 },
+        { id: "color-blue", type: "color", value: "blue", name: "Blue Color", cost: 35 },
+        { id: "color-purple", type: "color", value: "purple", name: "Purple Color", cost: 45 },
+        { id: "color-pink", type: "color", value: "pink", name: "Pink Color", cost: 45 },
+        { id: "color-orange", type: "color", value: "orange", name: "Orange Color", cost: 50 },
+        { id: "trail-spark", type: "trail", value: "spark", name: "Spark Trail", cost: 90 },
+        { id: "music-retro", type: "music", value: "retro", name: "Retro Music Pack", cost: 120 }
+      ];
+      const premiumItems = [
+        { id: "skin-sigma", type: "skin", value: "sigma", name: "Sigma Premium Skin", cost: 0, premium: true },
+        { id: "color-gold", type: "color", value: "gold", name: "Gold VIP Color", cost: 0, vip: true },
+        { id: "trail-vip", type: "trail", value: "vip", name: "VIP Trail", cost: 0, vip: true },
+        { id: "music-premium", type: "music", value: "premium", name: "Premium Music Pack", cost: 0, premium: true }
+      ];
+      const allShopItems = [...shopItems, ...premiumItems];
+      const battlePassRewards = [
+        { level: 1, free: "100 coins", premium: "Gold VIP color", coins: 100, xp: 0, premiumItem: "color-gold" },
+        { level: 2, free: "80 XP", premium: "VIP trail", coins: 0, xp: 80, premiumItem: "trail-vip" },
+        { level: 3, free: "Blue color", premium: "Sigma skin", coins: 0, xp: 0, freeItem: "color-blue", premiumItem: "skin-sigma" },
+        { level: 4, free: "150 coins", premium: "Premium music", coins: 150, xp: 0, premiumItem: "music-premium" },
+        { level: 5, free: "200 XP", premium: "Premium badge glow", coins: 0, xp: 200, premiumItem: "skin-sigma" }
+      ];
+      const donationLinks = {
+        main: "https://boosty.to/sigmaboyko228/posts/c185c4d3-f370-4a43-8fda-5e7580eb8e64"
+      };
+      const donationPacks = [
+        { id: "supporter", name: "Supporter", price: "$1", perk: "Thank-you badge idea" },
+        { id: "vip", name: "VIP Donate", price: "$3", perk: "VIP cosmetic idea" },
+        { id: "premium", name: "Premium Donate", price: "$5", perk: "Premium cosmetics idea" },
+        { id: "legend", name: "Sigma Legend", price: "$10", perk: "Special profile frame idea" }
+      ];
+      const achievementDefs = [
+        { id: "score10", name: "Score 10", check: () => score >= 10, xp: 50, coins: 20 },
+        { id: "score50", name: "Score 50", check: () => score >= 50, xp: 140, coins: 60 },
+        { id: "score100", name: "Score 100", check: () => score >= 100, xp: 300, coins: 120 },
+        { id: "playOnline", name: "Play Online", check: () => currentGame.startsWith("online-"), xp: 80, coins: 35 },
+        { id: "buyItem", name: "Buy Shop Item", check: () => false, xp: 70, coins: 20 }
+      ];
+      const questDefs = [
+        { id: "play1", name: "Play 1 game", target: 1, xp: 40, coins: 20 },
+        { id: "score25", name: "Earn 25 score", target: 25, xp: 80, coins: 35 },
+        { id: "online1", name: "Join 1 online room", target: 1, xp: 80, coins: 35 }
+      ];
 
       function startGame(gameName) {
         if (isSinglePlayerGame(gameName)) {
@@ -1820,6 +3159,7 @@
           pongMove = 0;
           onlineMove = { x: 0, y: 0 };
           showLocalScoreboard();
+          updateChatVisibility();
         }
 
         currentGame = gameName;
@@ -1937,11 +3277,31 @@
       }
 
       function updatePlayerStyle() {
+        const selectedSkin = skinSelect.value;
+        const selectedColor = colorSelect.value;
+        const ownsSkin = !currentAccount?.username || !currentUserData || Boolean(currentUserData.ownedItems?.[`skin-${selectedSkin}`]);
+        const ownsColor = !currentAccount?.username || !currentUserData || Boolean(currentUserData.ownedItems?.[`color-${selectedColor}`]);
+
+        if (!ownsSkin || !ownsColor) {
+          applyPlayerStyleControls();
+          settingsMessage.textContent = "Buy this skin/color in Shop first.";
+          startSettingsMessage.textContent = settingsMessage.textContent;
+          return;
+        }
+
         playerStyle = {
-          skin: skinSelect.value,
-          color: colorSelect.value
+          skin: selectedSkin,
+          color: selectedColor
         };
         savePlayerStyle();
+        if (currentAccount?.username) {
+          patchCurrentUser({
+            "equipped/skin": playerStyle.skin,
+            "equipped/color": playerStyle.color,
+            skin: playerStyle.skin,
+            color: playerStyle.color
+          }).catch(() => {});
+        }
 
         const player = onlineState?.playersState?.[onlinePlayerSlot];
 
@@ -2310,6 +3670,168 @@
           authMenu.classList.add("open");
           authMenu.setAttribute("aria-hidden", "false");
           authMessage.textContent = "Log in or register to play.";
+        }
+      }
+
+      function getLevelFromXp(xp) {
+        return Math.floor(Math.sqrt(Math.max(0, Number(xp || 0)) / 100)) + 1;
+      }
+
+      function getUserKeyFromAccount() {
+        return currentAccount?.username ? usernameKey(currentAccount.username) : "";
+      }
+
+      function normalizeUserProgress(user = {}) {
+        const ownedItems = {
+          "skin-classic": true,
+          "color-teal": true,
+          "color-green": true,
+          ...(user.ownedItems || {})
+        };
+        const xp = Number(user.xp || 0);
+
+        return {
+          ...user,
+          xp,
+          level: getLevelFromXp(xp),
+          coins: Number(user.coins || 0),
+          points: Number(user.points || 0),
+          vip: Boolean(user.vip),
+          premium: Boolean(user.premium),
+          battlePass: {
+            premium: Boolean(user.battlePass?.premium),
+            claimed: user.battlePass?.claimed || {}
+          },
+          ownedItems,
+          equipped: {
+            skin: user.equipped?.skin || user.skin || playerStyle.skin || "classic",
+            color: user.equipped?.color || user.color || playerStyle.color || "teal",
+            trail: user.equipped?.trail || "",
+            music: user.equipped?.music || ""
+          },
+          achievements: user.achievements || {},
+          quests: user.quests || {},
+          dailyReward: user.dailyReward || { lastClaimAt: 0, streak: 0 },
+          friends: user.friends || {},
+          friendRequests: {
+            incoming: user.friendRequests?.incoming || {},
+            sent: user.friendRequests?.sent || {}
+          },
+          mutedUntil: Number(user.mutedUntil || 0),
+          bannedUntil: Number(user.bannedUntil || 0)
+        };
+      }
+
+      async function refreshCurrentUserData() {
+        const userKey = getUserKeyFromAccount();
+
+        if (!userKey) {
+          currentUserData = null;
+          return null;
+        }
+
+        const user = await getUser(userKey);
+        currentUserData = normalizeUserProgress(user || {});
+        if (currentUserData.equipped) {
+          playerStyle = {
+            skin: currentUserData.equipped.skin || playerStyle.skin,
+            color: currentUserData.equipped.color || playerStyle.color
+          };
+          savePlayerStyle();
+          applyPlayerStyleControls();
+        }
+        return currentUserData;
+      }
+
+      async function patchCurrentUser(patch) {
+        const userKey = getUserKeyFromAccount();
+
+        if (!userKey) {
+          return null;
+        }
+
+        await patchUser(userKey, patch);
+        await refreshCurrentUserData();
+        return currentUserData;
+      }
+
+      function isCurrentUserBanned() {
+        return currentUserData?.bannedUntil && currentUserData.bannedUntil > Date.now();
+      }
+
+      function isCurrentUserMuted() {
+        return currentUserData?.mutedUntil && currentUserData.mutedUntil > Date.now();
+      }
+
+      async function grantRewards({ xp = 0, coins = 0, reason = "Reward" }) {
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        try {
+          const user = await refreshCurrentUserData();
+          const nextXp = Number(user?.xp || 0) + xp;
+          const nextCoins = Number(user?.coins || 0) + coins;
+          await patchCurrentUser({
+            xp: nextXp,
+            level: getLevelFromXp(nextXp),
+            coins: nextCoins
+          });
+          statusEl.textContent = `${reason}: +${xp} XP, +${coins} coins.`;
+        } catch {
+          statusEl.textContent = "Reward saved locally failed. Check Firebase.";
+        }
+      }
+
+      async function unlockAchievement(id, reason = "Achievement") {
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        const achievement = achievementDefs.find((item) => item.id === id);
+
+        if (!achievement) {
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+
+        if (user?.achievements?.[id]) {
+          return;
+        }
+
+        await patchCurrentUser({
+          [`achievements/${id}`]: Date.now()
+        });
+        await grantRewards({ xp: achievement.xp, coins: achievement.coins, reason });
+      }
+
+      function getQuestDayKey() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      async function addQuestProgress(id, amount) {
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        try {
+          const user = await refreshCurrentUserData();
+          const day = getQuestDayKey();
+          const current = user?.quests?.[day]?.[id]?.progress || 0;
+          await patchCurrentUser({
+            [`quests/${day}/${id}/progress`]: current + amount
+          });
+        } catch {
+          // Quest progress is optional.
+        }
+      }
+
+      async function checkScoreAchievements() {
+        for (const achievement of achievementDefs) {
+          if (achievement.check()) {
+            await unlockAchievement(achievement.id, achievement.name);
+          }
         }
       }
 
@@ -3164,7 +4686,24 @@
         pauseMenu.setAttribute("aria-hidden", "true");
         resetPauseMenu();
         statusEl.textContent = "Game over. Press Restart to play again.";
+        handleGameFinishedRewards();
         draw();
+      }
+
+      async function handleGameFinishedRewards() {
+        if (!currentAccount?.username) {
+          return;
+        }
+
+        const earnedXp = 15 + Math.min(score * 2, 200);
+        const earnedCoins = 5 + Math.min(score, 75);
+        await grantRewards({ xp: earnedXp, coins: earnedCoins, reason: "Game reward" });
+        await addQuestProgress("play1", 1);
+        await addQuestProgress("score25", score);
+        if (currentGame.startsWith("online-")) {
+          await addQuestProgress("online1", 1);
+        }
+        await checkScoreAchievements();
       }
 
       function showPlayOverlay() {
@@ -3234,6 +4773,14 @@
 
       function showStartSection(section) {
         startGamesMenu.classList.toggle("open", section === "games");
+        startProfileMenu.classList.toggle("open", section === "profile");
+        startShopMenu.classList.toggle("open", section === "shop");
+        startPremiumMenu.classList.toggle("open", section === "premium");
+        startDonateMenu.classList.toggle("open", section === "donate");
+        startBattlePassMenu.classList.toggle("open", section === "battlePass");
+        startLeaderboardMenu.classList.toggle("open", section === "leaderboard");
+        startQuestsMenu.classList.toggle("open", section === "quests");
+        startSocialMenu.classList.toggle("open", section === "social");
         startSettingsMenu.classList.toggle("open", section === "settings");
         startAccountMenu.classList.toggle("open", section === "account");
         startScreen.classList.toggle("submenu-open", section !== "main");
@@ -3244,6 +4791,31 @@
         }
         if (section === "games") {
           updateStartGameShowcase();
+          renderPublicRooms();
+        }
+        if (section === "profile") {
+          renderProfileMenu();
+        }
+        if (section === "shop") {
+          renderShopMenu();
+        }
+        if (section === "premium") {
+          renderPremiumMenu();
+        }
+        if (section === "donate") {
+          renderDonateMenu();
+        }
+        if (section === "battlePass") {
+          renderBattlePassMenu();
+        }
+        if (section === "leaderboard") {
+          renderLeaderboardMenu();
+        }
+        if (section === "quests") {
+          renderQuestsMenu();
+        }
+        if (section === "social") {
+          renderFriendsMenu();
         }
         if (section === "account") {
           startAccountMessage.textContent = currentAccount?.username
@@ -3354,6 +4926,555 @@
           : "Click Play to start.";
       }
 
+      async function renderProfileMenu() {
+        if (!currentAccount?.username) {
+          profileStats.innerHTML = "";
+          profileBestScores.textContent = "";
+          profileMessage.textContent = "Log in first.";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        const achievementCount = Object.keys(user.achievements || {}).length;
+        profileStats.innerHTML = `
+          <div class="profile-card">Username <strong>${escapeHtml(currentAccount.username)}</strong></div>
+          <div class="profile-card">Level <strong>${user.level}</strong></div>
+          <div class="profile-card">XP <strong>${user.xp}</strong></div>
+          <div class="profile-card">Coins <strong>${user.coins}</strong></div>
+          <div class="profile-card">Points <strong>${user.points}</strong></div>
+          <div class="profile-card">VIP <strong>${user.vip ? "Yes" : "No"}</strong></div>
+          <div class="profile-card">Premium <strong>${user.premium || user.battlePass?.premium ? "Yes" : "No"}</strong></div>
+          <div class="profile-card">Achievements <strong>${achievementCount}</strong></div>
+          <div class="profile-card">Skin <strong>${escapeHtml(user.equipped.skin)}</strong></div>
+          <div class="profile-card">Color <strong>${escapeHtml(user.equipped.color)}</strong></div>
+        `;
+        profileBestScores.innerHTML = Object.entries(user.bestScores || {})
+          .map(([game, value]) => `<div class="admin-user-card"><span>${escapeHtml(games[game]?.title || game)}: ${Number(value || 0)}</span></div>`)
+          .join("") || "No best scores yet.";
+        profileMessage.textContent = currentAccount.isAdmin ? "Admin profile loaded." : "Profile loaded.";
+      }
+
+      async function renderShopMenu() {
+        if (!currentAccount?.username) {
+          shopList.textContent = "Log in first.";
+          shopMessage.textContent = "";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        shopMessage.textContent = `Coins: ${user.coins} | Premium cosmetics are in Premium menu.`;
+        shopList.innerHTML = shopItems.map((item) => {
+          const owned = Boolean(user.ownedItems?.[item.id]);
+          const equipped = user.equipped?.[item.type] === item.value;
+          const action = owned ? (equipped ? "Equipped" : "Equip") : `Buy ${item.cost}`;
+          return `
+            <div class="shop-item">
+              <strong>${escapeHtml(item.name)}</strong>
+              <span>${escapeHtml(item.type)} | ${owned ? "Owned" : `${item.cost} coins`}</span>
+              <button type="button" data-shop-id="${escapeHtml(item.id)}" ${equipped ? "disabled" : ""}>${action}</button>
+            </div>
+          `;
+        }).join("");
+      }
+
+      async function renderPremiumMenu() {
+        if (!currentAccount?.username) {
+          premiumStatus.textContent = "Log in first.";
+          premiumList.textContent = "";
+          premiumMessage.textContent = "";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        const hasPremium = Boolean(user.premium || user.battlePass?.premium);
+        premiumStatus.textContent = `${user.vip ? "VIP active" : "VIP locked"} | ${hasPremium ? "Premium active" : "Premium locked"}`;
+        premiumList.innerHTML = premiumItems.map((item) => {
+          const allowed = (!item.vip || user.vip) && (!item.premium || hasPremium);
+          const owned = Boolean(user.ownedItems?.[item.id]);
+          const equipped = user.equipped?.[item.type] === item.value;
+          const action = !allowed ? "Locked" : owned ? (equipped ? "Equipped" : "Equip") : "Unlock";
+          return `
+            <div class="shop-item premium-item">
+              <strong>${escapeHtml(item.name)}</strong>
+              <span>${item.vip ? "VIP" : "Premium"} cosmetic | ${owned ? "Owned" : allowed ? "Ready to unlock" : "Needs access"}</span>
+              <button type="button" data-shop-id="${escapeHtml(item.id)}" ${!allowed || equipped ? "disabled" : ""}>${action}</button>
+            </div>
+          `;
+        }).join("");
+        premiumMessage.textContent = "Admins can grant VIP/Premium from Admin Panel.";
+      }
+
+      function renderDonateMenu() {
+        donateList.innerHTML = donationPacks.map((pack) => `
+          <div class="shop-item donate-card">
+            <div>
+              <strong>${escapeHtml(pack.name)}</strong>
+              <span>${escapeHtml(pack.perk)}</span>
+            </div>
+            <div class="donate-price">${escapeHtml(pack.price)}</div>
+            <button type="button" data-donate-pack="${escapeHtml(pack.id)}">Donate</button>
+          </div>
+        `).join("");
+        donateMessage.textContent = donationLinks.main
+          ? "Choose a support pack. Payment opens in a new tab."
+          : "Donation link is not connected yet. Add your Ko-fi, Boosty, Patreon, or DonationAlerts link in donationLinks.main.";
+      }
+
+      function handleDonateAction(event) {
+        const button = event.target.closest("[data-donate-pack]");
+
+        if (!button) {
+          return;
+        }
+
+        if (!donationLinks.main) {
+          donateMessage.textContent = "Send me your donation link and I will connect this button.";
+          return;
+        }
+
+        window.open(donationLinks.main, "_blank", "noopener,noreferrer");
+      }
+
+      async function renderBattlePassMenu() {
+        if (!currentAccount?.username) {
+          battlePassList.textContent = "Log in first.";
+          battlePassMessage.textContent = "";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        const hasPremium = Boolean(user.premium || user.battlePass?.premium);
+        const maxLevel = Math.max(...battlePassRewards.map((reward) => reward.level));
+        const progress = Math.min(100, Math.round((user.level / maxLevel) * 100));
+        const iconForReward = (text, premiumTrack = false) => {
+          const lower = String(text).toLowerCase();
+
+          if (lower.includes("coin")) return "C";
+          if (lower.includes("xp")) return "XP";
+          if (lower.includes("color")) return premiumTrack ? "G" : "B";
+          if (lower.includes("trail")) return "T";
+          if (lower.includes("music")) return "M";
+          if (lower.includes("skin")) return "S";
+          return premiumTrack ? "P" : "F";
+        };
+        const renderReward = (reward, track) => {
+          const unlocked = user.level >= reward.level;
+          const premiumTrack = track === "premium";
+          const claimed = Boolean(user.battlePass?.claimed?.[`${track}-${reward.level}`]);
+          const locked = !unlocked || (premiumTrack && !hasPremium);
+          const text = premiumTrack ? reward.premium : reward.free;
+          const buttonText = claimed ? "Claimed" : locked ? "Locked" : "Claim";
+
+          return `
+            <div class="pass-reward ${premiumTrack ? "premium" : "free"} ${locked ? "locked" : ""}">
+              <div class="pass-icon">${escapeHtml(iconForReward(text, premiumTrack))}</div>
+              <strong>${escapeHtml(text)}</strong>
+              <button type="button" data-battle-pass-track="${track}" data-battle-pass-level="${reward.level}" ${locked || claimed ? "disabled" : ""}>${buttonText}</button>
+            </div>
+          `;
+        };
+        battlePassList.style.setProperty("--battle-pass-count", battlePassRewards.length);
+        battlePassList.innerHTML = `
+          <div class="battle-pass-topbar">
+            <div class="battle-pass-season-wrap">
+              <div class="battle-pass-season">Season<br>${user.level}/${maxLevel}</div>
+              <div class="battle-pass-progress" aria-label="Battle pass progress">
+                <div class="battle-pass-fill" style="width: ${progress}%"></div>
+              </div>
+            </div>
+            <button type="button" disabled>${hasPremium ? "Activated" : "Activate"}</button>
+          </div>
+          <div class="battle-pass-track">
+            <div class="pass-label gold">Golden<br>Pass</div>
+            ${battlePassRewards.map((reward) => renderReward(reward, "premium")).join("")}
+          </div>
+          <div class="pass-levels">
+            <span></span>
+            ${battlePassRewards.map((reward) => `<div class="pass-level ${user.level >= reward.level ? "unlocked" : ""}">${reward.level}</div>`).join("")}
+          </div>
+          <div class="battle-pass-track">
+            <div class="pass-label free">Free<br>Pass</div>
+            ${battlePassRewards.map((reward) => renderReward(reward, "free")).join("")}
+          </div>
+        `;
+        battlePassMessage.textContent = `Your level: ${user.level}. ${hasPremium ? "Premium track active." : "Premium track locked."}`;
+      }
+
+      async function renderLeaderboardMenu() {
+        leaderboardList.textContent = "Loading leaderboard...";
+        leaderboardMessage.textContent = "";
+
+        try {
+          const users = await getAllUsers();
+          const entries = Object.entries(users || {})
+            .map(([key, user]) => ({
+              key,
+              username: user?.username || key,
+              xp: Number(user?.xp || 0),
+              coins: Number(user?.coins || 0),
+              points: Number(user?.points || 0),
+              vip: Boolean(user?.vip),
+              premium: Boolean(user?.premium || user?.battlePass?.premium),
+              bestTotal: Object.values(user?.bestScores || {}).reduce((sum, value) => sum + Number(value || 0), 0)
+            }))
+            .sort((a, b) => b.xp - a.xp || b.bestTotal - a.bestTotal || b.points - a.points)
+            .slice(0, 20);
+
+          leaderboardList.innerHTML = entries.map((entry, index) => `
+            <div class="admin-user-card leaderboard-card">
+              <div class="admin-user-top">
+                <span class="admin-user-name">#${index + 1} ${escapeHtml(entry.username)}</span>
+                <span class="admin-badge">${entry.vip ? "VIP" : entry.premium ? "Premium" : "Player"}</span>
+              </div>
+              <div class="admin-user-meta">XP: ${entry.xp} | Best: ${entry.bestTotal} | Points: ${entry.points} | Coins: ${entry.coins}</div>
+            </div>
+          `).join("") || `<div class="empty-card">No players yet.</div>`;
+          leaderboardMessage.textContent = "Leaderboard sorted by XP, best score, then points.";
+        } catch {
+          leaderboardList.textContent = "Could not load leaderboard.";
+        }
+      }
+
+      async function claimBattlePassReward(event) {
+        const button = event.target.closest("[data-battle-pass-level]");
+
+        if (!button || !currentAccount?.username) {
+          return;
+        }
+
+        const level = Number(button.dataset.battlePassLevel);
+        const track = button.dataset.battlePassTrack;
+        const reward = battlePassRewards.find((item) => item.level === level);
+        const user = await refreshCurrentUserData();
+        const hasPremium = Boolean(user.premium || user.battlePass?.premium);
+        const claimedKey = `${track}-${level}`;
+
+        if (!reward || user.level < level || user.battlePass?.claimed?.[claimedKey]) {
+          return;
+        }
+
+        if (track === "premium" && !hasPremium) {
+          battlePassMessage.textContent = "Premium track is locked.";
+          return;
+        }
+
+        const patch = {
+          [`battlePass/claimed/${claimedKey}`]: true
+        };
+
+        if (track === "free") {
+          if (reward.coins) {
+            patch.coins = Number(user.coins || 0) + reward.coins;
+          }
+          if (reward.xp) {
+            const nextXp = Number(user.xp || 0) + reward.xp;
+            patch.xp = nextXp;
+            patch.level = getLevelFromXp(nextXp);
+          }
+          if (reward.freeItem) {
+            patch[`ownedItems/${reward.freeItem}`] = true;
+          }
+        } else if (reward.premiumItem) {
+          patch[`ownedItems/${reward.premiumItem}`] = true;
+        }
+
+        await patchCurrentUser(patch);
+        battlePassMessage.textContent = `${track === "premium" ? "Premium" : "Free"} reward claimed.`;
+        await renderBattlePassMenu();
+        await renderShopMenu();
+        await renderPremiumMenu();
+        await renderProfileMenu();
+      }
+
+      async function renderQuestsMenu() {
+        if (!currentAccount?.username) {
+          questsList.textContent = "Log in first.";
+          achievementsList.textContent = "";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        const day = getQuestDayKey();
+        questsList.innerHTML = questDefs.map((quest) => {
+          const entry = user.quests?.[day]?.[quest.id] || {};
+          const progress = Math.min(Number(entry.progress || 0), quest.target);
+          const claimed = Boolean(entry.claimed);
+          return `
+            <div class="quest-card">
+              <strong>${escapeHtml(quest.name)}</strong>
+              <span>${progress}/${quest.target} | +${quest.xp} XP +${quest.coins} coins</span>
+              <button type="button" data-quest-id="${quest.id}" ${claimed || progress < quest.target ? "disabled" : ""}>${claimed ? "Claimed" : "Claim"}</button>
+            </div>
+          `;
+        }).join("");
+        achievementsList.innerHTML = achievementDefs.map((achievement) => `
+          <div class="quest-card">
+            <strong>${escapeHtml(achievement.name)}</strong>
+            <span>${user.achievements?.[achievement.id] ? "Unlocked" : `Reward: ${achievement.xp} XP ${achievement.coins} coins`}</span>
+          </div>
+        `).join("");
+        questsMessage.textContent = "Quest data loaded.";
+      }
+
+      async function renderFriendsMenu() {
+        if (!currentAccount?.username) {
+          friendsList.textContent = "Log in first.";
+          friendRequestsList.textContent = "";
+          sentRequestsList.textContent = "";
+          socialMessage.textContent = "";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+        const friends = Object.keys(user.friends || {}).sort();
+        const incoming = Object.keys(user.friendRequests?.incoming || {}).sort();
+        const sent = Object.keys(user.friendRequests?.sent || {}).sort();
+
+        friendRequestsList.innerHTML = incoming.map((requestKey) => `
+          <div class="admin-user-card social-card">
+            <div class="admin-user-top">
+              <span class="admin-user-name">${escapeHtml(user.friendRequests.incoming[requestKey]?.username || requestKey)}</span>
+              <span class="admin-badge">Request</span>
+            </div>
+            <div class="admin-user-actions">
+              <button type="button" data-friend-action="accept" data-friend-key="${escapeHtml(requestKey)}">Accept</button>
+              <button type="button" class="admin-danger" data-friend-action="decline" data-friend-key="${escapeHtml(requestKey)}">Decline</button>
+            </div>
+          </div>
+        `).join("") || `<div class="empty-card">No incoming requests.</div>`;
+
+        sentRequestsList.innerHTML = sent.map((requestKey) => `
+          <div class="admin-user-card social-card">
+            <div class="admin-user-top">
+              <span class="admin-user-name">${escapeHtml(user.friendRequests.sent[requestKey]?.username || requestKey)}</span>
+              <span class="admin-badge">Sent</span>
+            </div>
+            <button type="button" data-friend-action="cancel" data-friend-key="${escapeHtml(requestKey)}">Cancel Request</button>
+          </div>
+        `).join("") || `<div class="empty-card">No sent requests.</div>`;
+
+        friendsList.innerHTML = friends.map((friend) => `
+          <div class="admin-user-card">
+            <div class="admin-user-top"><span class="admin-user-name">${escapeHtml(friend)}</span><span class="admin-badge">Friend</span></div>
+            <button type="button" data-friend-action="remove" data-friend-key="${escapeHtml(friend)}">Remove Friend</button>
+          </div>
+        `).join("") || `<div class="empty-card">No friends yet.</div>`;
+        socialMessage.textContent = "Friends loaded.";
+      }
+
+      async function handleShopAction(event) {
+        const button = event.target.closest("[data-shop-id]");
+
+        if (!button || !currentAccount?.username) {
+          return;
+        }
+
+        const item = allShopItems.find((shopItem) => shopItem.id === button.dataset.shopId);
+        const user = await refreshCurrentUserData();
+
+        if (!item || !user) {
+          return;
+        }
+
+        const hasPremium = Boolean(user.premium || user.battlePass?.premium);
+        const allowed = (!item.vip || user.vip) && (!item.premium || hasPremium);
+
+        if (!allowed) {
+          shopMessage.textContent = "This cosmetic needs VIP or Premium.";
+          premiumMessage.textContent = shopMessage.textContent;
+          return;
+        }
+
+        if (!user.ownedItems?.[item.id]) {
+          if (user.coins < item.cost) {
+            shopMessage.textContent = "Not enough coins.";
+            return;
+          }
+
+          await patchCurrentUser({
+            coins: user.coins - item.cost,
+            [`ownedItems/${item.id}`]: true
+          });
+          await unlockAchievement("buyItem", "Shop item bought");
+        }
+
+        const patch = {
+          [`equipped/${item.type}`]: item.value
+        };
+        if (item.type === "skin" || item.type === "color") {
+          playerStyle = {
+            ...playerStyle,
+            [item.type]: item.value
+          };
+          savePlayerStyle();
+          applyPlayerStyleControls();
+          patch[item.type] = item.value;
+        }
+        await patchCurrentUser(patch);
+        await renderShopMenu();
+        await renderPremiumMenu();
+        await renderProfileMenu();
+        draw();
+      }
+
+      async function claimQuest(event) {
+        const button = event.target.closest("[data-quest-id]");
+
+        if (!button || !currentAccount?.username) {
+          return;
+        }
+
+        const quest = questDefs.find((item) => item.id === button.dataset.questId);
+        const user = await refreshCurrentUserData();
+        const day = getQuestDayKey();
+        const entry = user.quests?.[day]?.[quest.id] || {};
+
+        if (!quest || entry.claimed || Number(entry.progress || 0) < quest.target) {
+          return;
+        }
+
+        await patchCurrentUser({
+          [`quests/${day}/${quest.id}/claimed`]: true
+        });
+        await grantRewards({ xp: quest.xp, coins: quest.coins, reason: quest.name });
+        await renderQuestsMenu();
+      }
+
+      async function addFriendFromInput() {
+        if (!currentAccount?.username) {
+          socialMessage.textContent = "Log in first.";
+          return;
+        }
+
+        const friend = sanitizeUsername(friendSearchInput.value);
+        const currentKey = usernameKey(currentAccount.username);
+        const friendKey = usernameKey(friend);
+
+        if (!friend || friendKey === currentKey) {
+          socialMessage.textContent = "Enter another username.";
+          return;
+        }
+
+        const friendUser = await getUser(friendKey);
+
+        if (!friendUser) {
+          socialMessage.textContent = "User not found.";
+          return;
+        }
+
+        const user = await refreshCurrentUserData();
+
+        if (user.friends?.[friendKey]) {
+          socialMessage.textContent = "You are already friends.";
+          return;
+        }
+
+        if (user.friendRequests?.sent?.[friendKey]) {
+          socialMessage.textContent = "Request already sent.";
+          return;
+        }
+
+        if (user.friendRequests?.incoming?.[friendKey]) {
+          await acceptFriendRequest(friendKey);
+          return;
+        }
+
+        await patchCurrentUser({
+          [`friendRequests/sent/${friendKey}`]: {
+            username: friendUser.username || friend,
+            createdAt: Date.now()
+          }
+        });
+        await patchUser(friendKey, {
+          [`friendRequests/incoming/${currentKey}`]: {
+            username: currentAccount.username,
+            createdAt: Date.now()
+          }
+        });
+        socialMessage.textContent = `Request sent to ${friendUser.username || friend}.`;
+        friendSearchInput.value = "";
+        await renderFriendsMenu();
+      }
+
+      async function handleFriendAction(event) {
+        const button = event.target.closest("[data-friend-action]");
+
+        if (!button || !currentAccount?.username) {
+          return;
+        }
+
+        const friendKey = button.dataset.friendKey;
+        const action = button.dataset.friendAction;
+
+        button.disabled = true;
+
+        try {
+          if (action === "accept") {
+            await acceptFriendRequest(friendKey);
+          } else if (action === "decline") {
+            await declineFriendRequest(friendKey);
+          } else if (action === "cancel") {
+            await cancelFriendRequest(friendKey);
+          } else if (action === "remove") {
+            await removeFriend(friendKey);
+          }
+        } finally {
+          button.disabled = false;
+          await renderFriendsMenu();
+        }
+      }
+
+      async function acceptFriendRequest(friendKey) {
+        const currentKey = getUserKeyFromAccount();
+        const friendUser = await getUser(friendKey);
+
+        await patchCurrentUser({
+          [`friends/${friendKey}`]: true,
+          [`friendRequests/incoming/${friendKey}`]: null
+        });
+        await patchUser(friendKey, {
+          [`friends/${currentKey}`]: true,
+          [`friendRequests/sent/${currentKey}`]: null
+        });
+        socialMessage.textContent = `${friendUser?.username || friendKey} accepted.`;
+      }
+
+      async function declineFriendRequest(friendKey) {
+        const currentKey = getUserKeyFromAccount();
+
+        await patchCurrentUser({
+          [`friendRequests/incoming/${friendKey}`]: null
+        });
+        await patchUser(friendKey, {
+          [`friendRequests/sent/${currentKey}`]: null
+        });
+        socialMessage.textContent = "Request declined.";
+      }
+
+      async function cancelFriendRequest(friendKey) {
+        const currentKey = getUserKeyFromAccount();
+
+        await patchCurrentUser({
+          [`friendRequests/sent/${friendKey}`]: null
+        });
+        await patchUser(friendKey, {
+          [`friendRequests/incoming/${currentKey}`]: null
+        });
+        socialMessage.textContent = "Request canceled.";
+      }
+
+      async function removeFriend(friendKey) {
+        const currentKey = getUserKeyFromAccount();
+
+        await patchCurrentUser({
+          [`friends/${friendKey}`]: null
+        });
+        await patchUser(friendKey, {
+          [`friends/${currentKey}`]: null
+        });
+        socialMessage.textContent = "Friend removed.";
+      }
+
       async function createRoomFromStart() {
         closeStartScreen();
         await createRoom();
@@ -3363,6 +5484,109 @@
         roomCodeInput.value = startRoomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
         closeStartScreen();
         await joinRoom();
+      }
+
+      async function renderPublicRooms() {
+        publicRoomsList.textContent = "Loading rooms...";
+
+        try {
+          const rooms = await getAllRooms();
+          const roomEntries = Object.entries(rooms || {})
+            .filter(([, room]) => room?.isPublic !== false && Number(room?.players || 0) < 2)
+            .sort(([, a], [, b]) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+
+          if (!roomEntries.length) {
+            publicRoomsList.textContent = "No public rooms.";
+            return;
+          }
+
+          publicRoomsList.innerHTML = roomEntries.map(([code, room]) => `
+            <div class="admin-room-card">
+              <div class="admin-user-top">
+                <span class="admin-room-code">${escapeHtml(code)}</span>
+                <span class="admin-badge">${Number(room.players || 0)} players</span>
+              </div>
+              <div class="admin-user-meta">${escapeHtml(room.gameName || room.game || "Online game")} | ${escapeHtml(room.createdByUsername || "Player")}</div>
+              <div class="admin-user-actions">
+                <button type="button" data-lobby-join="${escapeHtml(code)}">Join</button>
+                <button type="button" data-lobby-spectate="${escapeHtml(code)}">Spectate</button>
+              </div>
+            </div>
+          `).join("");
+        } catch {
+          publicRoomsList.textContent = "Could not load public rooms.";
+        }
+      }
+
+      function updateChatVisibility() {
+        roomChat.hidden = !onlineRoomCode;
+      }
+
+      function renderRoomChat() {
+        const messages = (onlineState?.chat || []).slice(-30);
+        chatMessages.innerHTML = messages.map((message) => `
+          <div class="chat-message">
+            <strong>${escapeHtml(message.username || "Player")}</strong>
+            <span>${escapeHtml(message.text || "")}</span>
+          </div>
+        `).join("") || "<div class=\"chat-message\"><span>No messages yet.</span></div>";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      async function sendRoomChat() {
+        if (!onlineRoomCode || !currentAccount?.username) {
+          chatMessage.textContent = "Log in and join a room first.";
+          return;
+        }
+
+        await refreshCurrentUserData();
+        if (isCurrentUserMuted()) {
+          chatMessage.textContent = "You are muted right now.";
+          return;
+        }
+
+        const text = chatInput.value.trim().slice(0, 80);
+
+        if (!text) {
+          return;
+        }
+
+        const messages = [
+          ...((onlineState?.chat || []).slice(-29)),
+          {
+            username: currentAccount.username,
+            text,
+            at: Date.now()
+          }
+        ];
+        chatInput.value = "";
+        chatMessage.textContent = "";
+        onlineState.chat = messages;
+        renderRoomChat();
+
+        try {
+          await patchRoom(onlineRoomCode, { chat: messages, updatedAt: Date.now() });
+        } catch {
+          chatMessage.textContent = "Could not send chat.";
+        }
+      }
+
+      async function handlePublicRoomAction(event) {
+        const joinButton = event.target.closest("[data-lobby-join]");
+        const spectateButton = event.target.closest("[data-lobby-spectate]");
+
+        if (joinButton) {
+          roomCodeInput.value = joinButton.dataset.lobbyJoin;
+          startRoomCodeInput.value = joinButton.dataset.lobbyJoin;
+          closeStartScreen();
+          await joinRoom();
+          return;
+        }
+
+        if (spectateButton) {
+          closeStartScreen();
+          await spectateOnlineRoom(spectateButton.dataset.lobbySpectate);
+        }
       }
 
       function logoutFromStart() {
@@ -3607,15 +5831,16 @@
           classic: isHead ? 7 : 5,
           round: 9,
           neon: 8,
-          block: 2
+          block: 2,
+          sigma: isHead ? 10 : 7
         };
 
         ctx.save();
         ctx.fillStyle = color;
 
-        if (skin === "neon") {
+        if (skin === "neon" || skin === "sigma") {
           ctx.shadowColor = color;
-          ctx.shadowBlur = 14;
+          ctx.shadowBlur = skin === "sigma" ? 20 : 14;
         }
 
         roundTile(part.x, part.y, radiusBySkin[skin] ?? 5);
@@ -3624,6 +5849,12 @@
           ctx.strokeStyle = "rgba(248, 250, 252, 0.24)";
           ctx.lineWidth = 2;
           strokeTile(part.x, part.y, 2);
+        }
+
+        if (skin === "sigma") {
+          ctx.strokeStyle = isHead ? "rgba(250, 204, 21, 0.95)" : "rgba(253, 224, 71, 0.48)";
+          ctx.lineWidth = isHead ? 3 : 2;
+          strokeTile(part.x, part.y, radiusBySkin.sigma);
         }
 
         ctx.restore();
@@ -4046,6 +6277,7 @@
         if (account) {
           localStorage.setItem(accountStorageKey, JSON.stringify(account));
         } else {
+          currentUserData = null;
           localStorage.removeItem(accountStorageKey);
         }
 
@@ -4275,20 +6507,32 @@
       }
 
       function updateAccountUi() {
+        document.body.classList.toggle("admin-mode", Boolean(currentAccount?.isAdmin));
+        document.body.classList.toggle("phone-preview-mode", Boolean(currentAccount?.isAdmin && phonePreviewMode));
+
         if (currentAccount) {
           accountStatus.textContent = currentAccount.isAdmin
             ? `Logged in as ${currentAccount.username} - Admin`
             : `Logged in as ${currentAccount.username}`;
           logoutButton.hidden = false;
-          adminPanel.classList.toggle("open", Boolean(currentAccount.isAdmin));
+          adminToggleButton.hidden = !currentAccount.isAdmin;
+          phoneModeButton.hidden = !currentAccount.isAdmin;
+          adminPanel.classList.toggle("open", Boolean(currentAccount.isAdmin && adminPanelOpen));
+          adminToggleButton.textContent = adminPanelOpen ? "Close Admin" : "Admin Panel";
+          phoneModeButton.textContent = phonePreviewMode ? "PC Mode" : "Phone Mode";
           authMenu.classList.remove("open");
           authMenu.setAttribute("aria-hidden", "true");
-          if (currentAccount.isAdmin) {
+          refreshCurrentUserData().catch(() => {});
+          if (currentAccount.isAdmin && adminPanelOpen) {
             loadAdminPanel();
           }
         } else {
           accountStatus.textContent = "Not logged in";
           logoutButton.hidden = true;
+          adminToggleButton.hidden = true;
+          phoneModeButton.hidden = true;
+          phonePreviewMode = false;
+          adminPanelOpen = false;
           adminPanel.classList.remove("open");
           authMenu.classList.add("open");
           authMenu.setAttribute("aria-hidden", "false");
@@ -4301,6 +6545,30 @@
         accountSettingsButton.textContent = currentAccount
           ? `Account: ${currentAccount.username}`
           : "Account: log in";
+      }
+
+      function toggleAdminPanel() {
+        if (!currentAccount?.isAdmin) {
+          return;
+        }
+
+        adminPanelOpen = !adminPanelOpen;
+        adminPanel.classList.toggle("open", adminPanelOpen);
+        adminToggleButton.textContent = adminPanelOpen ? "Close Admin" : "Admin Panel";
+
+        if (adminPanelOpen) {
+          loadAdminPanel();
+        }
+      }
+
+      function togglePhonePreviewMode() {
+        if (!currentAccount?.isAdmin) {
+          return;
+        }
+
+        phonePreviewMode = !phonePreviewMode;
+        document.body.classList.toggle("phone-preview-mode", phonePreviewMode);
+        phoneModeButton.textContent = phonePreviewMode ? "PC Mode" : "Phone Mode";
       }
 
       async function loadAdminPanel() {
@@ -4357,17 +6625,28 @@
           .sort(([, a], [, b]) => (b?.isAdmin ? 1 : 0) - (a?.isAdmin ? 1 : 0) || String(a?.username || "").localeCompare(String(b?.username || "")))
           .forEach(([key, user]) => {
             const totalBest = Object.values(user?.bestScores || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+            const muted = Number(user?.mutedUntil || 0) > Date.now();
+            const banned = Number(user?.bannedUntil || 0) > Date.now();
+            const premium = Boolean(user?.premium || user?.battlePass?.premium);
             const card = document.createElement("div");
             card.className = "admin-user-card";
             card.innerHTML = `
               <div class="admin-user-top">
                 <span class="admin-user-name">${escapeHtml(user?.username || key)}</span>
-                ${user?.isAdmin ? '<span class="admin-badge">Admin</span>' : '<span class="admin-badge">User</span>'}
+                <span class="admin-badge">${user?.isAdmin ? "Admin" : user?.vip ? "VIP" : premium ? "Premium" : "User"}</span>
               </div>
-              <div class="admin-user-meta">Points: ${Number(user?.points || 0)} | Best total: ${totalBest}</div>
+              <div class="admin-user-meta">Points: ${Number(user?.points || 0)} | Coins: ${Number(user?.coins || 0)} | XP: ${Number(user?.xp || 0)} | Best total: ${totalBest}${user?.vip ? " | VIP" : ""}${premium ? " | Premium" : ""}${muted ? " | Muted" : ""}${banned ? " | Banned" : ""}</div>
               <div class="admin-user-actions">
                 <button type="button" data-admin-action="${user?.isAdmin ? "remove-admin" : "make-admin"}" data-user-key="${escapeHtml(key)}">${user?.isAdmin ? "Remove Admin" : "Make Admin"}</button>
+                <button type="button" data-admin-action="${user?.vip ? "remove-vip" : "give-vip"}" data-user-key="${escapeHtml(key)}">${user?.vip ? "Remove VIP" : "Give VIP"}</button>
+                <button type="button" data-admin-action="${premium ? "remove-premium" : "give-premium"}" data-user-key="${escapeHtml(key)}">${premium ? "Remove Premium" : "Give Premium"}</button>
                 <button type="button" data-admin-action="reset-scores" data-user-key="${escapeHtml(key)}">Reset Scores</button>
+                <button type="button" data-admin-action="add-coins" data-user-key="${escapeHtml(key)}">+100 Coins</button>
+                <button type="button" data-admin-action="add-xp" data-user-key="${escapeHtml(key)}">+100 XP</button>
+                <button type="button" data-admin-action="mute-10" data-user-key="${escapeHtml(key)}">Mute 10m</button>
+                <button type="button" data-admin-action="mute-60" data-user-key="${escapeHtml(key)}">Mute 1h</button>
+                <button type="button" data-admin-action="ban-60" data-user-key="${escapeHtml(key)}" class="admin-danger">Ban 1h</button>
+                <button type="button" data-admin-action="clear-limits" data-user-key="${escapeHtml(key)}">Unmute/Unban</button>
                 <button type="button" data-admin-action="delete-user" data-user-key="${escapeHtml(key)}" class="admin-danger">Delete User</button>
                 <button type="button" data-admin-action="copy-name" data-user-key="${escapeHtml(key)}">Use Name</button>
               </div>
@@ -4550,6 +6829,49 @@
 
             await patchUser(userKey, { isAdmin: false });
             adminMessage.textContent = `${user.username || userKey} admin removed.`;
+          } else if (action === "give-vip") {
+            await patchUser(userKey, { vip: true });
+            adminMessage.textContent = `${user.username || userKey} got VIP.`;
+          } else if (action === "remove-vip") {
+            await patchUser(userKey, { vip: false });
+            adminMessage.textContent = `${user.username || userKey} VIP removed.`;
+          } else if (action === "give-premium") {
+            await patchUser(userKey, {
+              premium: true,
+              "battlePass/premium": true
+            });
+            adminMessage.textContent = `${user.username || userKey} got Premium.`;
+          } else if (action === "remove-premium") {
+            await patchUser(userKey, {
+              premium: false,
+              "battlePass/premium": false
+            });
+            adminMessage.textContent = `${user.username || userKey} Premium removed.`;
+          } else if (action === "add-coins") {
+            await patchUser(userKey, { coins: Number(user.coins || 0) + 100 });
+            adminMessage.textContent = `${user.username || userKey} got 100 coins.`;
+          } else if (action === "add-xp") {
+            const nextXp = Number(user.xp || 0) + 100;
+            await patchUser(userKey, { xp: nextXp, level: getLevelFromXp(nextXp) });
+            adminMessage.textContent = `${user.username || userKey} got 100 XP.`;
+          } else if (action === "mute-10" || action === "mute-60" || action === "ban-60" || action === "clear-limits") {
+            if (usernameKey(currentAccount.username) === userKey) {
+              adminMessage.textContent = "You cannot ban or mute yourself.";
+              return;
+            }
+
+            if (action === "clear-limits") {
+              await patchUser(userKey, { mutedUntil: 0, bannedUntil: 0 });
+              adminMessage.textContent = `${user.username || userKey} unmuted/unbanned.`;
+            } else {
+              const minutes = action === "mute-10" ? 10 : 60;
+              const until = Date.now() + minutes * 60 * 1000;
+              const patch = action === "ban-60"
+                ? { bannedUntil: until }
+                : { mutedUntil: until };
+              await patchUser(userKey, patch);
+              adminMessage.textContent = `${user.username || userKey} ${action === "ban-60" ? "banned" : "muted"} for ${minutes}m.`;
+            }
           } else if (action === "reset-scores") {
             await patchUser(userKey, {
               bestScores: null,
@@ -4722,6 +7044,37 @@
             gmail,
             authUid,
             bestScores: getLocalBestScores(),
+            xp: 0,
+            level: 1,
+            coins: 100,
+            points: 0,
+            vip: false,
+            premium: false,
+            battlePass: {
+              premium: false,
+              claimed: {}
+            },
+            ownedItems: {
+              "skin-classic": true,
+              "color-teal": true,
+              "color-green": true
+            },
+            equipped: {
+              skin: playerStyle.skin,
+              color: playerStyle.color,
+              trail: "",
+              music: ""
+            },
+            achievements: {},
+            quests: {},
+            dailyReward: { lastClaimAt: 0, streak: 0 },
+            friends: {},
+            friendRequests: {
+              incoming: {},
+              sent: {}
+            },
+            mutedUntil: 0,
+            bannedUntil: 0,
             createdAt: Date.now()
           });
 
@@ -5052,6 +7405,7 @@
         gameOver = true;
         hidePlayOverlay();
         showLocalScoreboard();
+        updateChatVisibility();
         startGame("snake");
         statusEl.textContent = message;
       }
@@ -5084,6 +7438,8 @@
         resetPauseMenu();
 
         onlineState = prepareOnlineState(room, gameName, slot);
+        updateChatVisibility();
+        renderRoomChat();
         updateOnlineScoreboard();
         onlineDirection = onlineState.playersState[slot]?.dir || { x: 1, y: 0 };
         onlinePushBusy = false;
@@ -5101,6 +7457,8 @@
         lastTankShot = 0;
         statusEl.textContent =
           `${slot === "p1" ? "Player 1" : "Player 2"} in ${gameTitle.textContent}. Room ${code}.`;
+        unlockAchievement("playOnline", "Played online").catch(() => {});
+        addQuestProgress("online1", 1).catch(() => {});
         await saveRoom(code, onlineState);
         subscribeToRoom(code, (latestRoom) => {
           if (!onlineRoomCode || code !== onlineRoomCode) {
@@ -5114,6 +7472,7 @@
 
           mergeOnlineState(latestRoom);
           updateOnlineScoreboard();
+          renderRoomChat();
         });
         drawOnlineGame();
         timer = setInterval(tickOnlineGame, getOnlineTickDelay(gameName));
@@ -5157,7 +7516,9 @@
         resetPauseMenu();
         updateShootButton();
         updatePauseButton();
-        onlineState = prepareOnlineState(room, gameName, "p1");
+        onlineState = prepareOnlineState(room, gameName, "");
+        updateChatVisibility();
+        renderRoomChat();
         updateOnlineScoreboard();
         statusEl.textContent = `Spectating ${code}.`;
         adminMessage.textContent = `Spectating ${code}.`;
@@ -5172,8 +7533,9 @@
             return;
           }
 
-          onlineState = prepareOnlineState(latestRoom, gameName, "p1");
+          onlineState = prepareOnlineState(latestRoom, gameName, "");
           updateOnlineScoreboard();
+          renderRoomChat();
           drawOnlineGame();
         });
 
@@ -5186,6 +7548,7 @@
           ...room,
           game: gameName,
           gameName: onlineGameNames[gameName],
+          chat: Array.isArray(room.chat) ? room.chat.slice(-30) : [],
           playersState: {
             ...(room.playersState || {})
           }
@@ -5459,6 +7822,7 @@
           onlinePlayerSlot = "";
           onlineSpectating = false;
           onlineState = null;
+          updateChatVisibility();
           startGame("snake");
           statusEl.textContent = "Stopped spectating.";
           return;
@@ -5708,6 +8072,8 @@
           onlineState.orb = remoteState.orb || onlineState.orb;
           onlineState.poweredSlot = remoteState.poweredSlot || "";
         }
+
+        onlineState.chat = remoteState.chat || [];
       }
 
       function updateOnlineSnake() {
@@ -6507,14 +8873,26 @@
         roomNoteEl.textContent = `Creating ${onlineGameNames[selectedOnlineGame]} room...`;
 
         try {
+          if (currentAccount?.username) {
+            await refreshCurrentUserData();
+            if (isCurrentUserBanned()) {
+              roomNoteEl.textContent = "You are banned from online rooms right now.";
+              return;
+            }
+          }
+
           const code = await generateRoomCode();
           const room = {
             players: 1,
             game: selectedOnlineGame,
             gameName: onlineGameNames[selectedOnlineGame],
             createdBy: playerId,
+            createdByUsername: currentAccount?.username || "Player",
+            isPublic: startRoomVisibilitySelect.value !== "private",
+            status: "waiting",
             joinedBy: null,
             createdAt: Date.now(),
+            chat: [],
             playersState: {
               p1: makeOnlinePlayer("p1", selectedOnlineGame)
             },
@@ -6572,6 +8950,14 @@
         roomNoteEl.textContent = "Joining room...";
 
         try {
+          if (currentAccount?.username) {
+            await refreshCurrentUserData();
+            if (isCurrentUserBanned()) {
+              roomNoteEl.textContent = "You are banned from online rooms right now.";
+              return;
+            }
+          }
+
           const room = await getRoom(code);
 
           if (!room) {
@@ -6595,6 +8981,7 @@
           const joinedRoom = {
             ...room,
             players: 2,
+            status: "playing",
             playersState: {
               ...(room.playersState || {}),
               p2: makeOnlinePlayer("p2", room.game || "online-snake")
@@ -6645,6 +9032,30 @@
       startGamesButton.addEventListener("click", () => {
         showStartSection("games");
       });
+      startProfileButton.addEventListener("click", () => {
+        showStartSection("profile");
+      });
+      startShopButton.addEventListener("click", () => {
+        showStartSection("shop");
+      });
+      startPremiumButton.addEventListener("click", () => {
+        showStartSection("premium");
+      });
+      startDonateButton.addEventListener("click", () => {
+        showStartSection("donate");
+      });
+      startBattlePassButton.addEventListener("click", () => {
+        showStartSection("battlePass");
+      });
+      startLeaderboardButton.addEventListener("click", () => {
+        showStartSection("leaderboard");
+      });
+      startQuestsButton.addEventListener("click", () => {
+        showStartSection("quests");
+      });
+      startSocialButton.addEventListener("click", () => {
+        showStartSection("social");
+      });
       startSettingsButton.addEventListener("click", () => {
         showStartSection("settings");
       });
@@ -6652,6 +9063,14 @@
         showStartSection("account");
       });
       startBackFromGames.addEventListener("click", () => showStartSection("main"));
+      startBackFromProfile.addEventListener("click", () => showStartSection("main"));
+      startBackFromShop.addEventListener("click", () => showStartSection("main"));
+      startBackFromPremium.addEventListener("click", () => showStartSection("main"));
+      startBackFromDonate.addEventListener("click", () => showStartSection("main"));
+      startBackFromBattlePass.addEventListener("click", () => showStartSection("main"));
+      startBackFromLeaderboard.addEventListener("click", () => showStartSection("main"));
+      startBackFromQuests.addEventListener("click", () => showStartSection("main"));
+      startBackFromSocial.addEventListener("click", () => showStartSection("main"));
       startBackFromSettings.addEventListener("click", () => showStartSection("main"));
       startBackFromAccount.addEventListener("click", () => showStartSection("main"));
       startSoloGameButtons.forEach((button) => {
@@ -6666,6 +9085,17 @@
       });
       startCreateRoomButton.addEventListener("click", createRoomFromStart);
       startJoinRoomButton.addEventListener("click", joinRoomFromStart);
+      refreshLobbyButton.addEventListener("click", renderPublicRooms);
+      publicRoomsList.addEventListener("click", handlePublicRoomAction);
+      shopList.addEventListener("click", handleShopAction);
+      premiumList.addEventListener("click", handleShopAction);
+      donateList.addEventListener("click", handleDonateAction);
+      battlePassList.addEventListener("click", claimBattlePassReward);
+      questsList.addEventListener("click", claimQuest);
+      addFriendButton.addEventListener("click", addFriendFromInput);
+      friendRequestsList.addEventListener("click", handleFriendAction);
+      sentRequestsList.addEventListener("click", handleFriendAction);
+      friendsList.addEventListener("click", handleFriendAction);
       startRoomCodeInput.addEventListener("input", () => {
         startRoomCodeInput.value = startRoomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
       });
@@ -6684,6 +9114,12 @@
       playButton.addEventListener("click", playLocalGame);
       cancelWaitButton.addEventListener("click", leaveOnlineRoom);
       shootButton.addEventListener("click", shootOnlineTank);
+      sendChatButton.addEventListener("click", sendRoomChat);
+      chatInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          sendRoomChat();
+        }
+      });
       loginButton.addEventListener("click", loginAccount);
       registerButton.addEventListener("click", registerAccount);
       saveGmailButton.addEventListener("click", () => saveAccountGmail("account"));
@@ -6691,8 +9127,13 @@
       settingsSaveGmailButton.addEventListener("click", () => saveAccountGmail("settings"));
       settingsSendRecoveryEmailButton.addEventListener("click", () => sendPasswordRecoveryEmail("settings"));
       accountBackButton.addEventListener("click", closeAccountSettings);
+      adminToggleButton.addEventListener("click", toggleAdminPanel);
+      phoneModeButton.addEventListener("click", togglePhonePreviewMode);
       logoutButton.addEventListener("click", () => {
         firebaseAuth.signOut();
+        phonePreviewMode = false;
+        document.body.classList.remove("phone-preview-mode");
+        adminPanelOpen = false;
         gmailInput.value = "";
         changeGmailInput.value = "";
         settingsGmailInput.value = "";
